@@ -506,6 +506,7 @@ const coverLayerPaths = {
   graffitiFreestyle: "/assets/main-menu/prop_graffiti_freestyle.png",
   speakerLeft: "/assets/main-menu/prop_speaker_left.png",
   speakerRight: "/assets/main-menu/prop_speaker_right.png",
+  logoFreestyleGame: "/assets/main-menu/logo_freestyle_game.png",
 } as const;
 type CoverLayerKey = keyof typeof coverLayerPaths;
 const coverLayerImages: Partial<Record<CoverLayerKey, HTMLImageElement>> = {};
@@ -1500,18 +1501,20 @@ function drawStartBackdrop(): void {
 function drawMainMenuScreen(): void {
   drawStartBackdrop();
   drawPanel(36, 36, 348, 470);
-  drawLogoLockup(74, 70, 1);
+  drawLogoLockup(74, 58, 1);
   drawMc(242, 224, 0.92, state.animationTime);
-  drawMainMenuButton("new", 92, 244, "Nueva carrera", newCareerDraft, true);
-  drawMainMenuButton("continue", 92, 292, "Cargar partida", continueCareer);
-  drawMainMenuButton("options", 92, 340, "Opciones", () => setEvent(["Opciones llegaran en una proxima version."]));
-  drawMainMenuButton("credits", 92, 388, "Creditos", () => setEvent(["Juego creado como simulador freestyle RPG."]));
-  drawMainMenuButton("delete", 92, 436, "Borrar save", deleteSave);
+  drawMainMenuButton("new", 92, 258, "Nueva carrera", newCareerDraft, true);
+  drawMainMenuButton("continue", 92, 306, "Cargar partida", continueCareer);
+  drawMainMenuButton("options", 92, 354, "Opciones", () => setEvent(["Opciones llegaran en una proxima version."]));
+  drawMainMenuButton("credits", 92, 402, "Creditos", () => setEvent(["Juego creado como simulador freestyle RPG."]));
+  drawMainMenuButton("delete", 92, 450, "Borrar save", deleteSave);
   drawTextLine("v0.1.0", 64, 490, 11, palette.muted, 90);
   drawTextLine("Practica, compite y sube al circuito.", 548, 486, 13, palette.ink, 342);
 }
 
 function drawLogoLockup(x: number, y: number, scale: number): void {
+  if (drawLogoSprite(x, y, scale)) return;
+
   pixelRect(x + 12 * scale, y + 34 * scale, 236 * scale, 24 * scale, "rgba(0,0,0,0.46)");
   drawText("FREESTYLE", x + 4 * scale, y + 48 * scale, 38 * scale, "#0a0c18");
   drawText("FREESTYLE", x, y + 44 * scale, 38 * scale, "#f7f6ef");
@@ -1519,6 +1522,19 @@ function drawLogoLockup(x: number, y: number, scale: number): void {
   drawText("GAME", x + 74 * scale, y + 78 * scale, 27 * scale, palette.yellow);
   pixelRect(x + 8 * scale, y + 92 * scale, 208 * scale, 4 * scale, palette.red);
   pixelRect(x + 84 * scale, y + 102 * scale, 126 * scale, 3 * scale, palette.blue);
+}
+
+function drawLogoSprite(x: number, y: number, scale: number): boolean {
+  const image = coverLayerImages.logoFreestyleGame;
+  if (!image || !coverLayerReady.logoFreestyleGame || image.width <= 0 || image.height <= 0) return false;
+  const width = 266 * scale;
+  const height = width * (image.height / image.width);
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  pixelRect(x + 16 * scale, y + 24 * scale, width - 34 * scale, height - 28 * scale, "rgba(0,0,0,0.24)");
+  ctx.drawImage(image, x - 16 * scale, y - 6 * scale, width, height);
+  ctx.restore();
+  return true;
 }
 
 function drawLayeredCoverBackdrop(): boolean {
