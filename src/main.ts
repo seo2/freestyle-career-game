@@ -17,6 +17,7 @@ const H = 540;
 const SAVE_KEY = "freestyle-career-save-v1";
 
 type GameMode = "start" | "career" | "battle";
+type CareerView = "base" | "calendar" | "map" | "training" | "social" | "work" | "shop" | "stats";
 type StageId = "pieza" | "plaza" | "regional" | "nacional" | "internacional" | "estrella";
 type StatKey =
   | "flow"
@@ -155,6 +156,34 @@ interface CareerAction {
   durationHours: number;
   disabledReason?: string;
   run: () => void;
+}
+
+interface CareerNavItem {
+  id: CareerView;
+  label: string;
+  key: string;
+  accent: string;
+}
+
+interface SocialPostOption {
+  id: string;
+  label: string;
+  detail: string;
+  fans: number;
+  fame: number;
+  energy: number;
+  hours: number;
+  rhythm: number;
+}
+
+interface JobOption {
+  id: string;
+  label: string;
+  detail: string;
+  cash: number;
+  energy: number;
+  hours: number;
+  disciplineChance: number;
 }
 
 interface TimeAdvanceFx {
@@ -310,8 +339,12 @@ const palette = {
   ink: "#f3f2e9",
   muted: "#a8a59c",
   black: "#101114",
-  panel: "#1c1e23",
-  line: "#363941",
+  panel: "#101735",
+  line: "#39428a",
+  deep: "#070b22",
+  panelAlt: "#172052",
+  borderHi: "#6b70c9",
+  borderLo: "#20275c",
   yellow: "#e1b84a",
   red: "#f04d3a",
   teal: "#2fa58d",
@@ -321,6 +354,102 @@ const palette = {
   floor: "#2c2f36",
   room: "#20242d",
 };
+
+const careerNavItems: CareerNavItem[] = [
+  { id: "base", label: "Base", key: "B", accent: palette.yellow },
+  { id: "calendar", label: "Semana", key: "C", accent: palette.blue },
+  { id: "map", label: "Mapa", key: "M", accent: palette.teal },
+  { id: "training", label: "Entreno", key: "E", accent: palette.green },
+  { id: "social", label: "Redes", key: "R", accent: palette.pink },
+  { id: "work", label: "Trabajo", key: "J", accent: "#8fd36c" },
+  { id: "shop", label: "Tienda", key: "T", accent: palette.yellow },
+  { id: "stats", label: "Stats", key: "S", accent: palette.red },
+];
+
+const calendarActionIds = ["practice", "social", "work", "rest", "write", "battle", "cypher"];
+const trainingStats: StatKey[] = ["flow", "punchline", "metrica", "improvisacion", "escena", "carisma", "disciplina"];
+
+const socialPostOptions: SocialPostOption[] = [
+  {
+    id: "video",
+    label: "Video freestyle",
+    detail: "Clip corto con punch y energia.",
+    fans: 26,
+    fame: 5,
+    energy: 12,
+    hours: 2,
+    rhythm: 8,
+  },
+  {
+    id: "studio-photo",
+    label: "Foto estudio",
+    detail: "Muestra disciplina y proceso.",
+    fans: 18,
+    fame: 4,
+    energy: 8,
+    hours: 1,
+    rhythm: 5,
+  },
+  {
+    id: "thought",
+    label: "Frase/reflexion",
+    detail: "Conecta con fans fieles.",
+    fans: 13,
+    fame: 2,
+    energy: 5,
+    hours: 1,
+    rhythm: 3,
+  },
+  {
+    id: "behind",
+    label: "Detras de escena",
+    detail: "Humaniza la carrera.",
+    fans: 21,
+    fame: 4,
+    energy: 9,
+    hours: 2,
+    rhythm: 6,
+  },
+];
+
+const jobOptions: JobOption[] = [
+  {
+    id: "delivery",
+    label: "Repartidor",
+    detail: "Turno rapido para pagar micros.",
+    cash: 40,
+    energy: 16,
+    hours: 4,
+    disciplineChance: 0.35,
+  },
+  {
+    id: "dishes",
+    label: "Lavaplatos",
+    detail: "Trabajo pesado, paga estable.",
+    cash: 50,
+    energy: 20,
+    hours: 5,
+    disciplineChance: 0.55,
+  },
+  {
+    id: "construction",
+    label: "Obra",
+    detail: "Mucho desgaste, mejor paga.",
+    cash: 62,
+    energy: 28,
+    hours: 6,
+    disciplineChance: 0.75,
+  },
+  {
+    id: "clothes-store",
+    label: "Tienda de ropa",
+    detail: "Contactos y algo de estilo.",
+    cash: 46,
+    energy: 14,
+    hours: 4,
+    disciplineChance: 0.45,
+  },
+];
 
 const upgrades: UpgradeDef[] = [
   {
@@ -366,6 +495,23 @@ const sceneAssetPaths: Partial<Record<StageId, string>> = {
 const sceneImages: Partial<Record<StageId, HTMLImageElement>> = {};
 const sceneReady: Partial<Record<StageId, boolean>> = {};
 
+const coverLayerPaths = {
+  sky: "/assets/main-menu/bg_sky_night.png",
+  clouds: "/assets/main-menu/bg_clouds.png",
+  cityBack: "/assets/main-menu/bg_city_back.png",
+  cityFront: "/assets/main-menu/bg_city_front.png",
+  rooftopFloor: "/assets/main-menu/bg_rooftop_floor.png",
+  rooftopFence: "/assets/main-menu/bg_rooftop_fence.png",
+  neonRap: "/assets/main-menu/prop_neon_rap.png",
+  graffitiFreestyle: "/assets/main-menu/prop_graffiti_freestyle.png",
+  speakerLeft: "/assets/main-menu/prop_speaker_left.png",
+  speakerRight: "/assets/main-menu/prop_speaker_right.png",
+} as const;
+type CoverLayerKey = keyof typeof coverLayerPaths;
+const coverLayerImages: Partial<Record<CoverLayerKey, HTMLImageElement>> = {};
+const coverLayerReady: Partial<Record<CoverLayerKey, boolean>> = {};
+const requiredCoverLayers: CoverLayerKey[] = ["sky", "cityBack", "cityFront", "rooftopFloor", "rooftopFence"];
+
 let zones: ButtonZone[] = [];
 let pointer = { x: 0, y: 0, down: false };
 let savedSnapshot = loadSavedState();
@@ -374,6 +520,7 @@ let state: GameState = savedSnapshot ? normalizeLoadedState(savedSnapshot) : cre
 let lastFrame = performance.now();
 let actionFocus = 0;
 let battleFocus = 0;
+let careerView: CareerView = "base";
 let timeFx: TimeAdvanceFx | null = null;
 
 ctx.imageSmoothingEnabled = false;
@@ -391,6 +538,19 @@ for (const [stageId, src] of Object.entries(sceneAssetPaths) as [StageId, string
   };
   image.src = src;
   sceneImages[stageId] = image;
+}
+
+for (const [key, src] of Object.entries(coverLayerPaths) as [CoverLayerKey, string][]) {
+  const image = new Image();
+  image.onload = () => {
+    coverLayerReady[key] = true;
+    render();
+  };
+  image.onerror = () => {
+    coverLayerReady[key] = false;
+  };
+  image.src = src;
+  coverLayerImages[key] = image;
 }
 
 function createNewState(name = "MC Barrio"): GameState {
@@ -480,6 +640,7 @@ function deleteSave(): void {
   savedSnapshot = null;
   creatingNew = true;
   state = createNewState();
+  careerView = "base";
   timeFx = null;
 }
 
@@ -551,6 +712,33 @@ function buyRecommendedUpgrade(): void {
   const timeMessages = advanceClock(1, upgrade.shortLabel);
   setEvent([
     `Invertiste $${cost} en ${upgrade.label} Nv ${level + 1}: ${upgrade.effect}.`,
+    ...rhythmMessages,
+    ...levelMessages,
+    ...timeMessages,
+  ]);
+}
+
+function buyUpgradeByKey(key: UpgradeKey): void {
+  const upgrade = upgrades.find((item) => item.key === key);
+  if (!upgrade) return;
+  const level = upgradeLevel(upgrade.key);
+  if (level >= upgrade.maxLevel) {
+    setEvent([`${upgrade.label} ya esta al maximo por ahora.`]);
+    return;
+  }
+  const cost = upgradeCost(upgrade, level);
+  if (state.cash < cost) {
+    setEvent([`Faltan $${cost - state.cash} para mejorar ${upgrade.label}.`]);
+    return;
+  }
+
+  state.cash -= cost;
+  setUpgradeLevel(upgrade.key, level + 1);
+  const levelMessages = addXp(14 + level * 4);
+  const rhythmMessages = applyRhythm(`upgrade-${upgrade.key}`, 6 + level * 2);
+  const timeMessages = advanceClock(1, upgrade.shortLabel);
+  setEvent([
+    `Compraste ${upgrade.label} Nv ${level + 1}: ${upgrade.effect}.`,
     ...rhythmMessages,
     ...levelMessages,
     ...timeMessages,
@@ -631,6 +819,7 @@ function startCareerFromMenu(): void {
   state.lastEvent = `${cleanName} parte rapeando en su pieza.`;
   creatingNew = false;
   actionFocus = 0;
+  careerView = "base";
   timeFx = null;
   saveState();
 }
@@ -645,6 +834,7 @@ function continueCareer(): void {
   };
   creatingNew = false;
   actionFocus = 0;
+  careerView = "base";
   timeFx = null;
 }
 
@@ -653,6 +843,7 @@ function newCareerDraft(): void {
   state = createNewState("");
   state.inputName = "";
   state.lastEvent = "Nueva carrera: elige nombre artistico.";
+  careerView = "base";
   timeFx = null;
 }
 
@@ -1017,6 +1208,63 @@ function getCareerActions(): CareerAction[] {
   return actions;
 }
 
+function runCareerAction(actionId: string): void {
+  const action = getCareerActions().find((item) => item.id === actionId);
+  if (!action || action.disabledReason) return;
+  action.run();
+}
+
+function trainSpecificStat(stat: StatKey): void {
+  if (state.energy < 14) {
+    setEvent(["Necesitas energia para entrenar."]);
+    return;
+  }
+  const disciplineBonus = Math.floor(state.stats.disciplina / 5);
+  addStat(stat, 1);
+  const extraXp = disciplineBonus + (stat === "disciplina" ? 2 : 0);
+  const levelMessages = addXp(20 + extraXp);
+  const rhythmMessages = applyRhythm(`train-${stat}`, 5);
+  const timeMessages = spendActionTime(14, 2, `Entrenar ${statLabels[stat]}`);
+  setEvent([`Entrenaste ${statLabels[stat]} 2h: +1 nivel.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
+}
+
+function publishSocialPost(option: SocialPostOption): void {
+  if (state.energy < option.energy) {
+    setEvent(["Necesitas energia para publicar con foco."]);
+    return;
+  }
+  const viral = random() > 0.88 - state.stats.carisma * 0.012;
+  const fanGain = option.fans + state.stats.carisma * 3 + state.outfitLevel * 5 + randomInt(0, 10) + (viral ? 48 : 0);
+  const fameGain = option.fame + Math.floor(fanGain / 12) + (viral ? 10 : 0);
+  state.fans += fanGain;
+  state.fame += fameGain;
+  state.health = clamp(state.health - (viral ? 4 : 1), 0, 100);
+  if (random() > 0.68) addStat("carisma", 1);
+  const levelMessages = addXp(16 + (viral ? 16 : 0));
+  const rhythmMessages = applyRhythm(`social-${option.id}`, viral ? option.rhythm + 9 : option.rhythm);
+  const timeMessages = spendActionTime(option.energy, option.hours, option.label);
+  setEvent([
+    viral ? `${option.label} exploto: +${fanGain} fans.` : `${option.label}: +${fanGain} fans, +${fameGain} fama.`,
+    ...rhythmMessages,
+    ...levelMessages,
+    ...timeMessages,
+  ]);
+}
+
+function performJob(option: JobOption): void {
+  if (state.energy < option.energy) {
+    setEvent(["Estas demasiado cansado para tomar ese turno."]);
+    return;
+  }
+  const earned = option.cash + state.stats.disciplina * 3 + randomInt(0, 12);
+  state.cash += earned;
+  if (random() < option.disciplineChance) addStat("disciplina", 1);
+  const levelMessages = addXp(8 + Math.floor(option.hours / 2));
+  const rhythmMessages = applyRhythm(`work-${option.id}`, -2);
+  const timeMessages = spendActionTime(option.energy, option.hours, option.label);
+  setEvent([`${option.label} ${option.hours}h: +$${earned}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
+}
+
 function battleLabel(): string {
   switch (state.stage) {
     case "pieza":
@@ -1182,6 +1430,7 @@ function finishBattle(): void {
   ];
   state.battle = null;
   state.mode = "career";
+  careerView = "base";
   setEvent(messages);
 }
 
@@ -1208,41 +1457,226 @@ function render(): void {
 }
 
 function drawStartScreen(): void {
-  drawBackdrop("pieza");
-  if (!hasSceneBackdrop("pieza")) drawRoomProps();
-  drawMc(465, 306, 1.5, state.animationTime);
-  drawVinylLogo(108, 112);
-
-  drawText("FREESTYLE CAREER", 156, 96, 34, palette.ink);
-  drawText("Desde la pieza al escenario mundial", 158, 132, 15, palette.yellow);
-
   const hasSave = Boolean(savedSnapshot);
-  drawPanel(566, 84, 300, 282);
-  drawText(hasSave && !creatingNew ? "Partida guardada" : "Nueva carrera", 590, 122, 20, palette.ink);
 
   if (hasSave && !creatingNew) {
-    drawText(`${savedSnapshot?.playerName ?? "MC"} · Nivel ${savedSnapshot?.level ?? 1}`, 590, 158, 16, palette.yellow);
-    drawText(`Semana ${savedSnapshot?.week ?? 1} · ${stageTitle(savedSnapshot?.stage ?? "pieza")}`, 590, 184, 14, palette.muted);
-    button("continue", 590, 222, 246, 44, "Continuar", "", false, continueCareer);
-    button("new", 590, 276, 246, 38, "Nueva carrera", "", false, newCareerDraft);
-    button("delete", 590, 322, 246, 34, "Borrar guardado", "", false, deleteSave);
+    drawMainMenuScreen();
   } else {
-    drawText("Nombre artistico", 590, 158, 14, palette.muted);
-    drawInputBox(590, 172, 246, 44, state.inputName || "MC Barrio");
-    drawText("Teclas para escribir · Enter empieza", 590, 230, 12, palette.muted);
-    button("start", 590, 260, 246, 48, "Empezar", "", false, startCareerFromMenu);
-    if (hasSave) {
-      button("back-save", 590, 320, 246, 36, "Volver al guardado", "", false, () => {
-        creatingNew = false;
-        state = normalizeLoadedState(savedSnapshot as GameState);
-      });
+    drawStartBackdrop();
+    drawCreateMcScreen(hasSave);
+  }
+}
+
+function drawStartBackdrop(): void {
+  if (drawLayeredCoverBackdrop()) return;
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, "#060932");
+  gradient.addColorStop(0.52, "#07134a");
+  gradient.addColorStop(1, "#080b24");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+  pixelRect(14, 14, W - 28, H - 28, "rgba(14,19,64,0.52)");
+  pixelRect(18, 18, W - 36, 4, palette.borderHi);
+  pixelRect(18, H - 22, W - 36, 4, palette.borderLo);
+  for (let i = 0; i < 14; i += 1) {
+    const x = 18 + i * 70;
+    const h = 42 + ((i * 19) % 94);
+    pixelRect(x, 248 - h, 42 + (i % 3) * 15, h, "#071132");
+    for (let win = 0; win < 4; win += 1) {
+      pixelRect(x + 8 + win * 12, 238 - h + ((i + win) % 5) * 16, 4, 6, win % 2 ? "#6aa7ff" : "#e1b84a");
     }
   }
+  pixelRect(0, 386, W, 154, "#101638");
+  for (let i = 0; i < 11; i += 1) {
+    drawLine(0, 402 + i * 13, W, 390 + i * 11, "rgba(255,255,255,0.06)", 1);
+  }
+  drawSpeakerStack(52, 334, 0.8);
+  drawSpeakerStack(838, 334, 0.8);
+  drawText("RAP", 96, 272, 24, palette.pink);
+  drawText("vive el freestyle", 748, 276, 18, palette.blue);
+}
 
-  drawText("F: pantalla completa", 36, 504, 13, palette.muted);
+function drawMainMenuScreen(): void {
+  drawStartBackdrop();
+  drawPanel(36, 36, 348, 470);
+  drawLogoLockup(74, 70, 1);
+  drawMc(242, 224, 0.92, state.animationTime);
+  drawMainMenuButton("new", 92, 244, "Nueva carrera", newCareerDraft, true);
+  drawMainMenuButton("continue", 92, 292, "Cargar partida", continueCareer);
+  drawMainMenuButton("options", 92, 340, "Opciones", () => setEvent(["Opciones llegaran en una proxima version."]));
+  drawMainMenuButton("credits", 92, 388, "Creditos", () => setEvent(["Juego creado como simulador freestyle RPG."]));
+  drawMainMenuButton("delete", 92, 436, "Borrar save", deleteSave);
+  drawTextLine("v0.1.0", 64, 490, 11, palette.muted, 90);
+  drawTextLine("Practica, compite y sube al circuito.", 548, 486, 13, palette.ink, 342);
+}
+
+function drawLogoLockup(x: number, y: number, scale: number): void {
+  pixelRect(x + 12 * scale, y + 34 * scale, 236 * scale, 24 * scale, "rgba(0,0,0,0.46)");
+  drawText("FREESTYLE", x + 4 * scale, y + 48 * scale, 38 * scale, "#0a0c18");
+  drawText("FREESTYLE", x, y + 44 * scale, 38 * scale, "#f7f6ef");
+  drawText("GAME", x + 78 * scale, y + 82 * scale, 27 * scale, "#0a0c18");
+  drawText("GAME", x + 74 * scale, y + 78 * scale, 27 * scale, palette.yellow);
+  pixelRect(x + 8 * scale, y + 92 * scale, 208 * scale, 4 * scale, palette.red);
+  pixelRect(x + 84 * scale, y + 102 * scale, 126 * scale, 3 * scale, palette.blue);
+}
+
+function drawLayeredCoverBackdrop(): boolean {
+  const ready = requiredCoverLayers.every((key) => coverLayerReady[key] && coverLayerImages[key]);
+  if (!ready) return false;
+
+  drawCoverLayer("sky");
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  const cloudDrift = Math.floor((state.animationTime * 6) % W);
+  drawCoverLayer("clouds", -cloudDrift, 0, W, H, 0.48);
+  drawCoverLayer("clouds", W - cloudDrift, 0, W, H, 0.26);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighten";
+  drawCoverLayer("cityBack", 0, 0, W, H, 0.95);
+  drawCoverLayer("cityFront", 0, 0, W, H, 0.92);
+  drawCoverLayer("rooftopFloor", 0, 0, W, H, 0.95);
+  drawCoverLayer("rooftopFence", 0, 0, W, H, 1);
+  drawCoverImageContain("neonRap", 20, 188, 184, 278, 0.55);
+  drawCoverImageContain("graffitiFreestyle", 752, 190, 188, 284, 0.5);
+  drawCoverImageContain("speakerLeft", 54, 336, 92, 132, 0.7);
+  drawCoverImageContain("speakerRight", 820, 334, 96, 136, 0.7);
+  ctx.restore();
+
+  const shade = ctx.createRadialGradient(W * 0.5, H * 0.48, 120, W * 0.5, H * 0.54, 600);
+  shade.addColorStop(0, "rgba(4,8,36,0.04)");
+  shade.addColorStop(0.72, "rgba(4,7,25,0.2)");
+  shade.addColorStop(1, "rgba(2,4,14,0.72)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, W, H);
+  pixelRect(14, 14, W - 28, 4, palette.borderHi);
+  pixelRect(14, H - 18, W - 28, 4, palette.borderLo);
+  pixelRect(14, 14, 4, H - 28, palette.borderHi);
+  pixelRect(W - 18, 14, 4, H - 28, palette.borderLo);
+  return true;
+}
+
+function drawCoverLayer(key: CoverLayerKey, x = 0, y = 0, w = W, h = H, alpha = 1): boolean {
+  const image = coverLayerImages[key];
+  if (!image || !coverLayerReady[key] || image.width <= 0 || image.height <= 0) return false;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  drawImageCover(image, x, y, w, h);
+  ctx.restore();
+  return true;
+}
+
+function drawCoverImageContain(key: CoverLayerKey, x: number, y: number, w: number, h: number, alpha = 1): boolean {
+  const image = coverLayerImages[key];
+  if (!image || !coverLayerReady[key] || image.width <= 0 || image.height <= 0) return false;
+  const scale = Math.min(w / image.width, h / image.height);
+  const dw = image.width * scale;
+  const dh = image.height * scale;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(image, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  ctx.restore();
+  return true;
+}
+
+function drawImageCover(image: HTMLImageElement, x: number, y: number, w: number, h: number): void {
+  const sourceRatio = image.width / image.height;
+  const targetRatio = w / h;
+  let sx = 0;
+  let sy = 0;
+  let sw = image.width;
+  let sh = image.height;
+
+  if (sourceRatio > targetRatio) {
+    sw = image.height * targetRatio;
+    sx = (image.width - sw) / 2;
+  } else if (sourceRatio < targetRatio) {
+    sh = image.width / targetRatio;
+    sy = (image.height - sh) / 2;
+  }
+
+  ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+}
+
+function drawMainMenuButton(id: string, x: number, y: number, label: string, onClick: () => void, selected = false): void {
+  button(id, x, y, 296, 42, label, "", false, onClick, selected ? "#20295f" : palette.panel);
+  if (selected) {
+    pixelRect(x - 26, y + 14, 16, 16, palette.yellow);
+    drawLine(x - 12, y + 22, x, y + 22, palette.yellow, 3);
+  }
+}
+
+function drawCreateMcScreen(hasSave: boolean): void {
+  drawText("2. Crear MC", 44, 70, 30, palette.ink);
+  drawPanel(38, 94, 884, 382);
+  drawLogoLockup(126, 128, 0.68);
+  drawMc(254, 356, 1.82, state.animationTime);
+  drawLine(410, 112, 410, 446, palette.borderLo, 3);
+  drawText("Nombre", 500, 156, 15, palette.ink);
+  drawInputBox(640, 130, 214, 42, state.inputName || "MC Barrio");
+  drawMenuField("Apodo", "Freestyler", 500, 202);
+  drawMenuField("Aspecto", "01", 500, 250);
+  drawMenuField("Color piel", "01", 500, 298);
+  drawMenuField("Voz", "01", 500, 346);
+  drawMenuField("Dificultad", "Normal", 500, 394);
+  button("start", 520, 430, 292, 42, "Comenzar", "", false, startCareerFromMenu, "#11183a");
+  if (hasSave) {
+    button(
+      "back-save",
+      762,
+      40,
+      118,
+      36,
+      "Volver",
+      "",
+      false,
+      () => {
+        creatingNew = false;
+        state = normalizeLoadedState(savedSnapshot as GameState);
+      },
+      "#11183a",
+    );
+  }
+  if (!hasSave) drawTextLine("Escribe tu nombre y presiona Enter.", 44, 508, 12, palette.muted, 360);
+}
+
+function drawMenuField(label: string, value: string, x: number, y: number): void {
+  drawText(label, x, y + 18, 15, palette.ink);
+  pixelRect(x + 140, y, 214, 34, "#0a0e25");
+  pixelRect(x + 140, y, 214, 3, palette.borderHi);
+  drawTextLine(value, x + 178, y + 23, 14, palette.ink, 126);
+  drawText("<", x + 154, y + 23, 14, palette.ink);
+  drawText(">", x + 326, y + 23, 14, palette.ink);
 }
 
 function drawCareerScreen(): void {
+  drawProceduralCareerView();
+}
+
+function drawProceduralCareerView(): void {
+  if (careerView === "base") {
+    drawBaseCareerView();
+    return;
+  }
+
+  drawInterfaceBackdrop();
+  drawCareerHeader();
+
+  if (careerView === "calendar") drawCalendarView();
+  else if (careerView === "map") drawMapView();
+  else if (careerView === "training") drawTrainingView();
+  else if (careerView === "social") drawSocialView();
+  else if (careerView === "work") drawWorkView();
+  else if (careerView === "shop") drawShopView();
+  else if (careerView === "stats") drawStatsView();
+
+  drawCareerNavBar();
+}
+
+function drawLegacyCareerScreen(): void {
   drawBackdrop(state.stage);
   if (!hasSceneBackdrop(state.stage)) drawEnvironment(state.stage);
   drawCareerSceneFrame();
@@ -1258,30 +1692,65 @@ function drawBattleScreen(): void {
   drawBackdrop(state.stage);
   drawBattleArena(state.stage);
 
-  drawMc(260, 310, 1.45, state.animationTime);
-  drawRival(675, 310, 1.45, state.animationTime);
-  drawMicStand(468, 294);
+  drawBattleStageHud(battle);
+  drawMc(160, 302, 1.62, state.animationTime);
+  drawRival(804, 302, 1.62, state.animationTime);
+  drawMicStand(468, 286);
 
-  drawTopHud();
-  drawBattleHeader(battle);
-
-  drawPanel(44, 348, 872, 170);
   if (battle.finished) {
-    const label = battle.result === "win" ? "Victoria" : battle.result === "draw" ? "Replica pareja" : "Derrota";
-    drawText(label, 70, 388, 24, battle.result === "win" ? palette.green : palette.yellow);
-    drawTextBlock(lastBattleNote(), 70, 418, 15, palette.ink, 560, 3);
-    button("finish-battle", 708, 418, 168, 52, "Cobrar resultado", "", false, finishBattle);
+    drawBattleResultPanel(battle);
   } else {
-    drawTextBlock(battle.prompt.text, 70, 382, 16, palette.ink, 808, 2);
-    battleChoices.forEach((choice, index) => {
-      const x = 70 + (index % 3) * 278;
-      const y = 424 + Math.floor(index / 3) * 44;
-      const boosted = battle.prompt.best.includes(choice.id);
-      drawBattleChoiceCard(choice, index, x, y, 252, 36, boosted, index === battleFocus);
-    });
+    drawBattleDecisionPanel(battle);
   }
 
-  drawBattleLog();
+}
+
+function drawBattleStageHud(battle: BattleState): void {
+  drawText("TU", 80, 64, 18, palette.ink);
+  drawText("RIVAL", 790, 64, 18, palette.ink);
+  drawText(`Ronda ${battle.round}`, 422, 62, 30, palette.ink);
+  drawMeter(116, 84, 168, 10, state.energy, maxEnergy(), palette.green, "Energia");
+  drawMeter(116, 116, 168, 10, battle.hype, 100, palette.yellow, "Hype");
+  drawMeter(674, 84, 168, 10, 70 + battle.rivalPower * 2, 100, palette.green, "Energia");
+  drawMeter(674, 116, 168, 10, Math.max(20, 100 - battle.hype / 2), 100, palette.yellow, "Hype");
+  drawSoftPanel(344, 142, 272, 82);
+  drawText("Estimulo", 426, 170, 16, palette.ink);
+  drawTextLine(battleStimulusLabel(battle.prompt.text), 388, 206, 32, palette.yellow, 188);
+}
+
+function battleStimulusLabel(prompt: string): string {
+  if (prompt.includes("barrio") || prompt.includes("canciones")) return "BARRIO";
+  if (prompt.includes("beat") || prompt.includes("tempo")) return "TEMPO";
+  if (prompt.includes("dificil")) return "PALABRA";
+  if (prompt.includes("tarima") || prompt.includes("publico")) return "ESCENA";
+  if (prompt.includes("nuevo")) return "NOVATO";
+  return "CORONA";
+}
+
+function drawBattleDecisionPanel(battle: BattleState): void {
+  drawSoftPanel(40, 324, 880, 198);
+  drawTextBlock(battle.prompt.text, 68, 354, 15, palette.ink, 820, 2);
+  battleChoices.forEach((choice, index) => {
+    const x = 68 + (index % 3) * 284;
+    const y = 388 + Math.floor(index / 3) * 58;
+    const boosted = battle.prompt.best.includes(choice.id);
+    drawBattleChoiceCard(choice, index, x, y, 256, 48, boosted, index === battleFocus);
+  });
+}
+
+function drawBattleResultPanel(battle: BattleState): void {
+  const label = battle.result === "win" ? "Ganaste" : battle.result === "draw" ? "Replica" : "Derrota";
+  const color = battle.result === "win" ? palette.yellow : battle.result === "draw" ? palette.teal : palette.red;
+  drawSoftPanel(104, 322, 752, 176);
+  drawTextLine(label, 380, 362, 34, color, 220);
+  drawPanel(148, 382, 176, 58);
+  drawTextLine("Tu puntaje", 174, 406, 12, palette.muted, 120);
+  drawTextLine(String(battle.playerScore * 32 + battle.hype), 210, 430, 22, palette.yellow, 80);
+  drawPanel(382, 382, 176, 58);
+  drawTextLine("Rival", 430, 406, 12, palette.muted, 80);
+  drawTextLine(String(battle.rivalScore * 32 + Math.floor((100 - battle.hype) / 2)), 444, 430, 22, palette.ink, 80);
+  drawTextBlock(lastBattleNote(), 604, 402, 13, palette.ink, 200, 3);
+  button("finish-battle", 384, 454, 192, 38, "Continuar", "", false, finishBattle, "#11183a");
 }
 
 function drawBattleHeader(battle: BattleState): void {
@@ -1385,6 +1854,386 @@ function drawActions(): void {
     const y = 384 + row * 34;
     drawActionListItem(action, index, x, y, 238, 30, index === actionFocus);
   });
+}
+
+function drawInterfaceBackdrop(): void {
+  const gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, "#070b22");
+  gradient.addColorStop(0.55, "#0b1238");
+  gradient.addColorStop(1, "#080b1e");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+  pixelRect(10, 8, W - 20, H - 16, "rgba(38,43,101,0.42)");
+  pixelRect(14, 12, W - 28, H - 24, "rgba(4,6,18,0.32)");
+  for (let i = 0; i < 80; i += 1) {
+    const x = (i * 73 + Math.floor(state.animationTime * 7)) % W;
+    const y = 26 + ((i * 41) % 438);
+    pixelRect(x, y, i % 7 === 0 ? 3 : 2, i % 7 === 0 ? 3 : 2, i % 5 === 0 ? "#39427f" : "#1a2257");
+  }
+}
+
+function drawCareerHeader(): void {
+  drawHudPanel(18, 12, 924, 68, palette.blue);
+  pixelRect(34, 20, 52, 52, "#080a16");
+  pixelRect(34, 20, 52, 3, palette.yellow);
+  drawMcBust(60, 56, 1.08);
+
+  drawText("ENERGIA", 106, 36, 12, palette.ink);
+  drawMeter(106, 54, 174, 11, state.energy, maxEnergy(), palette.green, "");
+  drawTextLine(`${state.energy}/${maxEnergy()}`, 286, 62, 12, palette.ink, 60);
+
+  drawHeaderStat(368, 24, 112, "$", `$${state.cash}`, palette.green);
+  drawHeaderStat(496, 24, 154, "Fans", String(state.fans), palette.blue);
+  drawHeaderStat(666, 24, 142, "Resp", String(state.respect), palette.pink);
+  drawHeaderStat(824, 24, 90, "Sem", `${state.week}.${state.day}`, palette.yellow);
+}
+
+function drawHeaderStat(x: number, y: number, w: number, label: string, value: string, color: string): void {
+  pixelRect(x + 3, y + 3, w, 36, "rgba(0,0,0,0.28)");
+  pixelRect(x, y, w, 36, "#0b0f25");
+  pixelRect(x, y, 4, 36, color);
+  drawTextLine(label, x + 12, y + 15, 10, palette.muted, 50);
+  drawTextLine(value, x + 12, y + 30, 14, label === "$" ? palette.green : palette.ink, w - 22);
+}
+
+function drawBaseCareerView(): void {
+  drawBackdrop(state.stage);
+  if (!hasSceneBackdrop(state.stage)) drawEnvironment(state.stage);
+  drawCareerSceneFrame();
+  drawMc(hasSceneBackdrop(state.stage) ? 392 : 284, 312, 1.25, state.animationTime);
+  drawCareerHeader();
+  drawBaseStatusStrip();
+  drawCareerDossier(684, 92, 228, 232);
+  drawHomeActionDock();
+  drawCareerNavBar();
+}
+
+function drawBaseStatusStrip(): void {
+  drawSoftPanel(44, 326, 590, 44);
+  drawTextLine(state.lastEvent, 64, 352, 11, palette.ink, 540);
+  if (timeFx) drawTimeAdvanceFx();
+}
+
+function drawHomeActionDock(): void {
+  const items = [
+    { id: "rest", label: "Dormir", action: () => runCareerAction("rest"), accent: "#9aa0ad" },
+    { id: "practice", label: "Entrenar", action: () => (careerView = "training"), accent: palette.green },
+    { id: "write", label: "Escribir", action: () => runCareerAction("write"), accent: palette.blue },
+    { id: "social", label: "Redes", action: () => (careerView = "social"), accent: palette.pink },
+    { id: "map", label: "Mapa", action: () => (careerView = "map"), accent: palette.yellow },
+  ];
+  const x0 = 44;
+  const y = 386;
+  const w = 168;
+  items.forEach((item, index) => {
+    const x = x0 + index * 178;
+    const hot = pointer.x >= x && pointer.x <= x + w && pointer.y >= y && pointer.y <= y + 78;
+    pixelRect(x + 4, y + 4, w, 78, "rgba(0,0,0,0.32)");
+    pixelRect(x, y, w, 78, hot ? "#1f2750" : "#111836");
+    pixelRect(x, y, w, 3, item.accent);
+    drawActionIcon(item.id, x + 18, y + 17, item.accent);
+    drawTextLine(item.label, x + 58, y + 46, 16, palette.ink, 92);
+    zones.push({ id: `home-${item.id}`, x, y, w, h: 78, disabled: false, onClick: item.action });
+  });
+}
+
+function drawCareerNavBar(): void {
+  const y = 486;
+  const x0 = 20;
+  const w = 108;
+  const h = 38;
+  careerNavItems.forEach((item, index) => {
+    const x = x0 + index * 115;
+    const active = item.id === careerView;
+    const hot = pointer.x >= x && pointer.x <= x + w && pointer.y >= y && pointer.y <= y + h;
+    pixelRect(x + 3, y + 3, w, h, "rgba(0,0,0,0.28)");
+    pixelRect(x, y, w, h, active ? "#273064" : hot ? "#1b2452" : "#0c1230");
+    pixelRect(x, y, w, 3, active ? item.accent : "#2d356d");
+    drawTextLine(item.key, x + 10, y + 23, 11, item.accent, 18);
+    drawTextLine(item.label, x + 32, y + 24, 11, palette.ink, 66);
+    zones.push({
+      id: `nav-${item.id}`,
+      x,
+      y,
+      w,
+      h,
+      disabled: false,
+      onClick: () => {
+        careerView = item.id;
+      },
+    });
+  });
+}
+
+function drawViewTitle(title: string, detail: string): void {
+  drawText(title, 40, 118, 27, palette.ink);
+  drawTextLine(detail, 42, 142, 11, palette.muted, 560);
+}
+
+function drawCalendarView(): void {
+  drawViewTitle("4. Calendario semanal", "Programa una accion rapida o vuelve a la base.");
+  const days = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+  const x0 = 40;
+  const y = 156;
+  const cardW = 120;
+  days.forEach((day, index) => {
+    const action = getCareerActions().find((item) => item.id === calendarActionIds[index]);
+    const x = x0 + index * 127;
+    const active = index + 1 === state.day;
+    const disabled = !action || Boolean(action.disabledReason);
+    pixelRect(x + 4, y + 4, cardW, 206, "rgba(0,0,0,0.28)");
+    pixelRect(x, y, cardW, 206, active ? "#182151" : "#111737");
+    pixelRect(x, y, cardW, 4, active ? palette.yellow : "#30386d");
+    drawText(day, x + 22, y + 34, 16, palette.ink);
+    drawActionIcon(action?.id ?? "rest", x + 47, y + 58, disabled ? "#555b6d" : actionAccent(action?.id ?? "rest"));
+    drawTextLine(actionShortLabel(action?.id ?? "rest", action?.label ?? "Libre"), x + 18, y + 116, 13, disabled ? "#74798c" : palette.ink, 84);
+    drawTextLine(action ? formatDuration(action.durationHours) : "-", x + 42, y + 142, 11, palette.yellow, 44);
+    pixelRect(x + 24, y + 156, 72, 34, "rgba(6,8,18,0.58)");
+    zones.push({
+      id: `calendar-${index}`,
+      x,
+      y,
+      w: cardW,
+      h: 206,
+      disabled,
+      onClick: () => {
+        if (action) action.run();
+      },
+    });
+  });
+
+  drawSoftPanel(42, 382, 580, 78);
+  drawText("Informacion", 64, 412, 16, palette.yellow);
+  drawTextBlock(state.lastEvent, 64, 436, 12, palette.ink, 520, 2);
+  button("calendar-continue", 724, 402, 154, 42, "Continuar", "", false, () => {
+    careerView = "base";
+  });
+}
+
+function drawMapView(): void {
+  drawViewTitle("5. Mapa (progreso)", currentStage().nextHint);
+  drawPanel(36, 146, 888, 266);
+  drawPixelCityMap(54, 164, 852, 230);
+  const points: Vec2[] = [
+    [134, 310],
+    [292, 238],
+    [448, 318],
+    [590, 226],
+    [742, 300],
+    [838, 194],
+  ];
+  points.forEach((point, index) => {
+    if (index === 0) return;
+    drawDottedLine(points[index - 1], point, index <= stageIndex() ? palette.yellow : "#5b628c");
+  });
+  stages.forEach((stage, index) => {
+    const [x, y] = points[index];
+    const open = index <= stageIndex();
+    const next = index === stageIndex() + 1;
+    const color = open ? palette.yellow : next ? palette.teal : "#5a5f74";
+    pixelRect(x - 22, y - 10, 44, 20, "rgba(0,0,0,0.4)");
+    pixelRect(x - 14, y - 16, 28, 28, color);
+    pixelRect(x - 8, y - 10, 16, 16, "#10142b");
+    drawTextLine(stage.title, x - 44, y - 24, 13, open ? palette.ink : "#8a8fa5", 88);
+    if (!open && !next) drawText("LOCK", x - 18, y + 28, 9, palette.red);
+    if (stage.id === state.stage) drawText("ACTUAL", x - 24, y + 42, 9, palette.green);
+  });
+  drawSoftPanel(38, 426, 884, 46);
+  const goal = getCareerGoals()[0];
+  drawTextLine(`Nivel ${state.level} · ${goal.label}`, 64, 454, 14, palette.ink, 300);
+  drawGoalRow(386, 438, 300, goal);
+  drawTextLine(`Fans ${state.fans} · Resp ${state.respect} · Fama ${state.fame}`, 714, 454, 11, palette.muted, 178);
+}
+
+function drawPixelCityMap(x: number, y: number, w: number, h: number): void {
+  pixelRect(x, y, w, h, "#111a33");
+  for (let i = 0; i < 22; i += 1) {
+    const bx = x + 16 + ((i * 73) % (w - 60));
+    const by = y + 34 + ((i * 47) % (h - 86));
+    const bw = 28 + (i % 3) * 14;
+    const bh = 28 + (i % 4) * 9;
+    pixelRect(bx, by, bw, bh, i % 2 === 0 ? "#172343" : "#1b2a4d");
+    for (let win = 0; win < 4; win += 1) {
+      pixelRect(bx + 7 + win * 10, by + 8 + ((i + win) % 3) * 8, 4, 5, "#d8b653");
+    }
+  }
+  for (let road = 0; road < 5; road += 1) {
+    drawLine(x, y + 42 + road * 42, x + w, y + 26 + road * 37, "rgba(243,242,233,0.12)", 2);
+  }
+}
+
+function drawDottedLine(a: Vec2, b: Vec2, color: string): void {
+  const steps = 18;
+  for (let i = 0; i <= steps; i += 1) {
+    if (i % 2 !== 0) continue;
+    const t = i / steps;
+    pixelRect(a[0] + (b[0] - a[0]) * t - 3, a[1] + (b[1] - a[1]) * t - 3, 6, 6, color);
+  }
+}
+
+function drawTrainingView(): void {
+  drawViewTitle("6. Entrenamiento", "Sube atributos concretos consumiendo 2h y energia.");
+  drawPanel(36, 150, 580, 310);
+  trainingStats.forEach((stat, index) => drawTrainingRow(stat, index, 60, 176 + index * 39, 526));
+  drawPanel(638, 150, 286, 310);
+  drawText("Entrenar cada dia", 690, 196, 18, palette.ink);
+  drawText("te hace mejor.", 718, 226, 18, palette.ink);
+  drawMc(780, 342, 1.2, state.animationTime);
+  drawTextLine("1-7 entrena una stat", 680, 424, 12, palette.muted, 210);
+}
+
+function drawTrainingRow(stat: StatKey, index: number, x: number, y: number, w: number): void {
+  const value = state.stats[stat];
+  const disabled = state.energy < 14;
+  pixelRect(x + 3, y + 3, w, 32, "rgba(0,0,0,0.26)");
+  pixelRect(x, y, w, 32, "#101735");
+  pixelRect(x, y, 4, 32, statColor(stat));
+  drawTextLine(`${index + 1}. ${statLabels[stat]}`, x + 18, y + 21, 13, palette.ink, 132);
+  drawMeter(x + 166, y + 13, 210, 8, value, 20, statColor(stat), "");
+  drawTextLine(`Nivel ${value}`, x + 392, y + 21, 12, palette.muted, 70);
+  button(`train-${stat}`, x + w - 42, y + 5, 28, 22, "+", "", disabled, () => trainSpecificStat(stat), "#202955");
+}
+
+function drawSocialView(): void {
+  drawViewTitle("7. Redes sociales", "Publica contenido, gana fans y cuida la energia.");
+  const engagement = clamp(12 + state.stats.carisma * 3 + Math.floor(state.momentum / 5), 0, 99);
+  drawPanel(36, 150, 530, 310);
+  drawTextLine(`Seguidores ${state.fans}`, 62, 180, 15, palette.blue, 190);
+  drawTextLine(`Engagement ${engagement}%`, 348, 180, 15, palette.yellow, 160);
+  socialPostOptions.forEach((option, index) => drawSocialRow(option, index, 60, 206 + index * 55, 482));
+  drawPanel(594, 150, 330, 310);
+  drawText("Vista previa", 694, 184, 17, palette.ink);
+  drawSocialPreview(622, 204, 274, 166);
+  button("publish-fast", 674, 394, 166, 42, "Publicar", "", state.energy < socialPostOptions[0].energy, () =>
+    publishSocialPost(socialPostOptions[0]),
+  );
+}
+
+function drawSocialRow(option: SocialPostOption, index: number, x: number, y: number, w: number): void {
+  const disabled = state.energy < option.energy;
+  pixelRect(x + 3, y + 3, w, 42, "rgba(0,0,0,0.26)");
+  pixelRect(x, y, w, 42, index === 0 ? "#1b2555" : "#101735");
+  pixelRect(x, y, 4, 42, palette.pink);
+  drawTextLine(`${index + 1}. ${option.label}`, x + 16, y + 26, 13, disabled ? "#7d8295" : palette.ink, 210);
+  drawTextLine(`+${option.fans} fans`, x + 260, y + 26, 11, palette.blue, 82);
+  drawTextLine(`${option.hours}h`, x + 368, y + 26, 11, palette.yellow, 34);
+  zones.push({ id: `social-${option.id}`, x, y, w, h: 42, disabled, onClick: () => publishSocialPost(option) });
+}
+
+function drawSocialPreview(x: number, y: number, w: number, h: number): void {
+  pixelRect(x, y, w, h, "#0b1026");
+  for (let i = 0; i < 8; i += 1) {
+    const bx = x + 12 + i * 32;
+    const bh = 34 + ((i * 13) % 42);
+    pixelRect(bx, y + 82 - bh, 22, bh, "#151e40");
+    pixelRect(bx + 6, y + 58 - bh, 4, 5, "#d8b653");
+    pixelRect(bx + 14, y + 72 - bh, 4, 5, "#6aa7ff");
+  }
+  pixelRect(x + 14, y + 14, 36, 36, "#171a20");
+  drawTextLine(state.playerName, x + 62, y + 36, 12, palette.ink, 120);
+  drawMc(x + 142, y + 120, 0.72, state.animationTime);
+  pixelRect(x + 12, y + h - 34, w - 24, 1, "#2d356d");
+  drawTextLine("Nuevo freestyle en la plaza.", x + 18, y + h - 14, 10, palette.ink, w - 36);
+}
+
+function drawWorkView(): void {
+  drawViewTitle("8. Trabajo", "Gana dinero para invertir en tu carrera.");
+  drawTextLine(`Dinero actual: $${state.cash}`, 610, 118, 16, palette.green, 220);
+  drawPanel(36, 150, 490, 258);
+  jobOptions.forEach((option, index) => drawJobRow(option, index, 60, 176 + index * 52, 438));
+  drawPanel(550, 150, 374, 258);
+  drawWarehouseScene(580, 174, 314, 186);
+  drawSoftPanel(38, 426, 884, 46);
+  drawTextLine("Trabajar da caja, pero baja energia e impulso si abusas.", 64, 454, 13, palette.ink, 700);
+}
+
+function drawJobRow(option: JobOption, index: number, x: number, y: number, w: number): void {
+  const disabled = state.energy < option.energy;
+  pixelRect(x + 3, y + 3, w, 42, "rgba(0,0,0,0.26)");
+  pixelRect(x, y, w, 42, "#101735");
+  pixelRect(x, y, 4, 42, palette.green);
+  drawTextLine(`${index + 1}. ${option.label}`, x + 16, y + 26, 14, disabled ? "#7d8295" : palette.ink, 190);
+  drawTextLine(`$${option.cash}`, x + 260, y + 26, 14, palette.green, 54);
+  drawTextLine(`${option.hours}h`, x + 330, y + 26, 11, palette.yellow, 34);
+  button(`job-${option.id}`, x + w - 42, y + 8, 28, 24, "+", "", disabled, () => performJob(option), "#202955");
+}
+
+function drawWarehouseScene(x: number, y: number, w: number, h: number): void {
+  pixelRect(x, y, w, h, "#323948");
+  for (let i = 0; i < 8; i += 1) {
+    pixelRect(x + 20 + (i % 4) * 58, y + 94 + Math.floor(i / 4) * 42, 42, 30, "#795333");
+    pixelRect(x + 26 + (i % 4) * 58, y + 101 + Math.floor(i / 4) * 42, 12, 4, "#a77a4c");
+  }
+  drawMc(x + 170, y + 156, 1.05, state.animationTime);
+  drawTextLine("Enfoque + disciplina", x + 164, y + 36, 13, palette.ink, 130);
+}
+
+function drawShopView(): void {
+  drawViewTitle("9. Tienda", "Compra equipo, ropa y base para mejorar tu carrera.");
+  drawTextLine(`Dinero $${state.cash}`, 752, 118, 18, palette.green, 140);
+  drawPanel(36, 150, 520, 310);
+  upgrades.forEach((upgrade, index) => drawShopRow(upgrade, index, 62, 184 + index * 70, 464));
+  drawPanel(586, 150, 338, 310);
+  drawShopPreview(630, 186);
+  const next = nextUpgrade();
+  drawTextLine(next ? `${next.label}: ${next.effect}` : "Setup al maximo", 626, 408, 15, palette.yellow, 240);
+  drawTextBlock(next ? `Costo recomendado: $${upgradeCost(next)}.` : "No hay compras pendientes.", 626, 432, 12, palette.ink, 240, 2);
+}
+
+function drawShopRow(upgrade: UpgradeDef, index: number, x: number, y: number, w: number): void {
+  const level = upgradeLevel(upgrade.key);
+  const maxed = level >= upgrade.maxLevel;
+  const cost = upgradeCost(upgrade, level);
+  const disabled = maxed || state.cash < cost;
+  pixelRect(x + 3, y + 3, w, 52, "rgba(0,0,0,0.26)");
+  pixelRect(x, y, w, 52, "#101735");
+  pixelRect(x, y, 4, 52, upgrade.color);
+  drawTextLine(`${index + 1}. ${upgrade.label}`, x + 16, y + 25, 15, palette.ink, 128);
+  drawTextLine(`Nv ${level}/${upgrade.maxLevel}`, x + 166, y + 25, 12, palette.muted, 64);
+  drawTextLine(maxed ? "MAX" : `$${cost}`, x + 256, y + 25, 14, maxed ? palette.teal : palette.green, 70);
+  drawTextLine(upgrade.effect, x + 16, y + 43, 10, palette.muted, 230);
+  button(`shop-${upgrade.key}`, x + w - 54, y + 12, 36, 28, "+", "", disabled, () => buyUpgradeByKey(upgrade.key), "#202955");
+}
+
+function drawShopPreview(x: number, y: number): void {
+  pixelRect(x, y, 250, 164, "#111835");
+  drawLine(x, y + 112, x + 250, y + 112, "#3c4370", 2);
+  drawMicStand(x + 124, y + 58);
+  drawSpeakerStack(x + 36, y + 56, 0.45);
+  drawSpeakerStack(x + 184, y + 56, 0.45);
+}
+
+function drawStatsView(): void {
+  drawViewTitle("13. Estadisticas", "Perfil del artista y metricas de carrera.");
+  drawPanel(32, 152, 244, 312);
+  drawText("Perfil", 112, 184, 16, palette.ink);
+  drawMc(154, 316, 1.28, state.animationTime);
+  drawTextLine(state.playerName, 80, 394, 20, palette.yellow, 148);
+  drawTextLine(`Nivel ${state.level} · ${stageTitle(state.stage)}`, 66, 424, 12, palette.ink, 180);
+  drawMeter(66, 444, 168, 10, state.xp, state.xpNext, palette.blue, "");
+
+  drawPanel(298, 152, 374, 312);
+  drawText("Atributos principales", 324, 184, 16, palette.ink);
+  trainingStats.forEach((stat, index) => {
+    const y = 208 + index * 33;
+    drawTextLine(statLabels[stat], 324, y, 12, palette.ink, 112);
+    drawMeter(452, y - 7, 134, 8, state.stats[stat], 20, statColor(stat), "");
+    drawTextLine(String(state.stats[stat]), 604, y, 12, palette.muted, 28);
+  });
+
+  drawPanel(694, 152, 230, 312);
+  drawText("Carrera", 770, 184, 16, palette.ink);
+  drawCareerMetric("Fans", state.fans, palette.blue, 720, 218);
+  drawCareerMetric("Respeto", state.respect, palette.pink, 720, 280);
+  drawCareerMetric("Fama", state.fame, palette.yellow, 720, 342);
+  drawCareerMetric("Dinero", `$${state.cash}`, palette.green, 720, 404);
+}
+
+function drawCareerMetric(label: string, value: number | string, color: string, x: number, y: number): void {
+  pixelRect(x, y - 24, 176, 44, "#101735");
+  pixelRect(x, y - 24, 4, 44, color);
+  drawTextLine(label, x + 16, y - 4, 12, palette.muted, 90);
+  drawTextLine(String(value), x + 112, y - 4, 13, color, 54);
 }
 
 function drawCareerSceneFrame(): void {
@@ -1683,12 +2532,13 @@ function drawGeneratedBackdrop(stageId: StageId): boolean {
   ctx.drawImage(image, sx, sy, sw, sh, 0, 0, W, H);
 
   const shade = ctx.createLinearGradient(0, 0, 0, H);
-  shade.addColorStop(0, "rgba(8, 10, 13, 0.42)");
-  shade.addColorStop(0.32, "rgba(8, 10, 13, 0.1)");
-  shade.addColorStop(0.64, "rgba(8, 10, 13, 0.06)");
-  shade.addColorStop(1, "rgba(8, 10, 13, 0.62)");
+  shade.addColorStop(0, "rgba(4, 7, 28, 0.56)");
+  shade.addColorStop(0.32, "rgba(10, 17, 54, 0.24)");
+  shade.addColorStop(0.64, "rgba(8, 12, 36, 0.16)");
+  shade.addColorStop(1, "rgba(4, 6, 18, 0.72)");
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, W, H);
+  pixelRect(0, 0, W, H, "rgba(18, 26, 82, 0.12)");
 
   return true;
 }
@@ -2020,6 +2870,25 @@ function drawRival(x: number, y: number, scale: number, time: number): void {
   drawPerformer(x, y, scale, time, "rival");
 }
 
+function drawMcBust(x: number, y: number, scale: number): void {
+  const s = scale;
+  const px = (dx: number, dy: number, w: number, h: number, color: string) => {
+    pixelRect(x + dx * s, y + dy * s, w * s, h * s, color);
+  };
+  const skin = "#f0bd82";
+  px(-17, -16, 34, 34, "#08090d");
+  px(-13, -12, 26, 26, skin);
+  px(-16, -18, 32, 9, palette.red);
+  px(8, -16, 18, 5, palette.red);
+  px(-14, -6, 28, 5, "#171116");
+  px(-8, 1, 5, 4, palette.black);
+  px(4, 1, 5, 4, palette.black);
+  px(-8, 10, 16, 3, "#7c3f33");
+  px(-18, 18, 36, 17, "#111318");
+  px(-10, 24, 20, 4, palette.ink);
+  px(-8, 30, 16, 3, palette.ink);
+}
+
 function drawPerformer(x: number, y: number, scale: number, time: number, variant: "mc" | "rival"): void {
   const s = scale;
   const bounce = Math.round((variant === "mc" ? Math.sin(time * 7) : Math.cos(time * 6.2)) * 1.2);
@@ -2184,21 +3053,23 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, color: string,
 }
 
 function drawPanel(x: number, y: number, w: number, h: number): void {
-  pixelRect(x + 4, y + 4, w, h, "rgba(0,0,0,0.28)");
-  pixelRect(x, y, w, h, palette.panel);
-  pixelRect(x, y, w, 3, palette.line);
-  pixelRect(x, y + h - 3, w, 3, "#0d0e11");
-  pixelRect(x, y, 3, h, palette.line);
-  pixelRect(x + w - 3, y, 3, h, "#0d0e11");
+  pixelRect(x + 5, y + 6, w, h, "rgba(0,0,0,0.36)");
+  pixelRect(x, y, w, h, palette.deep);
+  pixelRect(x + 4, y + 4, w - 8, h - 8, palette.panel);
+  pixelRect(x, y, w, 4, palette.borderHi);
+  pixelRect(x, y + h - 4, w, 4, palette.borderLo);
+  pixelRect(x, y, 4, h, palette.borderHi);
+  pixelRect(x + w - 4, y, 4, h, palette.borderLo);
+  pixelRect(x + 8, y + 8, w - 16, 2, "rgba(255,255,255,0.14)");
 }
 
 function drawSoftPanel(x: number, y: number, w: number, h: number): void {
-  pixelRect(x + 5, y + 6, w, h, "rgba(0,0,0,0.28)");
-  pixelRect(x, y, w, h, "rgba(18,20,26,0.88)");
-  pixelRect(x, y, w, 2, "rgba(243,242,233,0.16)");
-  pixelRect(x, y + h - 2, w, 2, "rgba(0,0,0,0.42)");
-  pixelRect(x, y, 2, h, "rgba(225,184,74,0.22)");
-  pixelRect(x + w - 2, y, 2, h, "rgba(0,0,0,0.36)");
+  pixelRect(x + 4, y + 5, w, h, "rgba(0,0,0,0.34)");
+  pixelRect(x, y, w, h, "rgba(8,12,34,0.93)");
+  pixelRect(x, y, w, 3, "rgba(107,112,201,0.85)");
+  pixelRect(x, y + h - 3, w, 3, "rgba(18,22,58,0.95)");
+  pixelRect(x, y, 3, h, "rgba(107,112,201,0.72)");
+  pixelRect(x + w - 3, y, 3, h, "rgba(25,30,76,0.95)");
 }
 
 function drawInputBox(x: number, y: number, w: number, h: number, value: string): void {
@@ -2222,11 +3093,14 @@ function button(
   base = palette.panel,
 ): void {
   const hot = pointer.x >= x && pointer.x <= x + w && pointer.y >= y && pointer.y <= y + h;
-  const fill = disabled ? "#25272d" : hot ? "#3b414b" : base;
+  const fill = disabled ? "#161b34" : hot ? "#273064" : base === palette.panel ? "#11183a" : base;
   const showDetail = Boolean(detail) && h >= 38;
-  pixelRect(x + 3, y + 3, w, h, "rgba(0,0,0,0.28)");
+  pixelRect(x + 4, y + 5, w, h, "rgba(0,0,0,0.34)");
   pixelRect(x, y, w, h, fill);
-  pixelRect(x, y, w, 3, disabled ? "#42444a" : palette.yellow);
+  pixelRect(x, y, w, 3, disabled ? "#343957" : palette.yellow);
+  pixelRect(x, y + h - 3, w, 3, "#080b1a");
+  pixelRect(x, y, 3, h, disabled ? "#343957" : palette.borderHi);
+  pixelRect(x + w - 3, y, 3, h, "#141936");
   drawTextLine(label, x + 12, y + (showDetail ? 19 : Math.floor(h / 2) + 5), 13, disabled ? "#777a82" : palette.ink, w - 24);
   if (showDetail) {
     drawTextLine(detail, x + 12, y + h - 9, 10, disabled ? "#686b72" : palette.muted, w - 24);
@@ -2488,9 +3362,46 @@ function handleKey(event: KeyboardEvent): void {
 
   if (state.mode === "career") {
     const actions = getCareerActions();
+    const lower = event.key.toLowerCase();
+    const navMatch = careerNavItems.find((item) => item.key.toLowerCase() === lower);
+    if (navMatch) {
+      careerView = navMatch.id;
+      event.preventDefault();
+      return;
+    }
+    if (event.key === "Escape") {
+      careerView = "base";
+      event.preventDefault();
+      return;
+    }
     if (event.key.toLowerCase() === "u") {
       buyRecommendedUpgrade();
       event.preventDefault();
+      return;
+    }
+    const number = Number(event.key);
+    if (Number.isInteger(number) && number > 0 && careerView !== "base") {
+      if (careerView === "calendar") {
+        const actionId = calendarActionIds[number - 1];
+        if (actionId) runCareerAction(actionId);
+      } else if (careerView === "training") {
+        const stat = trainingStats[number - 1];
+        if (stat) trainSpecificStat(stat);
+      } else if (careerView === "social") {
+        const option = socialPostOptions[number - 1];
+        if (option) publishSocialPost(option);
+      } else if (careerView === "work") {
+        const option = jobOptions[number - 1];
+        if (option) performJob(option);
+      } else if (careerView === "shop") {
+        const upgrade = upgrades[number - 1];
+        if (upgrade) buyUpgradeByKey(upgrade.key);
+      }
+      event.preventDefault();
+      return;
+    }
+    if (careerView !== "base") {
+      if (isConfirm) event.preventDefault();
       return;
     }
     if (event.key === "ArrowRight") {
@@ -2519,7 +3430,6 @@ function handleKey(event: KeyboardEvent): void {
       event.preventDefault();
       return;
     }
-    const number = Number(event.key);
     if (Number.isInteger(number) && number > 0) {
       const action = actions[number - 1];
       if (action && !action.disabledReason) action.run();
@@ -2624,6 +3534,7 @@ function renderGameToText(): string {
   return JSON.stringify({
     coordinate_system: "canvas 960x540, origin top-left, x right, y down",
     mode: state.mode,
+    careerView: state.mode === "career" ? careerView : null,
     player: {
       name: state.playerName,
       stage: state.stage,
