@@ -31,6 +31,7 @@ type Vec2 = [number, number];
 type Stats = Record<StatKey, number>;
 
 type BattleChoiceId = "respuesta" | "punchline" | "flow" | "humor" | "tecnica" | "escena";
+type UpgradeKey = "outfit" | "studio" | "home";
 
 interface StageDef {
   id: StageId;
@@ -102,6 +103,9 @@ interface GameState {
   fame: number;
   songs: number;
   discProgress: number;
+  outfitLevel: number;
+  studioLevel: number;
+  homeLevel: number;
   momentum: number;
   lastActionId: string | null;
   actionStreak: number;
@@ -111,6 +115,25 @@ interface GameState {
   seed: number;
   animationTime: number;
   battle: BattleState | null;
+}
+
+interface UpgradeDef {
+  key: UpgradeKey;
+  label: string;
+  shortLabel: string;
+  color: string;
+  baseCost: number;
+  costStep: number;
+  maxLevel: number;
+  effect: string;
+}
+
+interface CareerGoal {
+  label: string;
+  detail: string;
+  value: number;
+  max: number;
+  color: string;
 }
 
 interface ButtonZone {
@@ -299,6 +322,39 @@ const palette = {
   room: "#20242d",
 };
 
+const upgrades: UpgradeDef[] = [
+  {
+    key: "outfit",
+    label: "Outfit",
+    shortLabel: "Ropa",
+    color: palette.yellow,
+    baseCost: 55,
+    costStep: 85,
+    maxLevel: 3,
+    effect: "+fans/batalla",
+  },
+  {
+    key: "studio",
+    label: "Estudio",
+    shortLabel: "Studio",
+    color: palette.pink,
+    baseCost: 75,
+    costStep: 115,
+    maxLevel: 3,
+    effect: "+temas/grabar",
+  },
+  {
+    key: "home",
+    label: "Base",
+    shortLabel: "Casa",
+    color: palette.teal,
+    baseCost: 110,
+    costStep: 150,
+    maxLevel: 3,
+    effect: "+energia/salud",
+  },
+];
+
 const sceneAssetPaths: Partial<Record<StageId, string>> = {
   pieza: "/assets/scenes/pieza-home-studio-v1.png",
   plaza: "/assets/scenes/plaza-cypher-v1.png",
@@ -356,6 +412,9 @@ function createNewState(name = "MC Barrio"): GameState {
     fame: 0,
     songs: 0,
     discProgress: 0,
+    outfitLevel: 0,
+    studioLevel: 0,
+    homeLevel: 0,
     momentum: 42,
     lastActionId: null,
     actionStreak: 0,
@@ -384,6 +443,9 @@ function normalizeLoadedState(saved: GameState): GameState {
     inputName: saved.playerName || "MC Barrio",
     animationTime: 0,
     battle: null,
+    outfitLevel: clamp(saved.outfitLevel ?? 0, 0, 3),
+    studioLevel: clamp(saved.studioLevel ?? 0, 0, 3),
+    homeLevel: clamp(saved.homeLevel ?? 0, 0, 3),
     momentum: clamp(saved.momentum ?? 42, 0, 100),
     lastActionId: saved.lastActionId ?? null,
     actionStreak: saved.actionStreak ?? 0,
@@ -443,7 +505,121 @@ function stageIndex(id = state.stage): number {
 }
 
 function maxEnergy(): number {
-  return 90 + state.level * 2 + state.stats.disciplina;
+  return 90 + state.level * 2 + state.stats.disciplina + state.homeLevel * 8;
+}
+
+function upgradeLevel(key: UpgradeKey): number {
+  if (key === "outfit") return state.outfitLevel;
+  if (key === "studio") return state.studioLevel;
+  return state.homeLevel;
+}
+
+function setUpgradeLevel(key: UpgradeKey, value: number): void {
+  if (key === "outfit") state.outfitLevel = value;
+  else if (key === "studio") state.studioLevel = value;
+  else state.homeLevel = value;
+}
+
+function upgradeCost(def: UpgradeDef, level = upgradeLevel(def.key)): number {
+  return def.baseCost + def.costStep * level + level * level * 25;
+}
+
+function nextUpgrade(): UpgradeDef | null {
+  const available = upgrades.filter((upgrade) => upgradeLevel(upgrade.key) < upgrade.maxLevel);
+  if (available.length === 0) return null;
+  return [...available].sort((a, b) => {
+    const levelDelta = upgradeLevel(a.key) - upgradeLevel(b.key);
+    if (levelDelta !== 0) return levelDelta;
+    return upgradeCost(a) - upgradeCost(b);
+  })[0];
+}
+
+function buyRecommendedUpgrade(): void {
+  const upgrade = nextUpgrade();
+  if (!upgrade) {
+    setEvent(["Ya tienes el setup al maximo por ahora."]);
+    return;
+  }
+  const level = upgradeLevel(upgrade.key);
+  const cost = upgradeCost(upgrade, level);
+  if (state.cash < cost) return;
+
+  state.cash -= cost;
+  setUpgradeLevel(upgrade.key, level + 1);
+  const levelMessages = addXp(14 + level * 4);
+  const rhythmMessages = applyRhythm(`upgrade-${upgrade.key}`, 6 + level * 2);
+  const timeMessages = advanceClock(1, upgrade.shortLabel);
+  setEvent([
+    `Invertiste $${cost} en ${upgrade.label} Nv ${level + 1}: ${upgrade.effect}.`,
+    ...rhythmMessages,
+    ...levelMessages,
+    ...timeMessages,
+  ]);
+}
+
+function recordCost(): number {
+  return Math.max(20, 35 - state.studioLevel * 5);
+}
+
+function stageGoalProgress(stage: StageDef): number {
+  const ratios = [
+    stage.minLevel <= 1 ? 1 : clamp(state.level / stage.minLevel, 0, 1),
+    stage.minFans <= 0 ? 1 : clamp(state.fans / stage.minFans, 0, 1),
+    stage.minRespect <= 0 ? 1 : clamp(state.respect / stage.minRespect, 0, 1),
+    stage.minFame <= 0 ? 1 : clamp(state.fame / stage.minFame, 0, 1),
+  ];
+  return ratios.reduce((sum, value) => sum + value, 0) / ratios.length;
+}
+
+function getCareerGoals(): CareerGoal[] {
+  const next = stages[stageIndex() + 1];
+  const goals: CareerGoal[] = [];
+
+  if (next) {
+    goals.push({
+      label: `Abrir ${next.title}`,
+      detail: `Nv ${state.level}/${next.minLevel} · Resp ${state.respect}/${next.minRespect}`,
+      value: Math.round(stageGoalProgress(next) * 100),
+      max: 100,
+      color: palette.teal,
+    });
+  } else {
+    goals.push({
+      label: "Legado",
+      detail: `Fama ${state.fame} · Fans ${state.fans}`,
+      value: clamp(state.fame, 0, 2500),
+      max: 2500,
+      color: palette.pink,
+    });
+  }
+
+  if (state.discProgress < 80) {
+    goals.push({
+      label: "Primer tema",
+      detail: `${state.discProgress}% escrito`,
+      value: state.discProgress,
+      max: 80,
+      color: palette.yellow,
+    });
+  } else if (state.cash < recordCost()) {
+    goals.push({
+      label: "Pagar estudio",
+      detail: `$${state.cash}/$${recordCost()}`,
+      value: state.cash,
+      max: recordCost(),
+      color: palette.pink,
+    });
+  } else {
+    goals.push({
+      label: "Grabar tema",
+      detail: "Listo para entrar al estudio",
+      value: 1,
+      max: 1,
+      color: palette.green,
+    });
+  }
+
+  return goals;
 }
 
 function startCareerFromMenu(): void {
@@ -710,7 +886,7 @@ function getCareerActions(): CareerAction[] {
     disabledReason: state.energy < 12 ? tired : undefined,
     run: () => {
       const viral = random() > 0.88;
-      const fanGain = state.stats.carisma * 4 + randomInt(2, 12) + (viral ? 42 : 0);
+      const fanGain = state.stats.carisma * 4 + state.outfitLevel * 6 + randomInt(2, 12) + (viral ? 42 : 0);
       const fameGain = Math.floor(fanGain / 8) + (viral ? 12 : 0);
       state.fans += fanGain;
       state.fame += fameGain;
@@ -739,7 +915,7 @@ function getCareerActions(): CareerAction[] {
     durationHours: 3,
     disabledReason: state.energy < 18 ? tired : undefined,
     run: () => {
-      const progress = 18 + state.stats.metrica * 2 + randomInt(0, 8);
+      const progress = 18 + state.stats.metrica * 2 + state.studioLevel * 6 + randomInt(0, 8);
       state.discProgress = clamp(state.discProgress + progress, 0, 120);
       addStat(random() > 0.5 ? "metrica" : "punchline", 1);
       const levelMessages = addXp(22);
@@ -753,22 +929,28 @@ function getCareerActions(): CareerAction[] {
     id: "record",
     label: "Grabar",
     detail: "Pagar horas y subir una cancion terminada.",
-    cost: "4h / $35 / -16 energia",
+    cost: `4h / $${recordCost()} / -16 energia`,
     rhythm: rhythmPreview("record", 14),
     durationHours: 4,
     disabledReason:
       state.discProgress < 80
         ? "Necesitas 80% de cancion."
-        : state.cash < 35
+        : state.cash < recordCost()
           ? "Falta dinero."
           : state.energy < 16
             ? tired
             : undefined,
     run: () => {
-      state.cash -= 35;
+      state.cash -= recordCost();
       state.discProgress = 0;
       state.songs += 1;
-      const fanGain = 25 + state.stats.flow * 3 + state.stats.carisma * 2 + randomInt(0, 18);
+      const fanGain =
+        25 +
+        state.stats.flow * 3 +
+        state.stats.carisma * 2 +
+        state.studioLevel * 12 +
+        state.outfitLevel * 5 +
+        randomInt(0, 18);
       state.fans += fanGain;
       state.fame += Math.floor(fanGain / 4);
       state.respect += 8;
@@ -801,8 +983,8 @@ function getCareerActions(): CareerAction[] {
       durationHours: 5,
       disabledReason: state.energy < 26 ? tired : undefined,
       run: () => {
-        const earned = 28 + state.songs * 18 + state.stats.escena * 5 + randomInt(0, 20);
-        const fans = 18 + state.stats.escena * 5 + randomInt(0, 18);
+        const earned = 28 + state.songs * 18 + state.stats.escena * 5 + state.outfitLevel * 10 + randomInt(0, 20);
+        const fans = 18 + state.stats.escena * 5 + state.outfitLevel * 8 + state.studioLevel * 4 + randomInt(0, 18);
         state.cash += earned;
         state.fans += fans;
         state.fame += Math.floor(fans / 3);
@@ -824,8 +1006,8 @@ function getCareerActions(): CareerAction[] {
     durationHours: 8,
     run: () => {
       const rhythmBase = state.energy < 35 ? 10 : -2;
-      state.energy = clamp(state.energy + 36 + state.stats.disciplina * 2, 0, maxEnergy());
-      state.health = clamp(state.health + 18, 0, 100);
+      state.energy = clamp(state.energy + 36 + state.stats.disciplina * 2 + state.homeLevel * 10, 0, maxEnergy());
+      state.health = clamp(state.health + 18 + state.homeLevel * 4, 0, 100);
       const rhythmMessages = applyRhythm("rest", rhythmBase);
       const timeMessages = advanceClock(8, "Descansar");
       setEvent(["Descansaste 8h y ordenaste la cabeza.", ...rhythmMessages, ...timeMessages]);
@@ -916,6 +1098,7 @@ function resolveBattle(choice: BattleChoice): void {
   const energyBonus = state.energy > 45 ? 4 : state.energy < 15 ? -8 : 0;
   const healthBonus = state.health > 70 ? 3 : state.health < 30 ? -8 : 0;
   const momentumBonus = Math.floor((state.momentum - 50) / 8);
+  const presenceBonus = state.outfitLevel * 2 + (state.stage === "pieza" ? 0 : state.outfitLevel);
   const playerRoll =
     statValue * 8 +
     state.level * 3 +
@@ -923,6 +1106,7 @@ function resolveBattle(choice: BattleChoice): void {
     energyBonus +
     healthBonus +
     momentumBonus +
+    presenceBonus +
     Math.floor(battle.hype / 8) +
     randomInt(7, 26);
   const rivalRoll = battle.rivalPower * 8 + battle.round * 2 + randomInt(12, 34);
@@ -1139,7 +1323,7 @@ function drawTopHud(): void {
 }
 
 function drawCareerPanels(): void {
-  drawCareerDossier(676, 88, 236, 210);
+  drawCareerDossier(676, 88, 236, 236);
 }
 
 function drawActions(): void {
@@ -1189,26 +1373,48 @@ function drawCareerSceneFrame(): void {
 
 function drawCareerDossier(x: number, y: number, w: number, h: number): void {
   drawSoftPanel(x, y, w, h);
-  drawText("Ruta", x + 18, y + 32, 18, palette.ink);
+  drawText("Carrera", x + 18, y + 32, 18, palette.ink);
   drawTextLine(currentStage().title, x + w - 88, y + 32, 15, palette.yellow, 68);
   drawTextLine(currentStage().place, x + 18, y + 58, 12, palette.muted, w - 36);
 
   pixelRect(x + 18, y + 74, w - 36, 1, "#333842");
-  drawText("Proximo hito", x + 18, y + 96, 12, palette.teal);
-  drawTextBlock(currentStage().nextHint, x + 18, y + 116, 12, palette.ink, w - 36, 2);
+  drawText("Objetivos", x + 18, y + 94, 12, palette.teal);
+  getCareerGoals()
+    .slice(0, 2)
+    .forEach((goal, index) => drawGoalRow(x + 18, y + 108 + index * 34, w - 36, goal));
 
-  pixelRect(x + 18, y + 146, w - 36, 1, "#333842");
-  drawDossierMetric(x + 18, y + 170, "Respeto", state.respect, palette.teal);
-  drawDossierMetric(x + 124, y + 170, "Fama", state.fame, palette.pink);
-  drawDossierMetric(x + 18, y + 199, "Temas", state.songs, palette.yellow);
-  drawDossierMetric(x + 124, y + 199, "Maqueta", `${state.discProgress}%`, palette.blue);
+  pixelRect(x + 18, y + 174, w - 36, 1, "#333842");
+  drawSetupUpgrade(x + 18, y + 190, w - 36);
 }
 
-function drawDossierMetric(x: number, y: number, label: string, value: number | string, color: string): void {
-  pixelRect(x, y - 16, 92, 23, "rgba(13,15,20,0.88)");
-  pixelRect(x, y - 16, 4, 23, color);
-  drawTextLine(label, x + 12, y - 1, 10, palette.muted, 48);
-  drawTextLine(String(value), x + 64, y - 1, 12, palette.ink, 24);
+function drawGoalRow(x: number, y: number, w: number, goal: CareerGoal): void {
+  drawTextLine(goal.label, x, y, 11, palette.ink, w);
+  drawTextLine(goal.detail, x, y + 13, 9, palette.muted, w);
+  pixelRect(x, y + 19, w, 6, "rgba(8,9,12,0.92)");
+  pixelRect(x, y + 19, Math.floor((clamp(goal.value, 0, goal.max) / goal.max) * w), 6, goal.color);
+}
+
+function drawSetupUpgrade(x: number, y: number, w: number): void {
+  const next = nextUpgrade();
+  const setupText = `Setup ${state.outfitLevel}/${state.studioLevel}/${state.homeLevel}`;
+  drawTextLine(setupText, x, y, 11, palette.muted, 86);
+  upgrades.forEach((upgrade, index) => {
+    const level = upgradeLevel(upgrade.key);
+    const dotX = x + 94 + index * 36;
+    for (let i = 0; i < upgrade.maxLevel; i += 1) {
+      pixelRect(dotX + i * 8, y - 8, 6, 6, i < level ? upgrade.color : "#343843");
+    }
+  });
+
+  const buttonY = y + 12;
+  const disabled = !next || state.cash < upgradeCost(next);
+  const label = next ? `U ${next.shortLabel} $${upgradeCost(next)}` : "Setup max";
+  pixelRect(x + 2, buttonY + 2, w, 26, "rgba(0,0,0,0.24)");
+  pixelRect(x, buttonY, w, 26, disabled ? "rgba(18,20,26,0.72)" : "rgba(35,42,50,0.96)");
+  pixelRect(x, buttonY, 4, 26, next ? next.color : palette.muted);
+  drawTextLine(label, x + 12, buttonY + 17, 11, disabled ? "#72757d" : palette.ink, 92);
+  drawTextLine(next?.effect ?? "Todo listo", x + 112, buttonY + 17, 9, disabled ? "#676a71" : palette.muted, w - 120);
+  zones.push({ id: "upgrade", x, y: buttonY, w, h: 26, disabled, onClick: buyRecommendedUpgrade });
 }
 
 function drawSelectedActionDetail(action: CareerAction, x: number, y: number, w: number, h: number): void {
@@ -1780,10 +1986,20 @@ function drawPerformer(x: number, y: number, scale: number, time: number, varian
   const bounce = (variant === "mc" ? Math.sin(time * 6) : Math.cos(time * 5.5)) * 2;
   const dir = variant === "mc" ? 1 : -1;
   const idx = stageIndex();
-  const jacket = variant === "mc" ? (idx >= 3 ? palette.pink : idx >= 1 ? palette.yellow : palette.teal) : palette.pink;
-  const jacketDark = variant === "mc" ? (idx >= 3 ? "#8d3c61" : idx >= 1 ? "#8d7438" : "#1e766a") : "#a43f6b";
-  const pants = variant === "mc" ? (idx >= 2 ? "#38466f" : palette.blue) : "#525865";
-  const cap = variant === "mc" ? (state.level >= 4 ? palette.yellow : palette.red) : palette.blue;
+  const outfit = variant === "mc" ? state.outfitLevel : 0;
+  const jacket =
+    variant === "mc"
+      ? outfit >= 3
+        ? palette.pink
+        : outfit >= 2
+          ? palette.yellow
+          : idx >= 1
+            ? "#3ab89d"
+            : palette.teal
+      : palette.pink;
+  const jacketDark = variant === "mc" ? (outfit >= 2 ? "#8d7438" : "#1e766a") : "#a43f6b";
+  const pants = variant === "mc" ? (outfit >= 1 ? "#243a68" : idx >= 2 ? "#38466f" : palette.blue) : "#525865";
+  const cap = variant === "mc" ? (outfit >= 2 || state.level >= 4 ? palette.yellow : palette.red) : palette.blue;
   const skin = variant === "mc" ? "#f0bd82" : "#d69a72";
   const hair = "#171116";
   const shirt = variant === "mc" ? palette.ink : "#ddd8cf";
@@ -1832,8 +2048,12 @@ function drawPerformer(x: number, y: number, scale: number, time: number, varian
   px(-7, -55, 14, 3, "#7c3f33");
 
   px(-13, -28, 26, 3, palette.yellow);
-  if (state.level >= 3 && variant === "mc") {
+  if ((state.level >= 3 || outfit >= 1) && variant === "mc") {
     px(-6, -24, 12, 8, palette.yellow);
+  }
+  if (variant === "mc" && outfit >= 3) {
+    px(-18, -48, 5, 42, palette.pink);
+    px(13, -48, 5, 42, palette.pink);
   }
 }
 
@@ -2210,6 +2430,11 @@ function handleKey(event: KeyboardEvent): void {
 
   if (state.mode === "career") {
     const actions = getCareerActions();
+    if (event.key.toLowerCase() === "u") {
+      buyRecommendedUpgrade();
+      event.preventDefault();
+      return;
+    }
     if (event.key === "ArrowRight") {
       actionFocus = clamp(actionFocus + 1, 0, actions.length - 1);
       event.preventDefault();
@@ -2306,6 +2531,7 @@ function frame(now: number): void {
 }
 
 function renderGameToText(): string {
+  const upgrade = nextUpgrade();
   const actions =
     state.mode === "career"
       ? getCareerActions().map((action, index) => ({
@@ -2358,6 +2584,11 @@ function renderGameToText(): string {
       fame: state.fame,
       songs: state.songs,
       discProgress: state.discProgress,
+      upgrades: {
+        outfit: state.outfitLevel,
+        studio: state.studioLevel,
+        home: state.homeLevel,
+      },
       momentum: state.momentum,
       momentumMood: momentumMood(),
       lastActionId: state.lastActionId,
@@ -2374,6 +2605,20 @@ function renderGameToText(): string {
         }
       : null,
     lastEvent: state.lastEvent,
+    goals: getCareerGoals().map((goal) => ({
+      label: goal.label,
+      detail: goal.detail,
+      value: goal.value,
+      max: goal.max,
+    })),
+    nextUpgrade: upgrade
+      ? {
+          key: upgrade.key,
+          label: upgrade.label,
+          cost: upgradeCost(upgrade),
+          affordable: state.cash >= upgradeCost(upgrade),
+        }
+      : null,
     actions,
     battle,
   });
