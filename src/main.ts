@@ -1706,16 +1706,26 @@ function drawBattleScreen(): void {
 }
 
 function drawBattleStageHud(battle: BattleState): void {
-  drawText("TU", 80, 64, 18, palette.ink);
-  drawText("RIVAL", 790, 64, 18, palette.ink);
-  drawText(`Ronda ${battle.round}`, 422, 62, 30, palette.ink);
-  drawMeter(116, 84, 168, 10, state.energy, maxEnergy(), palette.green, "Energia");
-  drawMeter(116, 116, 168, 10, battle.hype, 100, palette.yellow, "Hype");
-  drawMeter(674, 84, 168, 10, 70 + battle.rivalPower * 2, 100, palette.green, "Energia");
-  drawMeter(674, 116, 168, 10, Math.max(20, 100 - battle.hype / 2), 100, palette.yellow, "Hype");
-  drawSoftPanel(344, 142, 272, 82);
-  drawText("Estimulo", 426, 170, 16, palette.ink);
-  drawTextLine(battleStimulusLabel(battle.prompt.text), 388, 206, 32, palette.yellow, 188);
+  drawScreenPixelBorder();
+  drawText("TU", 78, 54, 24, palette.ink);
+  drawText("RIVAL", 792, 54, 24, palette.ink);
+  drawBattleHudSide(202, 42, state.energy, maxEnergy(), battle.hype, false);
+  drawBattleHudSide(600, 42, 70 + battle.rivalPower * 2, 100, Math.max(20, 100 - battle.hype / 2), true);
+  drawTextLine(`RONDA ${battle.round}`, 396, 55, 30, palette.ink, 180);
+  drawText("HYPE", 452, 92, 17, "#ff9d2f");
+  drawHudBar(390, 104, 188, 15, battle.hype, 100, palette.yellow, true);
+  drawSoftPanel(338, 144, 284, 88);
+  drawText("ESTIMULO", 418, 170, 16, palette.ink);
+  drawTextLine(battleStimulusLabel(battle.prompt.text), 388, 214, 36, palette.yellow, 204);
+}
+
+function drawBattleHudSide(x: number, y: number, energy: number, maxEnergyValue: number, hype: number, alignRight: boolean): void {
+  const valueX = alignRight ? x + 126 : x + 134;
+  drawText("ENERGIA", x, y, 12, palette.ink);
+  drawTextLine(`${Math.floor(energy)}/${maxEnergyValue}`, valueX, y, 12, palette.ink, 68);
+  drawHudBar(x, y + 14, 166, 13, energy, maxEnergyValue, palette.green);
+  drawText("HYPE", x, y + 46, 16, "#ff9d2f");
+  drawHudBar(x, y + 60, 166, 13, hype, 100, palette.yellow, true);
 }
 
 function battleStimulusLabel(prompt: string): string {
@@ -1873,27 +1883,113 @@ function drawInterfaceBackdrop(): void {
 }
 
 function drawCareerHeader(): void {
-  drawHudPanel(18, 12, 924, 68, palette.blue);
-  pixelRect(34, 20, 52, 52, "#080a16");
-  pixelRect(34, 20, 52, 3, palette.yellow);
-  drawMcBust(60, 56, 1.08);
+  drawHudFrame(12, 10, 936, 76);
+  pixelRect(28, 18, 62, 60, "#070b1e");
+  pixelRect(28, 18, 62, 4, palette.yellow);
+  pixelRect(28, 74, 62, 3, "#050715");
+  drawMcBust(59, 43, 1);
 
-  drawText("ENERGIA", 106, 36, 12, palette.ink);
-  drawMeter(106, 54, 174, 11, state.energy, maxEnergy(), palette.green, "");
-  drawTextLine(`${state.energy}/${maxEnergy()}`, 286, 62, 12, palette.ink, 60);
+  drawText("ENERGIA", 112, 34, 16, palette.ink);
+  drawTextLine(`${state.energy}/${maxEnergy()}`, 270, 35, 16, palette.ink, 86);
+  drawHudBar(112, 54, 230, 15, state.energy, maxEnergy(), palette.green);
+  drawTextLine(`SEM ${state.week}.${state.day}  ${formatHour(state.hour)}`, 112, 78, 10, palette.muted, 150);
 
-  drawHeaderStat(368, 24, 112, "$", `$${state.cash}`, palette.green);
-  drawHeaderStat(496, 24, 154, "Fans", String(state.fans), palette.blue);
-  drawHeaderStat(666, 24, 142, "Resp", String(state.respect), palette.pink);
-  drawHeaderStat(824, 24, 90, "Sem", `${state.week}.${state.day}`, palette.yellow);
+  drawHudResourceCard(362, 22, 138, 54, "cash", "", formatHudNumber(state.cash), palette.green);
+  drawHudResourceCard(516, 22, 224, 54, "fans", "FANS", formatHudNumber(state.fans), palette.blue);
+  drawHudResourceCard(758, 22, 174, 54, "respect", "RESPETO", formatHudNumber(state.respect), "#7b63cc");
 }
 
-function drawHeaderStat(x: number, y: number, w: number, label: string, value: string, color: string): void {
-  pixelRect(x + 3, y + 3, w, 36, "rgba(0,0,0,0.28)");
-  pixelRect(x, y, w, 36, "#0b0f25");
-  pixelRect(x, y, 4, 36, color);
-  drawTextLine(label, x + 12, y + 15, 10, palette.muted, 50);
-  drawTextLine(value, x + 12, y + 30, 14, label === "$" ? palette.green : palette.ink, w - 22);
+function drawHudFrame(x: number, y: number, w: number, h: number): void {
+  pixelRect(x + 5, y + 5, w, h, "rgba(0,0,0,0.38)");
+  pixelRect(x, y, w, h, "#060b27");
+  pixelRect(x + 3, y + 3, w - 6, h - 6, "#0b1234");
+  pixelRect(x, y, w, 3, "#2e377f");
+  pixelRect(x, y + h - 3, w, 3, "#262e6e");
+  pixelRect(x, y, 3, h, "#5660b5");
+  pixelRect(x + w - 3, y, 3, h, "#1b2258");
+  pixelRect(x + 7, y + 7, w - 14, 2, "rgba(255,255,255,0.14)");
+}
+
+function drawScreenPixelBorder(): void {
+  pixelRect(14, 14, W - 28, 4, "#303979");
+  pixelRect(14, H - 18, W - 28, 4, "#202761");
+  pixelRect(14, 14, 4, H - 28, "#5660b5");
+  pixelRect(W - 18, 14, 4, H - 28, "#1b2258");
+  pixelRect(18, 18, W - 36, 2, "rgba(255,255,255,0.11)");
+}
+
+function drawHudResourceCard(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  icon: "cash" | "fans" | "respect",
+  label: string,
+  value: string,
+  color: string,
+): void {
+  pixelRect(x + 4, y + 4, w, h, "rgba(0,0,0,0.32)");
+  pixelRect(x, y, w, h, "#07102d");
+  pixelRect(x, y, w, 3, "#343d86");
+  pixelRect(x, y + h - 3, w, 3, "#111744");
+  pixelRect(x, y, 3, h, "#5660b5");
+  pixelRect(x + w - 3, y, 3, h, "#1c2359");
+
+  if (icon === "cash") drawDollarIcon(x + 22, y + 40, color);
+  else if (icon === "fans") drawFansIcon(x + 22, y + 35, color);
+  else drawRespectIcon(x + 22, y + 35, color);
+
+  if (label) {
+    drawText(label, x + 72, y + 25, 16, palette.ink);
+    drawTextLine(value, x + 72, y + 48, 20, palette.ink, w - 84);
+  } else {
+    drawTextLine(value, x + 66, y + 40, 22, palette.ink, w - 68);
+  }
+}
+
+function drawHudBar(x: number, y: number, w: number, h: number, value: number, max: number, color: string, segmented = false): void {
+  pixelRect(x + 3, y + 3, w, h, "rgba(0,0,0,0.28)");
+  pixelRect(x, y, w, h, "#060814");
+  pixelRect(x, y, w, 2, "rgba(255,255,255,0.2)");
+  pixelRect(x, y + h - 2, w, 2, "#03040a");
+  const fill = Math.floor((clamp(value, 0, max) / max) * w);
+  if (segmented) {
+    const orange = Math.min(fill, Math.floor(w * 0.42));
+    const yellow = Math.max(0, fill - orange);
+    pixelRect(x, y, orange, h, "#ff771f");
+    pixelRect(x + orange, y, yellow, h, color);
+  } else {
+    pixelRect(x, y, fill, h, color);
+    pixelRect(x, y, fill, Math.max(2, Math.floor(h * 0.35)), "rgba(255,255,255,0.14)");
+  }
+}
+
+function drawDollarIcon(x: number, y: number, color: string): void {
+  drawText("$", x - 10, y, 36, color);
+  pixelRect(x + 12, y - 35, 3, 40, "#1d6f3c");
+}
+
+function drawFansIcon(x: number, y: number, color: string): void {
+  pixelRect(x + 7, y - 26, 12, 12, color);
+  pixelRect(x + 5, y - 12, 16, 14, color);
+  pixelRect(x - 9, y - 18, 10, 10, "#4776df");
+  pixelRect(x - 12, y - 7, 14, 10, "#4776df");
+  pixelRect(x + 25, y - 18, 10, 10, "#4776df");
+  pixelRect(x + 24, y - 7, 14, 10, "#4776df");
+}
+
+function drawRespectIcon(x: number, y: number, color: string): void {
+  pixelRect(x + 5, y - 30, 8, 20, color);
+  pixelRect(x + 14, y - 28, 8, 18, color);
+  pixelRect(x + 23, y - 24, 8, 16, color);
+  pixelRect(x - 2, y - 20, 10, 16, color);
+  pixelRect(x + 2, y - 10, 28, 18, color);
+  pixelRect(x + 10, y + 6, 18, 8, "#4b3c88");
+  pixelRect(x - 6, y - 13, 9, 6, "#4b3c88");
+}
+
+function formatHudNumber(value: number): string {
+  return String(Math.floor(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 function drawBaseCareerView(): void {
