@@ -102,6 +102,9 @@ interface GameState {
   fame: number;
   songs: number;
   discProgress: number;
+  momentum: number;
+  lastActionId: string | null;
+  actionStreak: number;
   stage: StageId;
   stats: Stats;
   lastEvent: string;
@@ -125,6 +128,7 @@ interface CareerAction {
   label: string;
   detail: string;
   cost: string;
+  rhythm: string;
   durationHours: number;
   disabledReason?: string;
   run: () => void;
@@ -352,6 +356,9 @@ function createNewState(name = "MC Barrio"): GameState {
     fame: 0,
     songs: 0,
     discProgress: 0,
+    momentum: 42,
+    lastActionId: null,
+    actionStreak: 0,
     stage: "pieza",
     stats: {
       flow: 2,
@@ -377,6 +384,9 @@ function normalizeLoadedState(saved: GameState): GameState {
     inputName: saved.playerName || "MC Barrio",
     animationTime: 0,
     battle: null,
+    momentum: clamp(saved.momentum ?? 42, 0, 100),
+    lastActionId: saved.lastActionId ?? null,
+    actionStreak: saved.actionStreak ?? 0,
     lastEvent: `Partida encontrada: ${saved.playerName}, nivel ${saved.level}.`,
   };
 }
@@ -541,7 +551,10 @@ function advanceClock(hours: number, label: string): string[] {
     }
   }
 
-  if (daysPassed > 0) messages.push(`Paso ${daysPassed === 1 ? "un dia" : `${daysPassed} dias`}.`);
+  if (daysPassed > 0) {
+    state.momentum = clamp(state.momentum - daysPassed * 3, 0, 100);
+    messages.push(`Paso ${daysPassed === 1 ? "un dia" : `${daysPassed} dias`}.`);
+  }
   if (weekChanged) messages.push(`Semana ${state.week}: recuperaste energia.`);
   timeFx = {
     label,
@@ -583,6 +596,49 @@ function setEvent(parts: string[]): void {
   saveState();
 }
 
+function momentumMood(): string {
+  if (state.momentum >= 78) return "En racha";
+  if (state.momentum >= 55) return "Activo";
+  if (state.momentum >= 30) return "Frio";
+  return "Quemado";
+}
+
+function rhythmPreview(actionId: string, baseDelta: number): string {
+  const repeatPenalty = state.lastActionId === actionId ? Math.min(12, (state.actionStreak + 1) * 4) : -4;
+  const fatiguePenalty = state.energy < 24 && actionId !== "rest" ? 5 : 0;
+  const latePenalty = (state.hour >= 23 || state.hour < 6) && actionId !== "rest" ? 3 : 0;
+  const delta = Math.round(baseDelta - repeatPenalty - fatiguePenalty - latePenalty);
+  if (delta > 0) return `Impulso +${delta}`;
+  if (delta < 0) return `Impulso ${delta}`;
+  return "Impulso neutro";
+}
+
+function rhythmShort(label: string): string {
+  return label.replace("Impulso ", "").replace("neutro", "0");
+}
+
+function rhythmColor(label: string): string {
+  if (label.includes("+")) return palette.teal;
+  if (label.includes("-")) return palette.red;
+  return palette.muted;
+}
+
+function applyRhythm(actionId: string, baseDelta: number): string[] {
+  const repeated = state.lastActionId === actionId;
+  state.actionStreak = repeated ? state.actionStreak + 1 : 1;
+  state.lastActionId = actionId;
+
+  const repeatPenalty = repeated ? Math.min(12, state.actionStreak * 4) : -4;
+  const fatiguePenalty = state.energy < 24 && actionId !== "rest" ? 5 : 0;
+  const latePenalty = (state.hour >= 23 || state.hour < 6) && actionId !== "rest" ? 3 : 0;
+  const delta = Math.round(baseDelta - repeatPenalty - fatiguePenalty - latePenalty);
+  state.momentum = clamp(state.momentum + delta, 0, 100);
+
+  if (delta > 0) return [`Impulso +${delta}: ${momentumMood()}.`];
+  if (delta < 0) return [`Impulso ${delta}: ${momentumMood()}.`];
+  return [`Impulso estable: ${momentumMood()}.`];
+}
+
 function getCareerActions(): CareerAction[] {
   const actions: CareerAction[] = [];
   const tired = state.energy < 12 ? "Necesitas descansar." : undefined;
@@ -593,14 +649,16 @@ function getCareerActions(): CareerAction[] {
     label: "Practicar",
     detail: "Barras frente al espejo y beats en loop.",
     cost: "2h / -16 energia",
+    rhythm: rhythmPreview("practice", 4),
     durationHours: 2,
     disabledReason: state.energy < 16 ? tired : undefined,
     run: () => {
       const gained = random() > 0.5 ? "flow" : "improvisacion";
       addStat(gained, 1);
       const levelMessages = addXp(24);
+      const rhythmMessages = applyRhythm("practice", 4);
       const timeMessages = spendActionTime(16, 2, "Practicar");
-      setEvent([`Practicaste 2h en la pieza: +1 ${statLabels[gained]}.`, ...levelMessages, ...timeMessages]);
+      setEvent([`Practicaste 2h en la pieza: +1 ${statLabels[gained]}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
     },
   });
 
@@ -609,6 +667,7 @@ function getCareerActions(): CareerAction[] {
     label: "Cypher",
     detail: "Juntarte con amigos a soltar rimas.",
     cost: "3h / -14 energia",
+    rhythm: rhythmPreview("cypher", 8),
     durationHours: 3,
     disabledReason: state.energy < 14 ? tired : undefined,
     run: () => {
@@ -616,8 +675,9 @@ function getCareerActions(): CareerAction[] {
       state.respect += 4 + randomInt(0, 3);
       state.fans += 1 + randomInt(0, 2);
       const levelMessages = addXp(20);
+      const rhythmMessages = applyRhythm("cypher", 8);
       const timeMessages = spendActionTime(14, 3, "Cypher");
-      setEvent([`El cypher de 3h te dio respeto local.`, ...levelMessages, ...timeMessages]);
+      setEvent([`El cypher de 3h te dio respeto local.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
     },
   });
 
@@ -626,6 +686,7 @@ function getCareerActions(): CareerAction[] {
     label: "Trabajar",
     detail: "Turno corto para financiar micros y estudio.",
     cost: "6h / -20 energia",
+    rhythm: rhythmPreview("work", -3),
     durationHours: 6,
     disabledReason: state.energy < 20 ? tired : undefined,
     run: () => {
@@ -633,8 +694,9 @@ function getCareerActions(): CareerAction[] {
       state.cash += earned;
       addStat("disciplina", random() > 0.75 ? 1 : 0);
       const levelMessages = addXp(10);
+      const rhythmMessages = applyRhythm("work", -3);
       const timeMessages = spendActionTime(20, 6, "Trabajar");
-      setEvent([`Trabajaste 6h: +$${earned}.`, ...levelMessages, ...timeMessages]);
+      setEvent([`Trabajaste 6h: +$${earned}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
     },
   });
 
@@ -643,6 +705,7 @@ function getCareerActions(): CareerAction[] {
     label: "Subir clip",
     detail: "Publicar freestyle, responder comentarios.",
     cost: "2h / -12 energia",
+    rhythm: rhythmPreview("social", 7),
     durationHours: 2,
     disabledReason: state.energy < 12 ? tired : undefined,
     run: () => {
@@ -654,11 +717,13 @@ function getCareerActions(): CareerAction[] {
       state.health = clamp(state.health - (viral ? 5 : 2), 0, 100);
       addStat("carisma", random() > 0.68 ? 1 : 0);
       const levelMessages = addXp(18 + (viral ? 18 : 0));
+      const rhythmMessages = applyRhythm("social", viral ? 16 : 7);
       const timeMessages = spendActionTime(12, 2, "Redes");
       setEvent([
         viral
           ? `En 2h el clip se movio fuerte: +${fanGain} fans.`
           : `Subiste un clip en 2h: +${fanGain} fans.`,
+        ...rhythmMessages,
         ...levelMessages,
         ...timeMessages,
       ]);
@@ -670,6 +735,7 @@ function getCareerActions(): CareerAction[] {
     label: "Escribir tema",
     detail: "Convertir barras en una cancion grabable.",
     cost: "3h / -18 energia",
+    rhythm: rhythmPreview("write", 5),
     durationHours: 3,
     disabledReason: state.energy < 18 ? tired : undefined,
     run: () => {
@@ -677,8 +743,9 @@ function getCareerActions(): CareerAction[] {
       state.discProgress = clamp(state.discProgress + progress, 0, 120);
       addStat(random() > 0.5 ? "metrica" : "punchline", 1);
       const levelMessages = addXp(22);
+      const rhythmMessages = applyRhythm("write", 5);
       const timeMessages = spendActionTime(18, 3, "Escribir");
-      setEvent([`Escribiste 3h: +${progress}% de cancion.`, ...levelMessages, ...timeMessages]);
+      setEvent([`Escribiste 3h: +${progress}% de cancion.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
     },
   });
 
@@ -687,6 +754,7 @@ function getCareerActions(): CareerAction[] {
     label: "Grabar",
     detail: "Pagar horas y subir una cancion terminada.",
     cost: "4h / $35 / -16 energia",
+    rhythm: rhythmPreview("record", 14),
     durationHours: 4,
     disabledReason:
       state.discProgress < 80
@@ -705,8 +773,9 @@ function getCareerActions(): CareerAction[] {
       state.fame += Math.floor(fanGain / 4);
       state.respect += 8;
       const levelMessages = addXp(46);
+      const rhythmMessages = applyRhythm("record", 14);
       const timeMessages = spendActionTime(16, 4, "Grabar");
-      setEvent([`Grabaste 4h la cancion #${state.songs}: +${fanGain} fans.`, ...levelMessages, ...timeMessages]);
+      setEvent([`Grabaste 4h la cancion #${state.songs}: +${fanGain} fans.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
     },
   });
 
@@ -716,6 +785,7 @@ function getCareerActions(): CareerAction[] {
     label: battleLabel(),
     detail: `${stage.place}: ronda por decisiones rapidas.`,
     cost: `${battleDurationHours()}h / -${battleCost} energia`,
+    rhythm: rhythmPreview("battle", 12),
     durationHours: battleDurationHours(),
     disabledReason: state.energy < battleCost ? tired : undefined,
     run: () => startBattle(),
@@ -727,6 +797,7 @@ function getCareerActions(): CareerAction[] {
       label: "Show chico",
       detail: "Tocar en vivo, vender merch y probar canciones.",
       cost: "5h / -26 energia",
+      rhythm: rhythmPreview("show", 12),
       durationHours: 5,
       disabledReason: state.energy < 26 ? tired : undefined,
       run: () => {
@@ -737,8 +808,9 @@ function getCareerActions(): CareerAction[] {
         state.fame += Math.floor(fans / 3);
         addStat("escena", 1);
         const levelMessages = addXp(38);
+        const rhythmMessages = applyRhythm("show", 12);
         const timeMessages = spendActionTime(26, 5, "Show");
-        setEvent([`Hiciste show de 5h: +$${earned}, +${fans} fans.`, ...levelMessages, ...timeMessages]);
+        setEvent([`Hiciste show de 5h: +$${earned}, +${fans} fans.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
       },
     });
   }
@@ -748,12 +820,15 @@ function getCareerActions(): CareerAction[] {
     label: "Descansar",
     detail: "Recuperar aire y evitar quemarte.",
     cost: "8h / +energia / +salud",
+    rhythm: rhythmPreview("rest", state.energy < 35 ? 10 : -2),
     durationHours: 8,
     run: () => {
+      const rhythmBase = state.energy < 35 ? 10 : -2;
       state.energy = clamp(state.energy + 36 + state.stats.disciplina * 2, 0, maxEnergy());
       state.health = clamp(state.health + 18, 0, 100);
+      const rhythmMessages = applyRhythm("rest", rhythmBase);
       const timeMessages = advanceClock(8, "Descansar");
-      setEvent(["Descansaste 8h y ordenaste la cabeza.", ...timeMessages]);
+      setEvent(["Descansaste 8h y ordenaste la cabeza.", ...rhythmMessages, ...timeMessages]);
     },
   });
 
@@ -840,12 +915,14 @@ function resolveBattle(choice: BattleChoice): void {
   const promptBonus = battle.prompt.best.includes(choice.id) ? 12 : 0;
   const energyBonus = state.energy > 45 ? 4 : state.energy < 15 ? -8 : 0;
   const healthBonus = state.health > 70 ? 3 : state.health < 30 ? -8 : 0;
+  const momentumBonus = Math.floor((state.momentum - 50) / 8);
   const playerRoll =
     statValue * 8 +
     state.level * 3 +
     promptBonus +
     energyBonus +
     healthBonus +
+    momentumBonus +
     Math.floor(battle.hype / 8) +
     randomInt(7, 26);
   const rivalRoll = battle.rivalPower * 8 + battle.round * 2 + randomInt(12, 34);
@@ -909,11 +986,13 @@ function finishBattle(): void {
   state.respect += respect;
   state.fame += fame;
   const levelMessages = addXp(xp);
+  const rhythmMessages = applyRhythm("battle", won ? 18 : draw ? 7 : -10);
   const timeMessages = advanceClock(battleDurationHours(), battle.eventName);
 
   const resultText = won ? "Ganaste" : draw ? "Empataste" : "Perdiste";
   const messages = [
     `${resultText} en ${battle.eventName} (${formatDuration(battleDurationHours())}): +$${cash}, +${fans} fans, +${respect} respeto.`,
+    ...rhythmMessages,
     ...levelMessages,
     ...timeMessages,
   ];
@@ -994,12 +1073,13 @@ function drawBattleScreen(): void {
   if (!battle) return;
   drawBackdrop(state.stage);
   drawBattleArena(state.stage);
-  drawTopHud();
-  drawBattleHeader(battle);
 
   drawMc(260, 318, 2.25, state.animationTime);
   drawRival(675, 318, 2.25, state.animationTime);
   drawMicStand(468, 294);
+
+  drawTopHud();
+  drawBattleHeader(battle);
 
   drawPanel(44, 348, 872, 170);
   if (battle.finished) {
@@ -1051,10 +1131,11 @@ function drawTopHud(): void {
   drawDayProgress(348, 56, 206, 7);
 
   drawSoftPanel(604, 16, 332, 56);
-  drawSmallMeter(624, 40, 96, 8, state.energy, maxEnergy(), palette.green, "Energia");
-  drawSmallMeter(744, 40, 86, 8, state.health, 100, palette.red, "Salud");
-  drawTextLine(`$${state.cash}`, 850, 38, 14, palette.yellow, 66);
-  drawTextLine(`${state.fans} fans`, 850, 58, 12, palette.ink, 66);
+  drawSmallMeter(624, 40, 70, 8, state.energy, maxEnergy(), palette.green, "Energia");
+  drawSmallMeter(708, 40, 66, 8, state.health, 100, palette.red, "Salud");
+  drawSmallMeter(788, 40, 62, 8, state.momentum, 100, palette.teal, "Impulso");
+  drawTextLine(`$${state.cash}`, 864, 38, 13, palette.yellow, 62);
+  drawTextLine(`${state.fans} fans`, 864, 58, 11, palette.ink, 62);
 }
 
 function drawCareerPanels(): void {
@@ -1069,11 +1150,11 @@ function drawActions(): void {
   if (timeFx) {
     drawTimeAdvanceFx();
   } else {
-    drawTextLine("Elige una accion. Cada jugada consume horas del dia.", 382, 367, 11, palette.muted, 500);
+    drawTextLine(`Impulso: ${momentumMood()} · variar acciones mantiene la carrera viva`, 382, 367, 11, palette.muted, 500);
   }
 
-  drawTextLine(state.lastEvent, 64, 389, 11, palette.muted, 296);
-  drawSelectedActionDetail(actions[actionFocus], 64, 404, 286, 96);
+  drawTextBlock(state.lastEvent, 64, 389, 10, palette.muted, 296, 2);
+  drawSelectedActionDetail(actions[actionFocus], 64, 412, 286, 88);
   actions.forEach((action, index) => {
     const col = index % 2;
     const row = Math.floor(index / 2);
@@ -1138,7 +1219,8 @@ function drawSelectedActionDetail(action: CareerAction, x: number, y: number, w:
   drawText("Plan", x + 58, y + 19, 10, palette.muted);
   drawTextLine(action.label, x + 58, y + 40, 17, action.disabledReason ? "#858891" : palette.ink, w - 76);
   drawTextLine(action.detail, x + 18, y + 62, 10, palette.muted, w - 36);
-  drawTextLine(action.disabledReason ?? action.cost, x + 18, y + h - 10, 10, action.disabledReason ? palette.red : palette.yellow, w - 36);
+  drawTextLine(action.disabledReason ?? action.cost, x + 18, y + h - 10, 10, action.disabledReason ? palette.red : palette.yellow, 136);
+  drawTextLine(action.rhythm, x + 164, y + h - 10, 10, rhythmColor(action.rhythm), w - 182);
 }
 
 function drawActionListItem(
@@ -1166,14 +1248,10 @@ function drawActionListItem(
   pixelRect(x, y, 4, h, accent);
   drawTextLine(String(index + 1), x + 13, y + 19, 10, disabled ? "#70737b" : palette.muted, 18);
   drawTextLine(actionShortLabel(action.id, action.label), x + 36, y + 19, 12, disabled ? "#737781" : palette.ink, 112);
-  drawTextLine(
-    disabled ? "bloqueado" : formatDuration(action.durationHours),
-    x + w - 70,
-    y + 19,
-    10,
-    disabled ? "#686b72" : palette.yellow,
-    58,
-  );
+  drawTextLine(disabled ? "bloq" : formatDuration(action.durationHours), x + w - 88, y + 19, 10, disabled ? "#686b72" : palette.yellow, 42);
+  if (!disabled) {
+    drawTextLine(rhythmShort(action.rhythm), x + w - 48, y + 19, 10, rhythmColor(action.rhythm), 40);
+  }
   if (focused) {
     pixelRect(x + w - 7, y + 7, 3, h - 14, palette.yellow);
   }
@@ -1690,31 +1768,26 @@ function drawLedScreen(x: number, y: number, stageId: StageId): void {
 }
 
 function drawMc(x: number, y: number, scale: number, time: number): void {
-  const bounce = Math.sin(time * 6) * 2;
-  const s = scale;
-  drawQuad(
-    [
-      [x - 34 * s, y + 35 * s],
-      [x + 34 * s, y + 35 * s],
-      [x + 48 * s, y + 44 * s],
-      [x - 48 * s, y + 44 * s],
-    ],
-    "rgba(0,0,0,0.22)",
-  );
-  pixelRect(x - 18 * s, y - 66 * s + bounce, 36 * s, 18 * s, palette.red);
-  pixelRect(x - 22 * s, y - 48 * s + bounce, 44 * s, 48 * s, palette.teal);
-  pixelRect(x - 14 * s, y - 30 * s + bounce, 28 * s, 18 * s, palette.ink);
-  pixelRect(x - 28 * s, y - 42 * s + bounce, 12 * s, 46 * s, palette.ink);
-  pixelRect(x + 16 * s, y - 42 * s + bounce, 12 * s, 46 * s, palette.ink);
-  pixelRect(x - 15 * s, y + bounce, 12 * s, 38 * s, palette.blue);
-  pixelRect(x + 3 * s, y + bounce, 12 * s, 38 * s, palette.blue);
-  pixelRect(x + 22 * s, y - 50 * s + bounce, 22 * s, 8 * s, palette.yellow);
-  pixelRect(x + 40 * s, y - 54 * s + bounce, 8 * s, 8 * s, palette.ink);
+  drawPerformer(x, y, scale, time, "mc");
 }
 
 function drawRival(x: number, y: number, scale: number, time: number): void {
-  const bounce = Math.cos(time * 5.5) * 2;
+  drawPerformer(x, y, scale, time, "rival");
+}
+
+function drawPerformer(x: number, y: number, scale: number, time: number, variant: "mc" | "rival"): void {
   const s = scale;
+  const bounce = (variant === "mc" ? Math.sin(time * 6) : Math.cos(time * 5.5)) * 2;
+  const dir = variant === "mc" ? 1 : -1;
+  const idx = stageIndex();
+  const jacket = variant === "mc" ? (idx >= 3 ? palette.pink : idx >= 1 ? palette.yellow : palette.teal) : palette.pink;
+  const jacketDark = variant === "mc" ? (idx >= 3 ? "#8d3c61" : idx >= 1 ? "#8d7438" : "#1e766a") : "#a43f6b";
+  const pants = variant === "mc" ? (idx >= 2 ? "#38466f" : palette.blue) : "#525865";
+  const cap = variant === "mc" ? (state.level >= 4 ? palette.yellow : palette.red) : palette.blue;
+  const skin = variant === "mc" ? "#f0bd82" : "#d69a72";
+  const hair = "#171116";
+  const shirt = variant === "mc" ? palette.ink : "#ddd8cf";
+
   drawQuad(
     [
       [x - 34 * s, y + 35 * s],
@@ -1724,15 +1797,44 @@ function drawRival(x: number, y: number, scale: number, time: number): void {
     ],
     "rgba(0,0,0,0.22)",
   );
-  pixelRect(x - 18 * s, y - 66 * s + bounce, 36 * s, 18 * s, palette.blue);
-  pixelRect(x - 22 * s, y - 48 * s + bounce, 44 * s, 48 * s, palette.pink);
-  pixelRect(x - 14 * s, y - 30 * s + bounce, 28 * s, 18 * s, palette.ink);
-  pixelRect(x - 30 * s, y - 40 * s + bounce, 12 * s, 44 * s, palette.ink);
-  pixelRect(x + 18 * s, y - 40 * s + bounce, 12 * s, 44 * s, palette.ink);
-  pixelRect(x - 15 * s, y + bounce, 12 * s, 38 * s, "#555b66");
-  pixelRect(x + 3 * s, y + bounce, 12 * s, 38 * s, "#555b66");
-  pixelRect(x - 48 * s, y - 50 * s + bounce, 22 * s, 8 * s, palette.yellow);
-  pixelRect(x - 52 * s, y - 54 * s + bounce, 8 * s, 8 * s, palette.ink);
+
+  const yy = y + bounce;
+  const px = (dx: number, dy: number, w: number, h: number, color: string) => {
+    const left = w < 0 ? dx + w : dx;
+    pixelRect(x + left * s, yy + dy * s, Math.abs(w) * s, h * s, color);
+  };
+
+  px(-18, -2, 13, 38, pants);
+  px(5, -2, 13, 38, pants);
+  px(-21, 30, 19, 7, variant === "mc" ? palette.ink : "#16181d");
+  px(2, 30, 22, 7, variant === "mc" ? palette.yellow : palette.ink);
+  px(-16, -6, 34, 9, "#15171d");
+
+  px(-27, -54, 54, 13, jacketDark);
+  px(-23, -48, 46, 48, jacket);
+  px(-12, -45, 24, 43, shirt);
+  px(-4, -43, 8, 40, variant === "mc" ? "#f4efe4" : "#242834");
+  px(-22, -42, 9, 38, jacketDark);
+  px(13, -42, 9, 38, jacketDark);
+
+  px(-25, -37, 10, 42, skin);
+  px(15, -37, 10, 30, skin);
+  px(25 * dir, -50, 24 * dir, 7, skin);
+  px(43 * dir, -55, 7 * dir, 8, palette.ink);
+  px(38 * dir, -58, 15 * dir, 5, palette.yellow);
+
+  px(-15, -75, 30, 26, skin);
+  px(-18, -80, 36, 12, cap);
+  px(10 * dir, -78, 18 * dir, 5, cap);
+  px(-16, -67, 32, 8, hair);
+  px(-8, -63, 5, 4, palette.black);
+  px(5, -63, 5, 4, palette.black);
+  px(-7, -55, 14, 3, "#7c3f33");
+
+  px(-13, -28, 26, 3, palette.yellow);
+  if (state.level >= 3 && variant === "mc") {
+    px(-6, -24, 12, 8, palette.yellow);
+  }
 }
 
 function drawMicStand(x: number, y: number): void {
@@ -2119,12 +2221,12 @@ function handleKey(event: KeyboardEvent): void {
       return;
     }
     if (event.key === "ArrowDown") {
-      actionFocus = clamp(actionFocus + 4, 0, actions.length - 1);
+      actionFocus = clamp(actionFocus + 2, 0, actions.length - 1);
       event.preventDefault();
       return;
     }
     if (event.key === "ArrowUp") {
-      actionFocus = clamp(actionFocus - 4, 0, actions.length - 1);
+      actionFocus = clamp(actionFocus - 2, 0, actions.length - 1);
       event.preventDefault();
       return;
     }
@@ -2212,6 +2314,7 @@ function renderGameToText(): string {
           label: action.label,
           durationHours: action.durationHours,
           cost: action.cost,
+          rhythm: action.rhythm,
           disabled: Boolean(action.disabledReason),
           reason: action.disabledReason ?? null,
         }))
@@ -2255,6 +2358,10 @@ function renderGameToText(): string {
       fame: state.fame,
       songs: state.songs,
       discProgress: state.discProgress,
+      momentum: state.momentum,
+      momentumMood: momentumMood(),
+      lastActionId: state.lastActionId,
+      actionStreak: state.actionStreak,
       stats: state.stats,
     },
     timeFx: timeFx
