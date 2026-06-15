@@ -1500,16 +1500,28 @@ function drawStartBackdrop(): void {
 
 function drawMainMenuScreen(): void {
   drawStartBackdrop();
-  drawPanel(36, 36, 348, 470);
-  drawLogoLockup(74, 58, 1);
-  drawMc(242, 224, 0.92, state.animationTime);
-  drawMainMenuButton("new", 92, 258, "Nueva carrera", newCareerDraft, true);
-  drawMainMenuButton("continue", 92, 306, "Cargar partida", continueCareer);
-  drawMainMenuButton("options", 92, 354, "Opciones", () => setEvent(["Opciones llegaran en una proxima version."]));
-  drawMainMenuButton("credits", 92, 402, "Creditos", () => setEvent(["Juego creado como simulador freestyle RPG."]));
-  drawMainMenuButton("delete", 92, 450, "Borrar save", deleteSave);
-  drawTextLine("v0.1.0", 64, 490, 11, palette.muted, 90);
-  drawTextLine("Practica, compite y sube al circuito.", 548, 486, 13, palette.ink, 342);
+  drawMainMenuOverlay();
+  drawLogoLockup(244, 44, 1.9);
+  drawMc(292, 432, 2.05, state.animationTime);
+  drawMainMenuButton("new", 368, 224, "NUEVA CARRERA", newCareerDraft, true);
+  drawMainMenuButton("continue", 368, 278, "CARGAR PARTIDA", continueCareer);
+  drawMainMenuButton("options", 368, 332, "OPCIONES", () => setEvent(["Opciones llegaran en una proxima version."]));
+  drawMainMenuButton("credits", 368, 386, "CREDITOS", () => setEvent(["Juego creado como simulador freestyle RPG."]));
+  drawMainMenuButton("exit", 368, 440, "SALIR", () => setEvent(["En navegador, puedes cerrar la pestaña para salir."]));
+  drawTextLine("v0.1.0", 32, 510, 18, "#9aaedb", 110);
+  drawMusicStatus(810, 510);
+}
+
+function drawMainMenuOverlay(): void {
+  const topShade = ctx.createLinearGradient(0, 0, 0, H);
+  topShade.addColorStop(0, "rgba(2,4,22,0.1)");
+  topShade.addColorStop(0.36, "rgba(2,4,22,0.0)");
+  topShade.addColorStop(1, "rgba(2,4,22,0.18)");
+  ctx.fillStyle = topShade;
+  ctx.fillRect(0, 0, W, H);
+  drawMainMenuSpeakerStack(20, 318, false);
+  drawMainMenuSpeakerStack(866, 318, true);
+  drawScreenPixelBorder();
 }
 
 function drawLogoLockup(x: number, y: number, scale: number): void {
@@ -1556,10 +1568,10 @@ function drawLayeredCoverBackdrop(): boolean {
   drawCoverLayer("cityFront", 0, 0, W, H, 0.92);
   drawCoverLayer("rooftopFloor", 0, 0, W, H, 0.95);
   drawCoverLayer("rooftopFence", 0, 0, W, H, 1);
-  drawCoverImageContain("neonRap", 20, 188, 184, 278, 0.55);
-  drawCoverImageContain("graffitiFreestyle", 752, 190, 188, 284, 0.5);
-  drawCoverImageContain("speakerLeft", 54, 336, 92, 132, 0.7);
-  drawCoverImageContain("speakerRight", 820, 334, 96, 136, 0.7);
+  drawCoverImageContain("neonRap", 28, 190, 156, 254, 0.76);
+  drawCoverImageContain("graffitiFreestyle", 782, 172, 170, 280, 0.7);
+  drawCoverImageContain("speakerLeft", 12, 308, 100, 158, 0.98);
+  drawCoverImageContain("speakerRight", 852, 308, 100, 158, 0.98);
   ctx.restore();
 
   const shade = ctx.createRadialGradient(W * 0.5, H * 0.48, 120, W * 0.5, H * 0.54, 600);
@@ -1618,11 +1630,58 @@ function drawImageCover(image: HTMLImageElement, x: number, y: number, w: number
 }
 
 function drawMainMenuButton(id: string, x: number, y: number, label: string, onClick: () => void, selected = false): void {
-  button(id, x, y, 296, 42, label, "", false, onClick, selected ? "#20295f" : palette.panel);
+  const w = 300;
+  const h = 44;
+  const hot = pointer.x >= x && pointer.x <= x + w && pointer.y >= y && pointer.y <= y + h;
+  const fill = selected || hot ? "#171d4a" : "#101636";
+  pixelRect(x + 5, y + 6, w, h, "rgba(0,0,0,0.45)");
+  pixelRect(x, y, w, h, fill);
+  pixelRect(x, y, w, 3, selected ? palette.yellow : "#5159aa");
+  pixelRect(x, y + h - 3, w, 3, selected ? palette.yellow : "#252a70");
+  pixelRect(x, y, 3, h, selected ? palette.yellow : "#5c62b5");
+  pixelRect(x + w - 3, y, 3, h, selected ? palette.yellow : "#242967");
+  drawTextLine(label, x + 48, y + 30, 24, selected ? palette.yellow : palette.ink, w - 72);
   if (selected) {
-    pixelRect(x - 26, y + 14, 16, 16, palette.yellow);
-    drawLine(x - 12, y + 22, x, y + 22, palette.yellow, 3);
+    pixelRect(x - 24, y + 13, 9, 18, palette.yellow);
+    pixelRect(x - 15, y + 17, 7, 10, palette.yellow);
+    pixelRect(x - 8, y + 20, 5, 4, palette.yellow);
   }
+  zones.push({ id, x, y, w, h, disabled: false, onClick });
+}
+
+function drawMusicStatus(x: number, y: number): void {
+  drawText("♪", x, y, 30, "#b8c9ef");
+  drawTextLine("MUSICA: SI", x + 32, y - 2, 18, "#b8c9ef", 140);
+}
+
+function drawMainMenuSpeakerStack(x: number, y: number, mirror: boolean): void {
+  pixelRect(x + (mirror ? -10 : 10), y + 10, 78, 126, "rgba(0,0,0,0.42)");
+  pixelRect(x, y, 72, 132, "#050812");
+  pixelRect(x + (mirror ? -14 : 72), y + 14, 14, 112, "#151a28");
+  pixelRect(x + (mirror ? -14 : 72), y + 14, 14, 14, "#262c42");
+  pixelRect(x, y, 72, 4, "#2e377f");
+  pixelRect(x, y + 128, 72, 4, "#02040c");
+  pixelRect(x, y, 4, 132, "#273070");
+  pixelRect(x + 68, y, 4, 132, "#02040c");
+  pixelRect(x + 8, y + 10, 6, 6, "#02040c");
+  pixelRect(x + 58, y + 10, 6, 6, "#02040c");
+  pixelRect(x + 8, y + 116, 6, 6, "#02040c");
+  pixelRect(x + 58, y + 116, 6, 6, "#02040c");
+  drawPixelWoofer(x + 36, y + 44, 25);
+  drawPixelWoofer(x + 36, y + 94, 30);
+  pixelRect(x + 30, y + 76, 12, 6, "#7b63cc");
+  pixelRect(x + 26, y + 77, 20, 3, "#303a86");
+}
+
+function drawPixelWoofer(cx: number, cy: number, r: number): void {
+  pixelRect(cx - r, cy - r + 8, r * 2, (r - 8) * 2, "#101426");
+  pixelRect(cx - r + 8, cy - r, (r - 8) * 2, r * 2, "#101426");
+  pixelRect(cx - r + 7, cy - r + 12, (r - 7) * 2, (r - 12) * 2, "#02040c");
+  pixelRect(cx - r + 12, cy - r + 7, (r - 12) * 2, (r - 7) * 2, "#02040c");
+  pixelRect(cx - r + 17, cy - r + 18, (r - 17) * 2, (r - 18) * 2, "#222949");
+  pixelRect(cx - r + 20, cy - r + 16, (r - 20) * 2, (r - 16) * 2, "#222949");
+  pixelRect(cx - 7, cy - 7, 14, 14, "#5b64be");
+  pixelRect(cx - 4, cy - 4, 8, 8, "#111638");
 }
 
 function drawCreateMcScreen(hasSave: boolean): void {
