@@ -1210,7 +1210,7 @@ function render(): void {
 function drawStartScreen(): void {
   drawBackdrop("pieza");
   if (!hasSceneBackdrop("pieza")) drawRoomProps();
-  drawMc(465, 300, 2.2, state.animationTime);
+  drawMc(465, 306, 1.5, state.animationTime);
   drawVinylLogo(108, 112);
 
   drawText("FREESTYLE CAREER", 156, 96, 34, palette.ink);
@@ -1246,7 +1246,7 @@ function drawCareerScreen(): void {
   drawBackdrop(state.stage);
   if (!hasSceneBackdrop(state.stage)) drawEnvironment(state.stage);
   drawCareerSceneFrame();
-  drawMc(hasSceneBackdrop(state.stage) ? 470 : 250, 322, 2.0, state.animationTime);
+  drawMc(hasSceneBackdrop(state.stage) ? 470 : 250, 306, 1.3, state.animationTime);
   drawTopHud();
   drawCareerPanels();
   drawActions();
@@ -1258,8 +1258,8 @@ function drawBattleScreen(): void {
   drawBackdrop(state.stage);
   drawBattleArena(state.stage);
 
-  drawMc(260, 318, 2.25, state.animationTime);
-  drawRival(675, 318, 2.25, state.animationTime);
+  drawMc(260, 310, 1.45, state.animationTime);
+  drawRival(675, 310, 1.45, state.animationTime);
   drawMicStand(468, 294);
 
   drawTopHud();
@@ -1302,24 +1302,63 @@ function drawBattleHeader(battle: BattleState): void {
 }
 
 function drawTopHud(): void {
-  drawSoftPanel(24, 16, 288, 56);
-  drawTextLine(state.playerName, 44, 42, 19, palette.ink, 148);
-  drawText(`Nv ${state.level}`, 212, 42, 16, palette.yellow);
-  drawTextLine(currentStage().title, 256, 42, 13, palette.teal, 42);
-  drawSmallMeter(44, 56, 238, 6, state.xp, state.xpNext, palette.blue, "XP");
+  drawHudPanel(24, 14, 302, 60, palette.yellow);
+  drawText("MC", 42, 32, 9, palette.muted);
+  drawTextLine(state.playerName, 42, 52, 18, palette.ink, 142);
+  drawHudBadge(198, 25, 52, 22, `NV ${state.level}`, palette.yellow);
+  drawTextLine(currentStage().title, 258, 51, 12, palette.teal, 48);
+  drawHudMeter(42, 64, 248, 6, "XP", state.xp, state.xpNext, palette.blue);
 
-  drawSoftPanel(328, 16, 260, 56);
-  drawText(`Semana ${state.week}`, 348, 38, 12, palette.muted);
-  drawText(`Dia ${state.day}/7`, 438, 38, 12, palette.muted);
-  drawText(formatHour(state.hour), 520, 42, 18, palette.yellow);
-  drawDayProgress(348, 56, 206, 7);
+  drawHudPanel(342, 14, 238, 60, palette.teal);
+  drawText("SEM", 360, 32, 9, palette.muted);
+  drawText(`${state.week}`, 360, 52, 18, palette.ink);
+  drawText("DIA", 426, 32, 9, palette.muted);
+  drawText(`${state.day}/7`, 426, 52, 18, palette.ink);
+  drawText(formatHour(state.hour), 512, 52, 18, palette.yellow);
+  drawDayProgress(360, 64, 190, 6);
 
-  drawSoftPanel(604, 16, 332, 56);
-  drawSmallMeter(624, 40, 70, 8, state.energy, maxEnergy(), palette.green, "Energia");
-  drawSmallMeter(708, 40, 66, 8, state.health, 100, palette.red, "Salud");
-  drawSmallMeter(788, 40, 62, 8, state.momentum, 100, palette.teal, "Impulso");
-  drawTextLine(`$${state.cash}`, 864, 38, 13, palette.yellow, 62);
-  drawTextLine(`${state.fans} fans`, 864, 58, 11, palette.ink, 62);
+  drawHudPanel(596, 14, 340, 60, palette.blue);
+  drawHudMeter(616, 42, 68, 7, "ENE", state.energy, maxEnergy(), palette.green);
+  drawHudMeter(704, 42, 64, 7, "SAL", state.health, 100, palette.red);
+  drawHudMeter(788, 42, 64, 7, "IMP", state.momentum, 100, palette.teal);
+  drawHudValue(872, 34, `$${state.cash}`, palette.yellow);
+  drawHudValue(872, 58, `${state.fans} fans`, palette.ink);
+}
+
+function drawHudPanel(x: number, y: number, w: number, h: number, accent: string): void {
+  pixelRect(x + 4, y + 5, w, h, "rgba(0,0,0,0.32)");
+  pixelRect(x, y, w, h, "#141722");
+  pixelRect(x, y, w, 4, accent);
+  pixelRect(x, y + h - 3, w, 3, "#090a0e");
+  pixelRect(x, y, 3, h, "rgba(243,242,233,0.12)");
+  pixelRect(x + w - 3, y, 3, h, "#07080b");
+}
+
+function drawHudBadge(x: number, y: number, w: number, h: number, label: string, color: string): void {
+  pixelRect(x + 2, y + 2, w, h, "rgba(0,0,0,0.25)");
+  pixelRect(x, y, w, h, "#0d0f14");
+  pixelRect(x, y, 4, h, color);
+  drawTextLine(label, x + 10, y + 15, 11, palette.ink, w - 14);
+}
+
+function drawHudMeter(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  label: string,
+  value: number,
+  max: number,
+  color: string,
+): void {
+  drawText(label, x, y - 6, 8, palette.muted);
+  pixelRect(x, y, w, h, "#07080b");
+  pixelRect(x, y, Math.floor((clamp(value, 0, max) / max) * w), h, color);
+  pixelRect(x, y, w, 1, "rgba(255,255,255,0.2)");
+}
+
+function drawHudValue(x: number, y: number, value: string, color: string): void {
+  drawTextLine(value, x, y, 12, color, 50);
 }
 
 function drawCareerPanels(): void {
@@ -1983,7 +2022,7 @@ function drawRival(x: number, y: number, scale: number, time: number): void {
 
 function drawPerformer(x: number, y: number, scale: number, time: number, variant: "mc" | "rival"): void {
   const s = scale;
-  const bounce = (variant === "mc" ? Math.sin(time * 6) : Math.cos(time * 5.5)) * 2;
+  const bounce = Math.round((variant === "mc" ? Math.sin(time * 7) : Math.cos(time * 6.2)) * 1.2);
   const dir = variant === "mc" ? 1 : -1;
   const idx = stageIndex();
   const outfit = variant === "mc" ? state.outfitLevel : 0;
@@ -2003,57 +2042,76 @@ function drawPerformer(x: number, y: number, scale: number, time: number, varian
   const skin = variant === "mc" ? "#f0bd82" : "#d69a72";
   const hair = "#171116";
   const shirt = variant === "mc" ? palette.ink : "#ddd8cf";
+  const outline = "#08090d";
+  const shoe = variant === "mc" ? "#f3f2e9" : "#15171d";
+  const yy = y + bounce;
+  const micLift = Math.sin(time * 8 + (variant === "mc" ? 0 : 0.8)) > 0 ? -2 : 0;
 
   drawQuad(
     [
-      [x - 34 * s, y + 35 * s],
-      [x + 34 * s, y + 35 * s],
-      [x + 48 * s, y + 44 * s],
-      [x - 48 * s, y + 44 * s],
+      [x - 22 * s, y + 20 * s],
+      [x + 22 * s, y + 20 * s],
+      [x + 34 * s, y + 27 * s],
+      [x - 34 * s, y + 27 * s],
     ],
     "rgba(0,0,0,0.22)",
   );
 
-  const yy = y + bounce;
   const px = (dx: number, dy: number, w: number, h: number, color: string) => {
     const left = w < 0 ? dx + w : dx;
     pixelRect(x + left * s, yy + dy * s, Math.abs(w) * s, h * s, color);
   };
 
-  px(-18, -2, 13, 38, pants);
-  px(5, -2, 13, 38, pants);
-  px(-21, 30, 19, 7, variant === "mc" ? palette.ink : "#16181d");
-  px(2, 30, 22, 7, variant === "mc" ? palette.yellow : palette.ink);
-  px(-16, -6, 34, 9, "#15171d");
+  px(-14, -7, 12, 31, outline);
+  px(2, -7, 12, 31, outline);
+  px(-11, -5, 7, 27, pants);
+  px(4, -5, 7, 27, pants);
+  px(-16, 19, 15, 6, outline);
+  px(1, 19, 18, 6, outline);
+  px(-13, 17, 11, 4, shoe);
+  px(4, 17, 12, 4, variant === "mc" ? palette.yellow : shoe);
 
-  px(-27, -54, 54, 13, jacketDark);
-  px(-23, -48, 46, 48, jacket);
-  px(-12, -45, 24, 43, shirt);
-  px(-4, -43, 8, 40, variant === "mc" ? "#f4efe4" : "#242834");
-  px(-22, -42, 9, 38, jacketDark);
-  px(13, -42, 9, 38, jacketDark);
+  px(-20, -40, 40, 37, outline);
+  px(-16, -37, 32, 34, jacket);
+  px(-8, -36, 16, 31, shirt);
+  px(-2, -34, 4, 29, variant === "mc" ? "#f4efe4" : "#242834");
+  px(-17, -37, 5, 34, jacketDark);
+  px(12, -37, 5, 34, jacketDark);
 
-  px(-25, -37, 10, 42, skin);
-  px(15, -37, 10, 30, skin);
-  px(25 * dir, -50, 24 * dir, 7, skin);
-  px(43 * dir, -55, 7 * dir, 8, palette.ink);
-  px(38 * dir, -58, 15 * dir, 5, palette.yellow);
+  px(16 * dir, -34 + micLift, 8 * dir, 24, outline);
+  px(17 * dir, -32 + micLift, 5 * dir, 20, skin);
+  px(22 * dir, -35 + micLift, 8 * dir, 7, outline);
+  px(23 * dir, -34 + micLift, 5 * dir, 5, skin);
+  px(30 * dir, -40 + micLift, 7 * dir, 6, palette.ink);
+  px(35 * dir, -42 + micLift, 4 * dir, 8, palette.yellow);
 
-  px(-15, -75, 30, 26, skin);
-  px(-18, -80, 36, 12, cap);
-  px(10 * dir, -78, 18 * dir, 5, cap);
-  px(-16, -67, 32, 8, hair);
-  px(-8, -63, 5, 4, palette.black);
-  px(5, -63, 5, 4, palette.black);
-  px(-7, -55, 14, 3, "#7c3f33");
+  px(-23 * dir, -33, 8 * dir, 25, outline);
+  px(-21 * dir, -31, 5 * dir, 20, jacketDark);
+  px(-21 * dir, -13, 5 * dir, 6, skin);
 
-  px(-13, -28, 26, 3, palette.yellow);
+  px(-6, -46, 12, 7, skin);
+  px(-16, -64, 32, 28, outline);
+  px(-17, -56, 5, 10, outline);
+  px(12, -56, 5, 10, outline);
+  px(-12, -61, 24, 22, skin);
+  px(-15, -57, 30, 5, hair);
+  px(-7, -50, 4, 4, palette.black);
+  px(4, -50, 4, 4, palette.black);
+  px(-5, -43, 10, 2, "#7c3f33");
+
+  px(-18, -69, 36, 10, outline);
+  px(-15, -71, 30, 9, cap);
+  px(9 * dir, -68, 16 * dir, 5, outline);
+  px(9 * dir, -70, 14 * dir, 4, cap);
+
+  px(-6, -25, 12, 3, palette.yellow);
+  px(-5, -21, 10, 5, variant === "mc" ? palette.teal : palette.red);
   if ((state.level >= 3 || outfit >= 1) && variant === "mc") {
-    px(-6, -24, 12, 8, palette.yellow);
+    px(-4, -29, 8, 7, palette.yellow);
   }
   if (variant === "mc" && outfit >= 3) {
-    px(-18, -48, 5, 42, palette.pink);
-    px(13, -48, 5, 42, palette.pink);
+    px(-17, -37, 5, 34, palette.pink);
+    px(12, -37, 5, 34, palette.pink);
   }
 }
 
