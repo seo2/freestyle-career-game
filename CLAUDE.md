@@ -41,6 +41,7 @@ No hay tests todavía; la Fase 1 del plan introduce Vitest (`npx vitest run`).
 4. **Idiomas:** código, tipos y comentarios en inglés; todos los textos visibles del juego en español (tono chileno/neutro como los mockups: "pieza", "plata", "¡Buenísimo!").
 5. **Accesibilidad de input:** el juego completo debe poder jugarse con teclado (flechas + Enter/Espacio) además de mouse/touch. No introducir pantallas solo-mouse.
 6. **`dist/` es build generado** — no editarlo a mano. `output/` guarda evidencia de verificación (capturas Playwright), no assets del juego.
+7. **Flujo git — rama por tarea (regla del owner, 2026-08-07):** antes de partir cada tarea, crear una rama (`fase-N/descripcion-corta` o `fix/...`); al terminarla y verificarla, commit, push de la rama, y merge a `main` (+ push de main). Nunca desarrollar tareas directamente sobre `main`.
 
 ## Verificación (antes de dar por cerrado cualquier cambio)
 
