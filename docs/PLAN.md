@@ -31,7 +31,7 @@ Las fases de abajo son los **hitos de entrega** (incluyen trabajo visual/assets 
 
 `CLAUDE.md`, `README.md`, `AGENTS.md`, `docs/GAME_BIBLE.md`, `docs/GDD.md`, `docs/PLAN.md`, `docs/PANTALLAS.md`; decisiones de tiempo/plataforma/etapas/estilo registradas.
 
-### Fase 1 — Extraer el núcleo del juego (sin cambio visual) — gauntlets 1–4
+### Fase 1 — Extraer el núcleo del juego ✅ (2026-08-07) — gauntlets 1–4
 
 - Instalar Vitest + ESLint + Prettier.
 - Crear la estructura de `AGENTS.md`: `src/systems/` (CalendarSystem, TrainingSystem, JobsSystem, StoreSystem, BattleSystem, ProgressionSystem…), `src/managers/` (SaveManager…), `src/data/` (configs: costos, curvas, cartas, trabajos — cero números mágicos), `src/services/` (RandomService con seed), `src/events/`, `src/core/` (GameState, tipos).

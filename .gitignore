@@ -11,3 +11,6 @@ output/
 
 # External skill repo cloned locally (has its own .git) — not part of the game
 gauntlet-loop/
+
+# Local Claude Code permission overrides (per-machine)
+.claude/settings.local.json

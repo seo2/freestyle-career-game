@@ -1,5 +1,60 @@
 import "./styles.css";
 
+import type {
+  ActionResult,
+  BattleChoice,
+  BattleState,
+  CareerActionInfo,
+  CareerGoal,
+  CareerView,
+  GameState,
+  JobOption,
+  SocialPostOption,
+  StageDef,
+  StageId,
+  StatKey,
+  TimeAdvance,
+  UpgradeDef,
+  UpgradeKey,
+} from "./core/types";
+import { createNewState } from "./core/state";
+import {
+  currentStage as currentStageOf,
+  maxEnergy as maxEnergyOf,
+  momentumMood as momentumMoodOf,
+  stageIndex as stageIndexOf,
+} from "./core/derived";
+import { clamp } from "./utils/math";
+import { createStateRng, type RandomSource } from "./services/RandomService";
+import { createSaveManager } from "./managers/SaveManager";
+import { stages } from "./data/stages";
+import { statLabels, trainingStats } from "./data/stats";
+import { battleChoices } from "./data/battle";
+import { socialPostOptions } from "./data/social";
+import { jobOptions } from "./data/jobs";
+import { upgrades } from "./data/upgrades";
+import { calendarActionIds } from "./data/actions";
+import { formatBlock, formatDuration } from "./systems/CalendarSystem";
+import {
+  finalizeEvent,
+  getCareerGoals as getCareerGoalsOf,
+} from "./systems/ProgressionSystem";
+import {
+  finishBattle as finishBattleSys,
+  resolveBattle as resolveBattleSys,
+} from "./systems/BattleSystem";
+import {
+  buyRecommendedUpgrade as buyRecommendedUpgradeSys,
+  buyUpgradeByKey as buyUpgradeByKeySys,
+  nextUpgrade as nextUpgradeOf,
+  upgradeCost as upgradeCostOf,
+  upgradeLevel as upgradeLevelOf,
+} from "./systems/StoreSystem";
+import { trainSpecificStat as trainSpecificStatSys } from "./systems/TrainingSystem";
+import { publishSocialPost as publishSocialPostSys } from "./systems/SocialSystem";
+import { performJob as performJobSys } from "./systems/JobsSystem";
+import { executeAction, getCareerActions as getCareerActionsOf } from "./systems/ActionsSystem";
+
 const canvasEl = document.querySelector<HTMLCanvasElement>("#game-canvas");
 if (!canvasEl) {
   throw new Error("Missing #game-canvas");
@@ -14,128 +69,8 @@ const ctx: CanvasRenderingContext2D = canvasContext;
 
 const W = 960;
 const H = 540;
-const SAVE_KEY = "freestyle-career-save-v1";
 
-type GameMode = "start" | "career" | "battle";
-type CareerView = "base" | "calendar" | "map" | "training" | "social" | "work" | "shop" | "stats";
-type StageId = "pieza" | "plaza" | "regional" | "nacional" | "internacional" | "estrella";
-type StatKey =
-  | "flow"
-  | "punchline"
-  | "metrica"
-  | "improvisacion"
-  | "escena"
-  | "carisma"
-  | "disciplina";
 type Vec2 = [number, number];
-
-type Stats = Record<StatKey, number>;
-
-type BattleChoiceId = "respuesta" | "punchline" | "flow" | "humor" | "tecnica" | "escena";
-type UpgradeKey = "outfit" | "studio" | "home";
-
-interface StageDef {
-  id: StageId;
-  title: string;
-  place: string;
-  nextHint: string;
-  minLevel: number;
-  minFans: number;
-  minRespect: number;
-  minFame: number;
-}
-
-interface BattlePrompt {
-  text: string;
-  best: BattleChoiceId[];
-}
-
-interface BattleChoice {
-  id: BattleChoiceId;
-  label: string;
-  stat: StatKey;
-  detail: string;
-}
-
-interface RoundResult {
-  round: number;
-  choice: BattleChoiceId;
-  player: number;
-  rival: number;
-  note: string;
-}
-
-interface BattleState {
-  eventName: string;
-  rivalName: string;
-  rivalStyle: string;
-  rivalPower: number;
-  rewardCash: number;
-  rewardFans: number;
-  rewardRespect: number;
-  rewardFame: number;
-  rewardXp: number;
-  round: number;
-  maxRounds: number;
-  hype: number;
-  playerScore: number;
-  rivalScore: number;
-  prompt: BattlePrompt;
-  results: RoundResult[];
-  finished: boolean;
-  result: "win" | "loss" | "draw" | null;
-}
-
-interface GameState {
-  mode: GameMode;
-  playerName: string;
-  inputName: string;
-  week: number;
-  day: number;
-  hour: number;
-  level: number;
-  xp: number;
-  xpNext: number;
-  energy: number;
-  health: number;
-  cash: number;
-  fans: number;
-  respect: number;
-  fame: number;
-  songs: number;
-  discProgress: number;
-  outfitLevel: number;
-  studioLevel: number;
-  homeLevel: number;
-  momentum: number;
-  lastActionId: string | null;
-  actionStreak: number;
-  stage: StageId;
-  stats: Stats;
-  lastEvent: string;
-  seed: number;
-  animationTime: number;
-  battle: BattleState | null;
-}
-
-interface UpgradeDef {
-  key: UpgradeKey;
-  label: string;
-  shortLabel: string;
-  color: string;
-  baseCost: number;
-  costStep: number;
-  maxLevel: number;
-  effect: string;
-}
-
-interface CareerGoal {
-  label: string;
-  detail: string;
-  value: number;
-  max: number;
-  color: string;
-}
 
 interface ButtonZone {
   id: string;
@@ -147,17 +82,6 @@ interface ButtonZone {
   onClick: () => void;
 }
 
-interface CareerAction {
-  id: string;
-  label: string;
-  detail: string;
-  cost: string;
-  rhythm: string;
-  durationHours: number;
-  disabledReason?: string;
-  run: () => void;
-}
-
 interface CareerNavItem {
   id: CareerView;
   label: string;
@@ -165,175 +89,10 @@ interface CareerNavItem {
   accent: string;
 }
 
-interface SocialPostOption {
-  id: string;
-  label: string;
-  detail: string;
-  fans: number;
-  fame: number;
-  energy: number;
-  hours: number;
-  rhythm: number;
-}
-
-interface JobOption {
-  id: string;
-  label: string;
-  detail: string;
-  cash: number;
-  energy: number;
-  hours: number;
-  disciplineChance: number;
-}
-
-interface TimeAdvanceFx {
-  label: string;
-  fromHour: number;
-  toHour: number;
-  hours: number;
-  daysPassed: number;
+interface TimeAdvanceFx extends TimeAdvance {
   elapsed: number;
   duration: number;
 }
-
-const stages: StageDef[] = [
-  {
-    id: "pieza",
-    title: "Pieza",
-    place: "Pieza / cypher con amigos",
-    nextHint: "Gana nivel 2 y 8 de respeto para salir a la plaza.",
-    minLevel: 1,
-    minFans: 0,
-    minRespect: 0,
-    minFame: 0,
-  },
-  {
-    id: "plaza",
-    title: "Plaza",
-    place: "Competencias de plaza",
-    nextHint: "Nivel 4, 80 fans y 45 respeto abren el regional.",
-    minLevel: 2,
-    minFans: 0,
-    minRespect: 8,
-    minFame: 0,
-  },
-  {
-    id: "regional",
-    title: "Regional",
-    place: "Escenarios regionales",
-    nextHint: "Nivel 7, 350 fans y 90 fama abren el nacional.",
-    minLevel: 4,
-    minFans: 80,
-    minRespect: 45,
-    minFame: 0,
-  },
-  {
-    id: "nacional",
-    title: "Nacional",
-    place: "Liga nacional",
-    nextHint: "Nivel 10, 1200 fans y 350 fama abren internacional.",
-    minLevel: 7,
-    minFans: 350,
-    minRespect: 90,
-    minFame: 90,
-  },
-  {
-    id: "internacional",
-    title: "Internacional",
-    place: "Circuito mundial",
-    nextHint: "Nivel 14, 5000 fans y 1500 fama abren estrellato.",
-    minLevel: 10,
-    minFans: 1200,
-    minRespect: 180,
-    minFame: 350,
-  },
-  {
-    id: "estrella",
-    title: "Estrella",
-    place: "Festivales y giras",
-    nextHint: "Construye legado, crew y sello propio.",
-    minLevel: 14,
-    minFans: 5000,
-    minRespect: 350,
-    minFame: 1500,
-  },
-];
-
-const statLabels: Record<StatKey, string> = {
-  flow: "Flow",
-  punchline: "Punch",
-  metrica: "Metrica",
-  improvisacion: "Impro",
-  escena: "Escena",
-  carisma: "Carisma",
-  disciplina: "Disciplina",
-};
-
-const battleChoices: BattleChoice[] = [
-  {
-    id: "respuesta",
-    label: "Responder",
-    stat: "improvisacion",
-    detail: "Castiga el ataque del rival.",
-  },
-  {
-    id: "punchline",
-    label: "Punchline",
-    stat: "punchline",
-    detail: "Busca el remate mas fuerte.",
-  },
-  {
-    id: "flow",
-    label: "Flow",
-    stat: "flow",
-    detail: "Gana al publico con ritmo.",
-  },
-  {
-    id: "humor",
-    label: "Humor",
-    stat: "carisma",
-    detail: "Desarma la tension con gracia.",
-  },
-  {
-    id: "tecnica",
-    label: "Tecnica",
-    stat: "metrica",
-    detail: "Juega con estructuras y multis.",
-  },
-  {
-    id: "escena",
-    label: "Escena",
-    stat: "escena",
-    detail: "Domina el escenario y el hype.",
-  },
-];
-
-const battlePrompts: BattlePrompt[] = [
-  {
-    text: "El rival se burla de que eres nuevo en el circuito.",
-    best: ["respuesta", "humor"],
-  },
-  {
-    text: "El beat cambia y el publico espera doble tempo.",
-    best: ["flow", "tecnica"],
-  },
-  {
-    text: "Te tiran una palabra dificil como estimulo.",
-    best: ["tecnica", "punchline"],
-  },
-  {
-    text: "El host prende a la gente y la tarima se calienta.",
-    best: ["escena", "flow"],
-  },
-  {
-    text: "El rival ataca tu barrio y tus primeras canciones.",
-    best: ["respuesta", "punchline"],
-  },
-  {
-    text: "La ronda va pareja y queda una barra para cerrar.",
-    best: ["punchline", "escena"],
-  },
-];
 
 const palette = {
   ink: "#f3f2e9",
@@ -366,124 +125,6 @@ const careerNavItems: CareerNavItem[] = [
   { id: "stats", label: "Stats", key: "S", accent: palette.red },
 ];
 
-const calendarActionIds = ["practice", "social", "work", "rest", "write", "battle", "cypher"];
-const trainingStats: StatKey[] = ["flow", "punchline", "metrica", "improvisacion", "escena", "carisma", "disciplina"];
-
-const socialPostOptions: SocialPostOption[] = [
-  {
-    id: "video",
-    label: "Video freestyle",
-    detail: "Clip corto con punch y energia.",
-    fans: 26,
-    fame: 5,
-    energy: 12,
-    hours: 2,
-    rhythm: 8,
-  },
-  {
-    id: "studio-photo",
-    label: "Foto estudio",
-    detail: "Muestra disciplina y proceso.",
-    fans: 18,
-    fame: 4,
-    energy: 8,
-    hours: 1,
-    rhythm: 5,
-  },
-  {
-    id: "thought",
-    label: "Frase/reflexion",
-    detail: "Conecta con fans fieles.",
-    fans: 13,
-    fame: 2,
-    energy: 5,
-    hours: 1,
-    rhythm: 3,
-  },
-  {
-    id: "behind",
-    label: "Detras de escena",
-    detail: "Humaniza la carrera.",
-    fans: 21,
-    fame: 4,
-    energy: 9,
-    hours: 2,
-    rhythm: 6,
-  },
-];
-
-const jobOptions: JobOption[] = [
-  {
-    id: "delivery",
-    label: "Repartidor",
-    detail: "Turno rapido para pagar micros.",
-    cash: 40,
-    energy: 16,
-    hours: 4,
-    disciplineChance: 0.35,
-  },
-  {
-    id: "dishes",
-    label: "Lavaplatos",
-    detail: "Trabajo pesado, paga estable.",
-    cash: 50,
-    energy: 20,
-    hours: 5,
-    disciplineChance: 0.55,
-  },
-  {
-    id: "construction",
-    label: "Obra",
-    detail: "Mucho desgaste, mejor paga.",
-    cash: 62,
-    energy: 28,
-    hours: 6,
-    disciplineChance: 0.75,
-  },
-  {
-    id: "clothes-store",
-    label: "Tienda de ropa",
-    detail: "Contactos y algo de estilo.",
-    cash: 46,
-    energy: 14,
-    hours: 4,
-    disciplineChance: 0.45,
-  },
-];
-
-const upgrades: UpgradeDef[] = [
-  {
-    key: "outfit",
-    label: "Outfit",
-    shortLabel: "Ropa",
-    color: palette.yellow,
-    baseCost: 55,
-    costStep: 85,
-    maxLevel: 3,
-    effect: "+fans/batalla",
-  },
-  {
-    key: "studio",
-    label: "Estudio",
-    shortLabel: "Studio",
-    color: palette.pink,
-    baseCost: 75,
-    costStep: 115,
-    maxLevel: 3,
-    effect: "+temas/grabar",
-  },
-  {
-    key: "home",
-    label: "Base",
-    shortLabel: "Casa",
-    color: palette.teal,
-    baseCost: 110,
-    costStep: 150,
-    maxLevel: 3,
-    effect: "+energia/salud",
-  },
-];
-
 const sceneAssetPaths: Partial<Record<StageId, string>> = {
   pieza: "/assets/scenes/pieza-home-studio-v1.png",
   plaza: "/assets/scenes/plaza-cypher-v1.png",
@@ -491,6 +132,7 @@ const sceneAssetPaths: Partial<Record<StageId, string>> = {
   nacional: "/assets/scenes/regional-stage-v1.png",
   internacional: "/assets/scenes/regional-stage-v1.png",
   estrella: "/assets/scenes/regional-stage-v1.png",
+  leyenda: "/assets/scenes/regional-stage-v1.png",
 };
 const sceneImages: Partial<Record<StageId, HTMLImageElement>> = {};
 const sceneReady: Partial<Record<StageId, boolean>> = {};
@@ -513,16 +155,29 @@ const coverLayerImages: Partial<Record<CoverLayerKey, HTMLImageElement>> = {};
 const coverLayerReady: Partial<Record<CoverLayerKey, boolean>> = {};
 const requiredCoverLayers: CoverLayerKey[] = ["sky", "cityBack", "cityFront", "rooftopFloor", "rooftopFence"];
 
+const saveManager = createSaveManager(localStorage);
+
 let zones: ButtonZone[] = [];
 let pointer = { x: 0, y: 0, down: false };
-let savedSnapshot = loadSavedState();
+let savedSnapshot = saveManager.load();
 let creatingNew = !savedSnapshot;
-let state: GameState = savedSnapshot ? normalizeLoadedState(savedSnapshot) : createNewState();
+let state: GameState = savedSnapshot ? saveManager.normalize(savedSnapshot) : createNewState();
 let lastFrame = performance.now();
 let actionFocus = 0;
 let battleFocus = 0;
 let careerView: CareerView = "base";
 let timeFx: TimeAdvanceFx | null = null;
+
+// The RNG advances the seed of whatever GameState is currently active, so the
+// stream stays continuous across save/continue/new-game swaps.
+const rng: RandomSource = createStateRng({
+  get seed() {
+    return state.seed;
+  },
+  set seed(value: number) {
+    state.seed = value;
+  },
+});
 
 ctx.imageSmoothingEnabled = false;
 canvas.tabIndex = 0;
@@ -554,262 +209,112 @@ for (const [key, src] of Object.entries(coverLayerPaths) as [CoverLayerKey, stri
   coverLayerImages[key] = image;
 }
 
-function createNewState(name = "MC Barrio"): GameState {
-  return {
-    mode: "start",
-    playerName: name,
-    inputName: name,
-    week: 1,
-    day: 1,
-    hour: 10,
-    level: 1,
-    xp: 0,
-    xpNext: 70,
-    energy: 86,
-    health: 88,
-    cash: 25,
-    fans: 0,
-    respect: 0,
-    fame: 0,
-    songs: 0,
-    discProgress: 0,
-    outfitLevel: 0,
-    studioLevel: 0,
-    homeLevel: 0,
-    momentum: 42,
-    lastActionId: null,
-    actionStreak: 0,
-    stage: "pieza",
-    stats: {
-      flow: 2,
-      punchline: 2,
-      metrica: 1,
-      improvisacion: 2,
-      escena: 1,
-      carisma: 1,
-      disciplina: 1,
-    },
-    lastEvent: "Escribe tu nombre artistico y empieza desde la pieza.",
-    seed: Date.now() >>> 0,
-    animationTime: 0,
-    battle: null,
-  };
-}
-
-function normalizeLoadedState(saved: GameState): GameState {
-  return {
-    ...createNewState(saved.playerName || "MC Barrio"),
-    ...saved,
-    mode: "start",
-    inputName: saved.playerName || "MC Barrio",
-    animationTime: 0,
-    battle: null,
-    outfitLevel: clamp(saved.outfitLevel ?? 0, 0, 3),
-    studioLevel: clamp(saved.studioLevel ?? 0, 0, 3),
-    homeLevel: clamp(saved.homeLevel ?? 0, 0, 3),
-    momentum: clamp(saved.momentum ?? 42, 0, 100),
-    lastActionId: saved.lastActionId ?? null,
-    actionStreak: saved.actionStreak ?? 0,
-    lastEvent: `Partida encontrada: ${saved.playerName}, nivel ${saved.level}.`,
-  };
-}
-
-function loadSavedState(): GameState | null {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as GameState;
-  } catch {
-    return null;
-  }
-}
-
-function saveState(): void {
-  const toSave: GameState = {
-    ...state,
-    mode: "career",
-    inputName: state.playerName,
-    battle: null,
-    animationTime: 0,
-  };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
-  savedSnapshot = toSave;
-}
-
-function deleteSave(): void {
-  localStorage.removeItem(SAVE_KEY);
-  savedSnapshot = null;
-  creatingNew = true;
-  state = createNewState();
-  careerView = "base";
-  timeFx = null;
-}
-
-function random(): number {
-  state.seed = (state.seed * 1664525 + 1013904223) >>> 0;
-  return state.seed / 4294967296;
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(random() * (max - min + 1)) + min;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
+// --- State-bound shims -------------------------------------------------------
+// The presentation code below predates the systems extraction and calls game
+// logic with its legacy zero-state signatures. These thin wrappers bind the
+// live GameState (and RNG) so the drawing/input code stays untouched.
 
 function currentStage(): StageDef {
-  return stages.find((stage) => stage.id === state.stage) ?? stages[0];
+  return currentStageOf(state);
 }
 
-function stageIndex(id = state.stage): number {
-  return Math.max(0, stages.findIndex((stage) => stage.id === id));
+function stageIndex(id: StageId = state.stage): number {
+  return stageIndexOf(state, id);
 }
 
 function maxEnergy(): number {
-  return 90 + state.level * 2 + state.stats.disciplina + state.homeLevel * 8;
+  return maxEnergyOf(state);
+}
+
+
+function momentumMood(): string {
+  return momentumMoodOf(state);
+}
+
+
+function getCareerGoals(): CareerGoal[] {
+  return getCareerGoalsOf(state);
+}
+
+function getCareerActions(): CareerActionInfo[] {
+  return getCareerActionsOf(state);
 }
 
 function upgradeLevel(key: UpgradeKey): number {
-  if (key === "outfit") return state.outfitLevel;
-  if (key === "studio") return state.studioLevel;
-  return state.homeLevel;
-}
-
-function setUpgradeLevel(key: UpgradeKey, value: number): void {
-  if (key === "outfit") state.outfitLevel = value;
-  else if (key === "studio") state.studioLevel = value;
-  else state.homeLevel = value;
+  return upgradeLevelOf(state, key);
 }
 
 function upgradeCost(def: UpgradeDef, level = upgradeLevel(def.key)): number {
-  return def.baseCost + def.costStep * level + level * level * 25;
+  return upgradeCostOf(def, level);
 }
 
 function nextUpgrade(): UpgradeDef | null {
-  const available = upgrades.filter((upgrade) => upgradeLevel(upgrade.key) < upgrade.maxLevel);
-  if (available.length === 0) return null;
-  return [...available].sort((a, b) => {
-    const levelDelta = upgradeLevel(a.key) - upgradeLevel(b.key);
-    if (levelDelta !== 0) return levelDelta;
-    return upgradeCost(a) - upgradeCost(b);
-  })[0];
+  return nextUpgradeOf(state);
+}
+
+
+
+// --- Event / command plumbing ------------------------------------------------
+
+function saveState(): void {
+  savedSnapshot = saveManager.save(state);
+}
+
+function setEvent(parts: string[]): void {
+  finalizeEvent(state, parts);
+  saveState();
+}
+
+function startTimeFx(fx: TimeAdvance): void {
+  timeFx = { ...fx, elapsed: 0, duration: 1.8 };
+}
+
+function applyResult(result: ActionResult): void {
+  if (result.type === "event") {
+    if (result.fx) startTimeFx(result.fx);
+    setEvent(result.parts);
+  } else if (result.type === "battle-started") {
+    battleFocus = 0;
+  }
+}
+
+function runCareerAction(actionId: string): void {
+  applyResult(executeAction(state, rng, actionId));
+}
+
+function trainSpecificStat(stat: StatKey): void {
+  applyResult(trainSpecificStatSys(state, rng, stat));
+}
+
+function publishSocialPost(option: SocialPostOption): void {
+  applyResult(publishSocialPostSys(state, rng, option));
+}
+
+function performJob(option: JobOption): void {
+  applyResult(performJobSys(state, rng, option));
 }
 
 function buyRecommendedUpgrade(): void {
-  const upgrade = nextUpgrade();
-  if (!upgrade) {
-    setEvent(["Ya tienes el setup al maximo por ahora."]);
-    return;
-  }
-  const level = upgradeLevel(upgrade.key);
-  const cost = upgradeCost(upgrade, level);
-  if (state.cash < cost) return;
-
-  state.cash -= cost;
-  setUpgradeLevel(upgrade.key, level + 1);
-  const levelMessages = addXp(14 + level * 4);
-  const rhythmMessages = applyRhythm(`upgrade-${upgrade.key}`, 6 + level * 2);
-  const timeMessages = advanceClock(1, upgrade.shortLabel);
-  setEvent([
-    `Invertiste $${cost} en ${upgrade.label} Nv ${level + 1}: ${upgrade.effect}.`,
-    ...rhythmMessages,
-    ...levelMessages,
-    ...timeMessages,
-  ]);
+  applyResult(buyRecommendedUpgradeSys(state, rng));
 }
 
 function buyUpgradeByKey(key: UpgradeKey): void {
-  const upgrade = upgrades.find((item) => item.key === key);
-  if (!upgrade) return;
-  const level = upgradeLevel(upgrade.key);
-  if (level >= upgrade.maxLevel) {
-    setEvent([`${upgrade.label} ya esta al maximo por ahora.`]);
-    return;
-  }
-  const cost = upgradeCost(upgrade, level);
-  if (state.cash < cost) {
-    setEvent([`Faltan $${cost - state.cash} para mejorar ${upgrade.label}.`]);
-    return;
-  }
-
-  state.cash -= cost;
-  setUpgradeLevel(upgrade.key, level + 1);
-  const levelMessages = addXp(14 + level * 4);
-  const rhythmMessages = applyRhythm(`upgrade-${upgrade.key}`, 6 + level * 2);
-  const timeMessages = advanceClock(1, upgrade.shortLabel);
-  setEvent([
-    `Compraste ${upgrade.label} Nv ${level + 1}: ${upgrade.effect}.`,
-    ...rhythmMessages,
-    ...levelMessages,
-    ...timeMessages,
-  ]);
+  applyResult(buyUpgradeByKeySys(state, rng, key));
 }
 
-function recordCost(): number {
-  return Math.max(20, 35 - state.studioLevel * 5);
+function resolveBattle(choice: BattleChoice): void {
+  resolveBattleSys(state, rng, choice);
 }
 
-function stageGoalProgress(stage: StageDef): number {
-  const ratios = [
-    stage.minLevel <= 1 ? 1 : clamp(state.level / stage.minLevel, 0, 1),
-    stage.minFans <= 0 ? 1 : clamp(state.fans / stage.minFans, 0, 1),
-    stage.minRespect <= 0 ? 1 : clamp(state.respect / stage.minRespect, 0, 1),
-    stage.minFame <= 0 ? 1 : clamp(state.fame / stage.minFame, 0, 1),
-  ];
-  return ratios.reduce((sum, value) => sum + value, 0) / ratios.length;
+function finishBattle(): void {
+  const result = finishBattleSys(state, rng);
+  if (!result) return;
+  careerView = "base";
+  startTimeFx(result.fx);
+  setEvent(result.parts);
 }
 
-function getCareerGoals(): CareerGoal[] {
-  const next = stages[stageIndex() + 1];
-  const goals: CareerGoal[] = [];
-
-  if (next) {
-    goals.push({
-      label: `Abrir ${next.title}`,
-      detail: `Nv ${state.level}/${next.minLevel} · Resp ${state.respect}/${next.minRespect}`,
-      value: Math.round(stageGoalProgress(next) * 100),
-      max: 100,
-      color: palette.teal,
-    });
-  } else {
-    goals.push({
-      label: "Legado",
-      detail: `Fama ${state.fame} · Fans ${state.fans}`,
-      value: clamp(state.fame, 0, 2500),
-      max: 2500,
-      color: palette.pink,
-    });
-  }
-
-  if (state.discProgress < 80) {
-    goals.push({
-      label: "Primer tema",
-      detail: `${state.discProgress}% escrito`,
-      value: state.discProgress,
-      max: 80,
-      color: palette.yellow,
-    });
-  } else if (state.cash < recordCost()) {
-    goals.push({
-      label: "Pagar estudio",
-      detail: `$${state.cash}/$${recordCost()}`,
-      value: state.cash,
-      max: recordCost(),
-      color: palette.pink,
-    });
-  } else {
-    goals.push({
-      label: "Grabar tema",
-      detail: "Listo para entrar al estudio",
-      value: 1,
-      max: 1,
-      color: palette.green,
-    });
-  }
-
-  return goals;
-}
+// --- Menu / save flows --------------------------------------------------------
 
 function startCareerFromMenu(): void {
   const cleanName = state.inputName.trim().slice(0, 16) || "MC Barrio";
@@ -826,10 +331,10 @@ function startCareerFromMenu(): void {
 }
 
 function continueCareer(): void {
-  const saved = loadSavedState();
+  const saved = saveManager.load();
   if (!saved) return;
   state = {
-    ...normalizeLoadedState(saved),
+    ...saveManager.normalize(saved),
     mode: "career",
     lastEvent: "Retomaste la carrera desde tu ultimo guardado.",
   };
@@ -848,592 +353,10 @@ function newCareerDraft(): void {
   timeFx = null;
 }
 
-function addStat(stat: StatKey, amount = 1): void {
-  state.stats[stat] = clamp(state.stats[stat] + amount, 1, 99);
-}
 
-function addXp(amount: number): string[] {
-  const messages: string[] = [];
-  state.xp += amount;
-  while (state.xp >= state.xpNext) {
-    state.xp -= state.xpNext;
-    state.level += 1;
-    state.xpNext = Math.round(state.xpNext * 1.22 + 18);
-    state.energy = clamp(state.energy + 18, 0, maxEnergy());
-    state.health = clamp(state.health + 7, 0, 100);
-    const statToRaise = pickLevelStat();
-    addStat(statToRaise, 1);
-    messages.push(`Subiste a nivel ${state.level}: +1 ${statLabels[statToRaise]}.`);
-  }
-  return messages;
-}
+// --- Presentation-only helpers ------------------------------------------------
 
-function pickLevelStat(): StatKey {
-  const ordered: StatKey[] = [
-    "flow",
-    "punchline",
-    "improvisacion",
-    "metrica",
-    "escena",
-    "carisma",
-    "disciplina",
-  ];
-  return ordered[(state.level + stageIndex()) % ordered.length];
-}
 
-function spendActionTime(energyCost: number, hours: number, label: string): string[] {
-  state.energy = clamp(state.energy - energyCost, -20, maxEnergy());
-  if (state.energy < 0) {
-    state.health = clamp(state.health + state.energy, 0, 100);
-    state.energy = 0;
-  }
-  return advanceClock(hours, label);
-}
-
-function advanceClock(hours: number, label: string): string[] {
-  const messages: string[] = [];
-  const fromHour = state.hour;
-  let remaining = Math.max(0, Math.round(hours));
-  let daysPassed = 0;
-  let weekChanged = false;
-
-  while (remaining > 0) {
-    const untilMidnight = 24 - state.hour;
-    if (remaining >= untilMidnight) {
-      remaining -= untilMidnight;
-      state.hour = 0;
-      state.day += 1;
-      daysPassed += 1;
-      state.energy = clamp(state.energy + 8 + state.stats.disciplina, 0, maxEnergy());
-      state.health = clamp(state.health + 2, 0, 100);
-      if (state.day > 7) {
-        state.week += 1;
-        state.day = 1;
-        weekChanged = true;
-        state.energy = clamp(state.energy + 18 + state.stats.disciplina * 3, 0, maxEnergy());
-        state.health = clamp(state.health + 6, 0, 100);
-      }
-    } else {
-      state.hour += remaining;
-      remaining = 0;
-    }
-  }
-
-  if (daysPassed > 0) {
-    state.momentum = clamp(state.momentum - daysPassed * 3, 0, 100);
-    messages.push(`Paso ${daysPassed === 1 ? "un dia" : `${daysPassed} dias`}.`);
-  }
-  if (weekChanged) messages.push(`Semana ${state.week}: recuperaste energia.`);
-  timeFx = {
-    label,
-    fromHour,
-    toHour: state.hour,
-    hours,
-    daysPassed,
-    elapsed: 0,
-    duration: 1.8,
-  };
-  return messages;
-}
-
-function formatHour(hour: number): string {
-  return `${String(hour).padStart(2, "0")}:00`;
-}
-
-function formatDuration(hours: number): string {
-  return `${hours}h`;
-}
-
-function maybeUnlockStage(): string | null {
-  const next = stages[stageIndex() + 1];
-  if (!next) return null;
-  const unlocks =
-    state.level >= next.minLevel &&
-    state.fans >= next.minFans &&
-    state.respect >= next.minRespect &&
-    state.fame >= next.minFame;
-  if (!unlocks) return null;
-  state.stage = next.id;
-  return `Nuevo circuito desbloqueado: ${next.title}.`;
-}
-
-function setEvent(parts: string[]): void {
-  const unlock = maybeUnlockStage();
-  if (unlock) parts.push(unlock);
-  state.lastEvent = parts.join(" ");
-  saveState();
-}
-
-function momentumMood(): string {
-  if (state.momentum >= 78) return "En racha";
-  if (state.momentum >= 55) return "Activo";
-  if (state.momentum >= 30) return "Frio";
-  return "Quemado";
-}
-
-function rhythmPreview(actionId: string, baseDelta: number): string {
-  const repeatPenalty = state.lastActionId === actionId ? Math.min(12, (state.actionStreak + 1) * 4) : -4;
-  const fatiguePenalty = state.energy < 24 && actionId !== "rest" ? 5 : 0;
-  const latePenalty = (state.hour >= 23 || state.hour < 6) && actionId !== "rest" ? 3 : 0;
-  const delta = Math.round(baseDelta - repeatPenalty - fatiguePenalty - latePenalty);
-  if (delta > 0) return `Impulso +${delta}`;
-  if (delta < 0) return `Impulso ${delta}`;
-  return "Impulso neutro";
-}
-
-function rhythmShort(label: string): string {
-  return label.replace("Impulso ", "").replace("neutro", "0");
-}
-
-function rhythmColor(label: string): string {
-  if (label.includes("+")) return palette.teal;
-  if (label.includes("-")) return palette.red;
-  return palette.muted;
-}
-
-function applyRhythm(actionId: string, baseDelta: number): string[] {
-  const repeated = state.lastActionId === actionId;
-  state.actionStreak = repeated ? state.actionStreak + 1 : 1;
-  state.lastActionId = actionId;
-
-  const repeatPenalty = repeated ? Math.min(12, state.actionStreak * 4) : -4;
-  const fatiguePenalty = state.energy < 24 && actionId !== "rest" ? 5 : 0;
-  const latePenalty = (state.hour >= 23 || state.hour < 6) && actionId !== "rest" ? 3 : 0;
-  const delta = Math.round(baseDelta - repeatPenalty - fatiguePenalty - latePenalty);
-  state.momentum = clamp(state.momentum + delta, 0, 100);
-
-  if (delta > 0) return [`Impulso +${delta}: ${momentumMood()}.`];
-  if (delta < 0) return [`Impulso ${delta}: ${momentumMood()}.`];
-  return [`Impulso estable: ${momentumMood()}.`];
-}
-
-function getCareerActions(): CareerAction[] {
-  const actions: CareerAction[] = [];
-  const tired = state.energy < 12 ? "Necesitas descansar." : undefined;
-  const stage = currentStage();
-
-  actions.push({
-    id: "practice",
-    label: "Practicar",
-    detail: "Barras frente al espejo y beats en loop.",
-    cost: "2h / -16 energia",
-    rhythm: rhythmPreview("practice", 4),
-    durationHours: 2,
-    disabledReason: state.energy < 16 ? tired : undefined,
-    run: () => {
-      const gained = random() > 0.5 ? "flow" : "improvisacion";
-      addStat(gained, 1);
-      const levelMessages = addXp(24);
-      const rhythmMessages = applyRhythm("practice", 4);
-      const timeMessages = spendActionTime(16, 2, "Practicar");
-      setEvent([`Practicaste 2h en la pieza: +1 ${statLabels[gained]}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-    },
-  });
-
-  actions.push({
-    id: "cypher",
-    label: "Cypher",
-    detail: "Juntarte con amigos a soltar rimas.",
-    cost: "3h / -14 energia",
-    rhythm: rhythmPreview("cypher", 8),
-    durationHours: 3,
-    disabledReason: state.energy < 14 ? tired : undefined,
-    run: () => {
-      addStat("improvisacion", random() > 0.58 ? 1 : 0);
-      state.respect += 4 + randomInt(0, 3);
-      state.fans += 1 + randomInt(0, 2);
-      const levelMessages = addXp(20);
-      const rhythmMessages = applyRhythm("cypher", 8);
-      const timeMessages = spendActionTime(14, 3, "Cypher");
-      setEvent([`El cypher de 3h te dio respeto local.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-    },
-  });
-
-  actions.push({
-    id: "work",
-    label: "Trabajar",
-    detail: "Turno corto para financiar micros y estudio.",
-    cost: "6h / -20 energia",
-    rhythm: rhythmPreview("work", -3),
-    durationHours: 6,
-    disabledReason: state.energy < 20 ? tired : undefined,
-    run: () => {
-      const earned = 42 + state.stats.disciplina * 4 + randomInt(0, 12);
-      state.cash += earned;
-      addStat("disciplina", random() > 0.75 ? 1 : 0);
-      const levelMessages = addXp(10);
-      const rhythmMessages = applyRhythm("work", -3);
-      const timeMessages = spendActionTime(20, 6, "Trabajar");
-      setEvent([`Trabajaste 6h: +$${earned}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-    },
-  });
-
-  actions.push({
-    id: "social",
-    label: "Subir clip",
-    detail: "Publicar freestyle, responder comentarios.",
-    cost: "2h / -12 energia",
-    rhythm: rhythmPreview("social", 7),
-    durationHours: 2,
-    disabledReason: state.energy < 12 ? tired : undefined,
-    run: () => {
-      const viral = random() > 0.88;
-      const fanGain = state.stats.carisma * 4 + state.outfitLevel * 6 + randomInt(2, 12) + (viral ? 42 : 0);
-      const fameGain = Math.floor(fanGain / 8) + (viral ? 12 : 0);
-      state.fans += fanGain;
-      state.fame += fameGain;
-      state.health = clamp(state.health - (viral ? 5 : 2), 0, 100);
-      addStat("carisma", random() > 0.68 ? 1 : 0);
-      const levelMessages = addXp(18 + (viral ? 18 : 0));
-      const rhythmMessages = applyRhythm("social", viral ? 16 : 7);
-      const timeMessages = spendActionTime(12, 2, "Redes");
-      setEvent([
-        viral
-          ? `En 2h el clip se movio fuerte: +${fanGain} fans.`
-          : `Subiste un clip en 2h: +${fanGain} fans.`,
-        ...rhythmMessages,
-        ...levelMessages,
-        ...timeMessages,
-      ]);
-    },
-  });
-
-  actions.push({
-    id: "write",
-    label: "Escribir tema",
-    detail: "Convertir barras en una cancion grabable.",
-    cost: "3h / -18 energia",
-    rhythm: rhythmPreview("write", 5),
-    durationHours: 3,
-    disabledReason: state.energy < 18 ? tired : undefined,
-    run: () => {
-      const progress = 18 + state.stats.metrica * 2 + state.studioLevel * 6 + randomInt(0, 8);
-      state.discProgress = clamp(state.discProgress + progress, 0, 120);
-      addStat(random() > 0.5 ? "metrica" : "punchline", 1);
-      const levelMessages = addXp(22);
-      const rhythmMessages = applyRhythm("write", 5);
-      const timeMessages = spendActionTime(18, 3, "Escribir");
-      setEvent([`Escribiste 3h: +${progress}% de cancion.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-    },
-  });
-
-  actions.push({
-    id: "record",
-    label: "Grabar",
-    detail: "Pagar horas y subir una cancion terminada.",
-    cost: `4h / $${recordCost()} / -16 energia`,
-    rhythm: rhythmPreview("record", 14),
-    durationHours: 4,
-    disabledReason:
-      state.discProgress < 80
-        ? "Necesitas 80% de cancion."
-        : state.cash < recordCost()
-          ? "Falta dinero."
-          : state.energy < 16
-            ? tired
-            : undefined,
-    run: () => {
-      state.cash -= recordCost();
-      state.discProgress = 0;
-      state.songs += 1;
-      const fanGain =
-        25 +
-        state.stats.flow * 3 +
-        state.stats.carisma * 2 +
-        state.studioLevel * 12 +
-        state.outfitLevel * 5 +
-        randomInt(0, 18);
-      state.fans += fanGain;
-      state.fame += Math.floor(fanGain / 4);
-      state.respect += 8;
-      const levelMessages = addXp(46);
-      const rhythmMessages = applyRhythm("record", 14);
-      const timeMessages = spendActionTime(16, 4, "Grabar");
-      setEvent([`Grabaste 4h la cancion #${state.songs}: +${fanGain} fans.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-    },
-  });
-
-  const battleCost = 22 + stageIndex() * 3;
-  actions.push({
-    id: "battle",
-    label: battleLabel(),
-    detail: `${stage.place}: ronda por decisiones rapidas.`,
-    cost: `${battleDurationHours()}h / -${battleCost} energia`,
-    rhythm: rhythmPreview("battle", 12),
-    durationHours: battleDurationHours(),
-    disabledReason: state.energy < battleCost ? tired : undefined,
-    run: () => startBattle(),
-  });
-
-  if (state.songs > 0 || stageIndex() >= 2) {
-    actions.push({
-      id: "show",
-      label: "Show chico",
-      detail: "Tocar en vivo, vender merch y probar canciones.",
-      cost: "5h / -26 energia",
-      rhythm: rhythmPreview("show", 12),
-      durationHours: 5,
-      disabledReason: state.energy < 26 ? tired : undefined,
-      run: () => {
-        const earned = 28 + state.songs * 18 + state.stats.escena * 5 + state.outfitLevel * 10 + randomInt(0, 20);
-        const fans = 18 + state.stats.escena * 5 + state.outfitLevel * 8 + state.studioLevel * 4 + randomInt(0, 18);
-        state.cash += earned;
-        state.fans += fans;
-        state.fame += Math.floor(fans / 3);
-        addStat("escena", 1);
-        const levelMessages = addXp(38);
-        const rhythmMessages = applyRhythm("show", 12);
-        const timeMessages = spendActionTime(26, 5, "Show");
-        setEvent([`Hiciste show de 5h: +$${earned}, +${fans} fans.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-      },
-    });
-  }
-
-  actions.push({
-    id: "rest",
-    label: "Descansar",
-    detail: "Recuperar aire y evitar quemarte.",
-    cost: "8h / +energia / +salud",
-    rhythm: rhythmPreview("rest", state.energy < 35 ? 10 : -2),
-    durationHours: 8,
-    run: () => {
-      const rhythmBase = state.energy < 35 ? 10 : -2;
-      state.energy = clamp(state.energy + 36 + state.stats.disciplina * 2 + state.homeLevel * 10, 0, maxEnergy());
-      state.health = clamp(state.health + 18 + state.homeLevel * 4, 0, 100);
-      const rhythmMessages = applyRhythm("rest", rhythmBase);
-      const timeMessages = advanceClock(8, "Descansar");
-      setEvent(["Descansaste 8h y ordenaste la cabeza.", ...rhythmMessages, ...timeMessages]);
-    },
-  });
-
-  return actions;
-}
-
-function runCareerAction(actionId: string): void {
-  const action = getCareerActions().find((item) => item.id === actionId);
-  if (!action || action.disabledReason) return;
-  action.run();
-}
-
-function trainSpecificStat(stat: StatKey): void {
-  if (state.energy < 14) {
-    setEvent(["Necesitas energia para entrenar."]);
-    return;
-  }
-  const disciplineBonus = Math.floor(state.stats.disciplina / 5);
-  addStat(stat, 1);
-  const extraXp = disciplineBonus + (stat === "disciplina" ? 2 : 0);
-  const levelMessages = addXp(20 + extraXp);
-  const rhythmMessages = applyRhythm(`train-${stat}`, 5);
-  const timeMessages = spendActionTime(14, 2, `Entrenar ${statLabels[stat]}`);
-  setEvent([`Entrenaste ${statLabels[stat]} 2h: +1 nivel.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-}
-
-function publishSocialPost(option: SocialPostOption): void {
-  if (state.energy < option.energy) {
-    setEvent(["Necesitas energia para publicar con foco."]);
-    return;
-  }
-  const viral = random() > 0.88 - state.stats.carisma * 0.012;
-  const fanGain = option.fans + state.stats.carisma * 3 + state.outfitLevel * 5 + randomInt(0, 10) + (viral ? 48 : 0);
-  const fameGain = option.fame + Math.floor(fanGain / 12) + (viral ? 10 : 0);
-  state.fans += fanGain;
-  state.fame += fameGain;
-  state.health = clamp(state.health - (viral ? 4 : 1), 0, 100);
-  if (random() > 0.68) addStat("carisma", 1);
-  const levelMessages = addXp(16 + (viral ? 16 : 0));
-  const rhythmMessages = applyRhythm(`social-${option.id}`, viral ? option.rhythm + 9 : option.rhythm);
-  const timeMessages = spendActionTime(option.energy, option.hours, option.label);
-  setEvent([
-    viral ? `${option.label} exploto: +${fanGain} fans.` : `${option.label}: +${fanGain} fans, +${fameGain} fama.`,
-    ...rhythmMessages,
-    ...levelMessages,
-    ...timeMessages,
-  ]);
-}
-
-function performJob(option: JobOption): void {
-  if (state.energy < option.energy) {
-    setEvent(["Estas demasiado cansado para tomar ese turno."]);
-    return;
-  }
-  const earned = option.cash + state.stats.disciplina * 3 + randomInt(0, 12);
-  state.cash += earned;
-  if (random() < option.disciplineChance) addStat("disciplina", 1);
-  const levelMessages = addXp(8 + Math.floor(option.hours / 2));
-  const rhythmMessages = applyRhythm(`work-${option.id}`, -2);
-  const timeMessages = spendActionTime(option.energy, option.hours, option.label);
-  setEvent([`${option.label} ${option.hours}h: +$${earned}.`, ...rhythmMessages, ...levelMessages, ...timeMessages]);
-}
-
-function battleLabel(): string {
-  switch (state.stage) {
-    case "pieza":
-      return "Batalla casera";
-    case "plaza":
-      return "Batalla plaza";
-    case "regional":
-      return "Regional";
-    case "nacional":
-      return "Nacional";
-    case "internacional":
-      return "Internacional";
-    case "estrella":
-      return "Festival";
-  }
-}
-
-function battleDurationHours(): number {
-  return 4 + Math.min(stageIndex(), 3);
-}
-
-function startBattle(): void {
-  const cost = 22 + stageIndex() * 3;
-  if (state.energy < cost) return;
-  state.energy = clamp(state.energy - cost, 0, maxEnergy());
-  const tier = getBattleTier();
-  state.mode = "battle";
-  state.battle = {
-    ...tier,
-    round: 1,
-    maxRounds: 3,
-    hype: 50,
-    playerScore: 0,
-    rivalScore: 0,
-    prompt: pickPrompt(),
-    results: [],
-    finished: false,
-    result: null,
-  };
-  battleFocus = 0;
-}
-
-function getBattleTier(): Omit<
-  BattleState,
-  "round" | "maxRounds" | "hype" | "playerScore" | "rivalScore" | "prompt" | "results" | "finished" | "result"
-> {
-  const idx = stageIndex();
-  const rivals = [
-    ["Cypher de pieza", "Nico Cuaderno", "nervioso pero creativo"],
-    ["Plaza del barrio", "La Sombra", "agresivo de plaza"],
-    ["Regional Sur", "Killa Metro", "tecnico y frio"],
-    ["Final Nacional", "Rima Royal", "completo y mediatico"],
-    ["Mundial Underground", "Nova X", "veloz e impredecible"],
-    ["Festival Leyenda", "Icono", "leyenda con publico propio"],
-  ];
-  const picked = rivals[idx] ?? rivals[0];
-  return {
-    eventName: picked[0],
-    rivalName: picked[1],
-    rivalStyle: picked[2],
-    rivalPower: 3 + idx * 2 + Math.floor(state.level / 3),
-    rewardCash: 35 + idx * 85,
-    rewardFans: 18 + idx * 95,
-    rewardRespect: 10 + idx * 18,
-    rewardFame: 3 + idx * 25,
-    rewardXp: 48 + idx * 28,
-  };
-}
-
-function pickPrompt(): BattlePrompt {
-  return battlePrompts[randomInt(0, battlePrompts.length - 1)];
-}
-
-function resolveBattle(choice: BattleChoice): void {
-  const battle = state.battle;
-  if (!battle || battle.finished) return;
-  const statValue = state.stats[choice.stat];
-  const promptBonus = battle.prompt.best.includes(choice.id) ? 12 : 0;
-  const energyBonus = state.energy > 45 ? 4 : state.energy < 15 ? -8 : 0;
-  const healthBonus = state.health > 70 ? 3 : state.health < 30 ? -8 : 0;
-  const momentumBonus = Math.floor((state.momentum - 50) / 8);
-  const presenceBonus = state.outfitLevel * 2 + (state.stage === "pieza" ? 0 : state.outfitLevel);
-  const playerRoll =
-    statValue * 8 +
-    state.level * 3 +
-    promptBonus +
-    energyBonus +
-    healthBonus +
-    momentumBonus +
-    presenceBonus +
-    Math.floor(battle.hype / 8) +
-    randomInt(7, 26);
-  const rivalRoll = battle.rivalPower * 8 + battle.round * 2 + randomInt(12, 34);
-  const wonRound = playerRoll >= rivalRoll;
-
-  if (wonRound) {
-    battle.playerScore += 1;
-    battle.hype = clamp(battle.hype + 12 + promptBonus / 3, 0, 100);
-  } else {
-    battle.rivalScore += 1;
-    battle.hype = clamp(battle.hype - 7, 0, 100);
-  }
-
-  battle.results.push({
-    round: battle.round,
-    choice: choice.id,
-    player: playerRoll,
-    rival: rivalRoll,
-    note: wonRound ? "El publico reacciona a tu ronda." : "El rival conecto mas fuerte.",
-  });
-
-  if (battle.round >= battle.maxRounds) {
-    battle.finished = true;
-    battle.result =
-      battle.playerScore > battle.rivalScore
-        ? "win"
-        : battle.playerScore < battle.rivalScore
-          ? "loss"
-          : "draw";
-  } else {
-    battle.round += 1;
-    battle.prompt = pickPrompt();
-  }
-}
-
-function finishBattle(): void {
-  const battle = state.battle;
-  if (!battle || !battle.finished) return;
-  const won = battle.result === "win";
-  const draw = battle.result === "draw";
-  const cash = won ? battle.rewardCash : draw ? Math.floor(battle.rewardCash * 0.35) : 0;
-  const fans = won
-    ? battle.rewardFans
-    : draw
-      ? Math.floor(battle.rewardFans * 0.45)
-      : Math.floor(battle.rewardFans * 0.22);
-  const respect = won
-    ? battle.rewardRespect
-    : draw
-      ? Math.floor(battle.rewardRespect * 0.5)
-      : Math.floor(battle.rewardRespect * 0.25);
-  const fame = won
-    ? battle.rewardFame
-    : draw
-      ? Math.floor(battle.rewardFame * 0.45)
-      : Math.floor(battle.rewardFame * 0.2);
-  const xp = won ? battle.rewardXp : draw ? Math.floor(battle.rewardXp * 0.55) : Math.floor(battle.rewardXp * 0.32);
-
-  state.cash += cash;
-  state.fans += fans;
-  state.respect += respect;
-  state.fame += fame;
-  const levelMessages = addXp(xp);
-  const rhythmMessages = applyRhythm("battle", won ? 18 : draw ? 7 : -10);
-  const timeMessages = advanceClock(battleDurationHours(), battle.eventName);
-
-  const resultText = won ? "Ganaste" : draw ? "Empataste" : "Perdiste";
-  const messages = [
-    `${resultText} en ${battle.eventName} (${formatDuration(battleDurationHours())}): +$${cash}, +${fans} fans, +${respect} respeto.`,
-    ...rhythmMessages,
-    ...levelMessages,
-    ...timeMessages,
-  ];
-  state.battle = null;
-  state.mode = "career";
-  careerView = "base";
-  setEvent(messages);
-}
 
 function update(dt: number): void {
   state.animationTime += dt;
@@ -1710,7 +633,7 @@ function drawCreateMcScreen(hasSave: boolean): void {
       false,
       () => {
         creatingNew = false;
-        state = normalizeLoadedState(savedSnapshot as GameState);
+        state = saveManager.normalize(savedSnapshot as GameState);
       },
       "#11183a",
     );
@@ -1751,15 +674,6 @@ function drawProceduralCareerView(): void {
   drawCareerNavBar();
 }
 
-function drawLegacyCareerScreen(): void {
-  drawBackdrop(state.stage);
-  if (!hasSceneBackdrop(state.stage)) drawEnvironment(state.stage);
-  drawCareerSceneFrame();
-  drawMc(hasSceneBackdrop(state.stage) ? 470 : 250, 306, 1.3, state.animationTime);
-  drawTopHud();
-  drawCareerPanels();
-  drawActions();
-}
 
 function drawBattleScreen(): void {
   const battle = state.battle;
@@ -1838,108 +752,13 @@ function drawBattleResultPanel(battle: BattleState): void {
   button("finish-battle", 384, 454, 192, 38, "Continuar", "", false, finishBattle, "#11183a");
 }
 
-function drawBattleHeader(battle: BattleState): void {
-  drawPanel(44, 88, 300, 78);
-  drawTextLine(battle.eventName, 66, 120, 22, palette.ink, 248);
-  drawTextLine(`${state.playerName} vs ${battle.rivalName}`, 66, 146, 14, palette.yellow, 248);
 
-  drawPanel(370, 88, 224, 78);
-  drawText(`Ronda ${battle.round}/${battle.maxRounds}`, 392, 118, 17, palette.ink);
-  drawText(`Marcador ${battle.playerScore} - ${battle.rivalScore}`, 392, 144, 14, palette.yellow);
-  drawMeter(500, 118, 70, 10, battle.hype, 100, palette.red, "Hype");
 
-  if (battle.results.length === 0) {
-    drawPanel(632, 88, 248, 78);
-    drawText("Rival", 654, 118, 16, palette.ink);
-    drawTextLine(battle.rivalStyle, 654, 144, 12, palette.muted, 202);
-  }
-}
 
-function drawTopHud(): void {
-  drawHudPanel(24, 14, 302, 60, palette.yellow);
-  drawText("MC", 42, 32, 9, palette.muted);
-  drawTextLine(state.playerName, 42, 52, 18, palette.ink, 142);
-  drawHudBadge(198, 25, 52, 22, `NV ${state.level}`, palette.yellow);
-  drawTextLine(currentStage().title, 258, 51, 12, palette.teal, 48);
-  drawHudMeter(42, 64, 248, 6, "XP", state.xp, state.xpNext, palette.blue);
 
-  drawHudPanel(342, 14, 238, 60, palette.teal);
-  drawText("SEM", 360, 32, 9, palette.muted);
-  drawText(`${state.week}`, 360, 52, 18, palette.ink);
-  drawText("DIA", 426, 32, 9, palette.muted);
-  drawText(`${state.day}/7`, 426, 52, 18, palette.ink);
-  drawText(formatHour(state.hour), 512, 52, 18, palette.yellow);
-  drawDayProgress(360, 64, 190, 6);
 
-  drawHudPanel(596, 14, 340, 60, palette.blue);
-  drawHudMeter(616, 42, 68, 7, "ENE", state.energy, maxEnergy(), palette.green);
-  drawHudMeter(704, 42, 64, 7, "SAL", state.health, 100, palette.red);
-  drawHudMeter(788, 42, 64, 7, "IMP", state.momentum, 100, palette.teal);
-  drawHudValue(872, 34, `$${state.cash}`, palette.yellow);
-  drawHudValue(872, 58, `${state.fans} fans`, palette.ink);
-}
 
-function drawHudPanel(x: number, y: number, w: number, h: number, accent: string): void {
-  pixelRect(x + 4, y + 5, w, h, "rgba(0,0,0,0.32)");
-  pixelRect(x, y, w, h, "#141722");
-  pixelRect(x, y, w, 4, accent);
-  pixelRect(x, y + h - 3, w, 3, "#090a0e");
-  pixelRect(x, y, 3, h, "rgba(243,242,233,0.12)");
-  pixelRect(x + w - 3, y, 3, h, "#07080b");
-}
 
-function drawHudBadge(x: number, y: number, w: number, h: number, label: string, color: string): void {
-  pixelRect(x + 2, y + 2, w, h, "rgba(0,0,0,0.25)");
-  pixelRect(x, y, w, h, "#0d0f14");
-  pixelRect(x, y, 4, h, color);
-  drawTextLine(label, x + 10, y + 15, 11, palette.ink, w - 14);
-}
-
-function drawHudMeter(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  label: string,
-  value: number,
-  max: number,
-  color: string,
-): void {
-  drawText(label, x, y - 6, 8, palette.muted);
-  pixelRect(x, y, w, h, "#07080b");
-  pixelRect(x, y, Math.floor((clamp(value, 0, max) / max) * w), h, color);
-  pixelRect(x, y, w, 1, "rgba(255,255,255,0.2)");
-}
-
-function drawHudValue(x: number, y: number, value: string, color: string): void {
-  drawTextLine(value, x, y, 12, color, 50);
-}
-
-function drawCareerPanels(): void {
-  drawCareerDossier(676, 88, 236, 236);
-}
-
-function drawActions(): void {
-  const actions = getCareerActions();
-  actionFocus = clamp(actionFocus, 0, actions.length - 1);
-  drawSoftPanel(38, 340, 884, 186);
-  drawText("Siguiente movimiento", 64, 368, 18, palette.ink);
-  if (timeFx) {
-    drawTimeAdvanceFx();
-  } else {
-    drawTextLine(`Impulso: ${momentumMood()} · variar acciones mantiene la carrera viva`, 382, 367, 11, palette.muted, 500);
-  }
-
-  drawTextBlock(state.lastEvent, 64, 389, 10, palette.muted, 296, 2);
-  drawSelectedActionDetail(actions[actionFocus], 64, 412, 286, 88);
-  actions.forEach((action, index) => {
-    const col = index % 2;
-    const row = Math.floor(index / 2);
-    const x = 382 + col * 260;
-    const y = 384 + row * 34;
-    drawActionListItem(action, index, x, y, 238, 30, index === actionFocus);
-  });
-}
 
 function drawInterfaceBackdrop(): void {
   const gradient = ctx.createLinearGradient(0, 0, 0, H);
@@ -1967,7 +786,7 @@ function drawCareerHeader(): void {
   drawText("ENERGIA", 112, 34, 16, palette.ink);
   drawTextLine(`${state.energy}/${maxEnergy()}`, 270, 35, 16, palette.ink, 86);
   drawHudBar(112, 54, 230, 15, state.energy, maxEnergy(), palette.green);
-  drawTextLine(`SEM ${state.week}.${state.day}  ${formatHour(state.hour)}`, 112, 78, 10, palette.muted, 150);
+  drawTextLine(`SEM ${state.week}.${state.day}  ${formatBlock(state.block)}`, 112, 78, 10, palette.muted, 150);
 
   drawHudResourceCard(362, 22, 138, 54, "cash", "", formatHudNumber(state.cash), palette.green);
   drawHudResourceCard(516, 22, 224, 54, "fans", "FANS", formatHudNumber(state.fans), palette.blue);
@@ -2158,7 +977,7 @@ function drawCalendarView(): void {
     drawText(day, x + 22, y + 34, 16, palette.ink);
     drawActionIcon(action?.id ?? "rest", x + 47, y + 58, disabled ? "#555b6d" : actionAccent(action?.id ?? "rest"));
     drawTextLine(actionShortLabel(action?.id ?? "rest", action?.label ?? "Libre"), x + 18, y + 116, 13, disabled ? "#74798c" : palette.ink, 84);
-    drawTextLine(action ? formatDuration(action.durationHours) : "-", x + 42, y + 142, 11, palette.yellow, 44);
+    drawTextLine(action ? formatDuration(action.durationBlocks) : "-", x + 24, y + 142, 11, palette.yellow, 78);
     pixelRect(x + 24, y + 156, 72, 34, "rgba(6,8,18,0.58)");
     zones.push({
       id: `calendar-${index}`,
@@ -2168,7 +987,7 @@ function drawCalendarView(): void {
       h: 206,
       disabled,
       onClick: () => {
-        if (action) action.run();
+        if (action) runCareerAction(action.id);
       },
     });
   });
@@ -2185,13 +1004,15 @@ function drawMapView(): void {
   drawViewTitle("5. Mapa (progreso)", currentStage().nextHint);
   drawPanel(36, 146, 888, 266);
   drawPixelCityMap(54, 164, 852, 230);
+  // One node per career stage (stages.length entries, pieza -> leyenda).
   const points: Vec2[] = [
-    [134, 310],
-    [292, 238],
-    [448, 318],
-    [590, 226],
-    [742, 300],
-    [838, 194],
+    [120, 312],
+    [252, 240],
+    [386, 320],
+    [512, 228],
+    [644, 302],
+    [762, 210],
+    [858, 296],
   ];
   points.forEach((point, index) => {
     if (index === 0) return;
@@ -2243,7 +1064,7 @@ function drawDottedLine(a: Vec2, b: Vec2, color: string): void {
 }
 
 function drawTrainingView(): void {
-  drawViewTitle("6. Entrenamiento", "Sube atributos concretos consumiendo 2h y energia.");
+  drawViewTitle("6. Entrenamiento", "Sube atributos concretos consumiendo un bloque y energia.");
   drawPanel(36, 150, 580, 310);
   trainingStats.forEach((stat, index) => drawTrainingRow(stat, index, 60, 176 + index * 39, 526));
   drawPanel(638, 150, 286, 310);
@@ -2287,7 +1108,7 @@ function drawSocialRow(option: SocialPostOption, index: number, x: number, y: nu
   pixelRect(x, y, 4, 42, palette.pink);
   drawTextLine(`${index + 1}. ${option.label}`, x + 16, y + 26, 13, disabled ? "#7d8295" : palette.ink, 210);
   drawTextLine(`+${option.fans} fans`, x + 260, y + 26, 11, palette.blue, 82);
-  drawTextLine(`${option.hours}h`, x + 368, y + 26, 11, palette.yellow, 34);
+  drawTextLine(formatDuration(option.blocks), x + 368, y + 26, 11, palette.yellow, 34);
   zones.push({ id: `social-${option.id}`, x, y, w, h: 42, disabled, onClick: () => publishSocialPost(option) });
 }
 
@@ -2325,7 +1146,7 @@ function drawJobRow(option: JobOption, index: number, x: number, y: number, w: n
   pixelRect(x, y, 4, 42, palette.green);
   drawTextLine(`${index + 1}. ${option.label}`, x + 16, y + 26, 14, disabled ? "#7d8295" : palette.ink, 190);
   drawTextLine(`$${option.cash}`, x + 260, y + 26, 14, palette.green, 54);
-  drawTextLine(`${option.hours}h`, x + 330, y + 26, 11, palette.yellow, 34);
+  drawTextLine(formatDuration(option.blocks), x + 330, y + 26, 11, palette.yellow, 34);
   button(`job-${option.id}`, x + w - 42, y + 8, 28, 24, "+", "", disabled, () => performJob(option), "#202955");
 }
 
@@ -2476,52 +1297,7 @@ function drawSetupUpgrade(x: number, y: number, w: number): void {
   zones.push({ id: "upgrade", x, y: buttonY, w, h: 26, disabled, onClick: buyRecommendedUpgrade });
 }
 
-function drawSelectedActionDetail(action: CareerAction, x: number, y: number, w: number, h: number): void {
-  const accent = actionAccent(action.id);
-  pixelRect(x, y, w, h, "#111319");
-  pixelRect(x, y, 5, h, accent);
-  drawActionIcon(action.id, x + 18, y + 18, accent);
-  drawText("Plan", x + 58, y + 19, 10, palette.muted);
-  drawTextLine(action.label, x + 58, y + 40, 17, action.disabledReason ? "#858891" : palette.ink, w - 76);
-  drawTextLine(action.detail, x + 18, y + 62, 10, palette.muted, w - 36);
-  drawTextLine(action.disabledReason ?? action.cost, x + 18, y + h - 10, 10, action.disabledReason ? palette.red : palette.yellow, 136);
-  drawTextLine(action.rhythm, x + 164, y + h - 10, 10, rhythmColor(action.rhythm), w - 182);
-}
 
-function drawActionListItem(
-  action: CareerAction,
-  index: number,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  focused: boolean,
-): void {
-  const disabled = Boolean(action.disabledReason);
-  const accent = disabled ? "#5b5f68" : actionAccent(action.id);
-  const hot = pointer.x >= x && pointer.x <= x + w && pointer.y >= y && pointer.y <= y + h;
-  const fill = disabled
-    ? "rgba(19,21,27,0.74)"
-    : focused
-      ? "rgba(48,56,67,0.96)"
-      : hot
-        ? "rgba(39,45,55,0.96)"
-        : "rgba(18,20,26,0.88)";
-
-  pixelRect(x + 3, y + 3, w, h, "rgba(0,0,0,0.24)");
-  pixelRect(x, y, w, h, fill);
-  pixelRect(x, y, 4, h, accent);
-  drawTextLine(String(index + 1), x + 13, y + 19, 10, disabled ? "#70737b" : palette.muted, 18);
-  drawTextLine(actionShortLabel(action.id, action.label), x + 36, y + 19, 12, disabled ? "#737781" : palette.ink, 112);
-  drawTextLine(disabled ? "bloq" : formatDuration(action.durationHours), x + w - 88, y + 19, 10, disabled ? "#686b72" : palette.yellow, 42);
-  if (!disabled) {
-    drawTextLine(rhythmShort(action.rhythm), x + w - 48, y + 19, 10, rhythmColor(action.rhythm), 40);
-  }
-  if (focused) {
-    pixelRect(x + w - 7, y + 7, 3, h - 14, palette.yellow);
-  }
-  zones.push({ id: `action-${action.id}`, x, y, w, h, disabled, onClick: action.run });
-}
 
 function actionShortLabel(id: string, fallback: string): string {
   switch (id) {
@@ -2621,17 +1397,6 @@ function drawBattleChoiceCard(
   zones.push({ id: `battle-${choice.id}`, x, y, w, h, disabled: false, onClick: () => resolveBattle(choice) });
 }
 
-function drawBattleLog(): void {
-  const battle = state.battle;
-  if (!battle || battle.results.length === 0) return;
-  const recent = battle.results.slice(-2);
-  drawPanel(632, 88, 248, 86);
-  drawText("Ultimas barras", 654, 116, 16, palette.ink);
-  recent.forEach((result, index) => {
-    const winner = result.player >= result.rival ? "tuya" : "rival";
-    drawTextLine(`R${result.round}: ${winner} ${result.player}-${result.rival}`, 654, 142 + index * 20, 12, palette.muted, 198);
-  });
-}
 
 function lastBattleNote(): string {
   const battle = state.battle;
@@ -3161,12 +1926,6 @@ function drawMicStand(x: number, y: number): void {
   pixelRect(x - 6, y - 6, 34, 10, palette.yellow);
 }
 
-function drawVinylLogo(x: number, y: number): void {
-  pixelRect(x - 56, y - 56, 112, 112, "#111217");
-  pixelRect(x - 40, y - 40, 80, 80, palette.panel);
-  pixelRect(x - 16, y - 16, 32, 32, palette.yellow);
-  pixelRect(x - 4, y - 4, 8, 8, palette.black);
-}
 
 function drawBox3d(
   x: number,
@@ -3279,43 +2038,8 @@ function button(
   zones.push({ id, x, y, w, h, disabled, onClick });
 }
 
-function drawResourceLine(x: number, y: number, label: string, value: number | string, color: string): void {
-  pixelRect(x, y - 12, 9, 9, color);
-  drawText(label, x + 16, y, 14, palette.muted);
-  drawText(String(value), x + 140, y, 14, palette.ink);
-}
 
-function drawDayProgress(x: number, y: number, w: number, h: number): void {
-  pixelRect(x, y, w, h, "#0d0f13");
-  const dawn = Math.floor(w * 0.25);
-  const dusk = Math.floor(w * 0.75);
-  pixelRect(x, y, dawn, h, "#1d2230");
-  pixelRect(x + dawn, y, dusk - dawn, h, "#594f32");
-  pixelRect(x + dusk, y, w - dusk, h, "#171b28");
-  for (let i = 0; i <= 24; i += 4) {
-    const tickX = x + Math.floor((i / 24) * w);
-    pixelRect(tickX, y - 2, 1, h + 4, "rgba(243,242,233,0.22)");
-  }
-  const markerX = x + Math.floor((state.hour / 24) * w);
-  pixelRect(markerX - 3, y - 4, 7, h + 8, state.hour >= 7 && state.hour < 20 ? palette.yellow : palette.blue);
-  drawText(state.hour >= 7 && state.hour < 20 ? "dia" : "noche", x + w - 42, y + 8, 10, palette.muted);
-}
 
-function drawSmallMeter(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  value: number,
-  max: number,
-  color: string,
-  label: string,
-): void {
-  drawText(label, x, y - 4, 9, palette.muted);
-  pixelRect(x, y, w, h, "rgba(8,9,12,0.92)");
-  pixelRect(x, y, Math.floor((clamp(value, 0, max) / max) * w), h, color);
-  pixelRect(x, y, w, 1, "rgba(255,255,255,0.2)");
-}
 
 function drawTimeAdvanceFx(): void {
   if (!timeFx) return;
@@ -3326,8 +2050,8 @@ function drawTimeAdvanceFx(): void {
   const w = 510;
   pixelRect(x, y, w, 28, "rgba(18,20,26,0.94)");
   pixelRect(x, y, 4, 28, palette.yellow);
-  drawTextLine(`Pasaron ${formatDuration(timeFx.hours)} · ${timeFx.label}`, x + 14, y + 18, 11, palette.ink, 232);
-  drawText(`${formatHour(timeFx.fromHour)} -> ${formatHour(timeFx.toHour)}`, x + 260, y + 18, 10, palette.muted);
+  drawTextLine(`Paso ${formatDuration(timeFx.blocks)} · ${timeFx.label}`, x + 14, y + 18, 11, palette.ink, 232);
+  drawText(`${formatBlock(timeFx.fromBlock)} -> ${formatBlock(timeFx.toBlock)}`, x + 260, y + 18, 10, palette.muted);
   pixelRect(x + 358, y + 11, 110, 6, "#0d0f13");
   pixelRect(x + 358, y + 11, Math.floor(110 * eased), 6, palette.yellow);
   const markerX = x + 358 + Math.floor(110 * eased);
@@ -3337,20 +2061,7 @@ function drawTimeAdvanceFx(): void {
   }
 }
 
-function drawResourcePill(x: number, y: number, label: string, value: number | string, color: string): void {
-  pixelRect(x, y - 17, 114, 24, "#121419");
-  pixelRect(x, y - 17, 4, 24, color);
-  drawTextLine(label, x + 12, y - 1, 10, palette.muted, 62);
-  drawTextLine(String(value), x + 78, y - 1, 13, palette.ink, 30);
-}
 
-function drawMiniStatBar(x: number, y: number, label: string, value: number, color: string): void {
-  drawTextLine(label, x, y, 11, palette.muted, 78);
-  pixelRect(x, y + 7, 82, 8, "#0e1014");
-  const fill = Math.floor((clamp(value, 0, 20) / 20) * 82);
-  pixelRect(x, y + 7, fill, 8, color);
-  drawText(`${value}`, x + 94, y + 15, 11, palette.ink);
-}
 
 function drawMeter(
   x: number,
@@ -3597,13 +2308,13 @@ function handleKey(event: KeyboardEvent): void {
     }
     if (isConfirm) {
       const action = actions[actionFocus];
-      if (action && !action.disabledReason) action.run();
+      if (action && !action.disabledReason) runCareerAction(action.id);
       event.preventDefault();
       return;
     }
     if (Number.isInteger(number) && number > 0) {
       const action = actions[number - 1];
-      if (action && !action.disabledReason) action.run();
+      if (action && !action.disabledReason) runCareerAction(action.id);
     }
     return;
   }
@@ -3677,7 +2388,7 @@ function renderGameToText(): string {
           key: String(index + 1),
           id: action.id,
           label: action.label,
-          durationHours: action.durationHours,
+          durationBlocks: action.durationBlocks,
           cost: action.cost,
           rhythm: action.rhythm,
           disabled: Boolean(action.disabledReason),
@@ -3712,8 +2423,8 @@ function renderGameToText(): string {
       level: state.level,
       week: state.week,
       day: state.day,
-      hour: state.hour,
-      timeLabel: formatHour(state.hour),
+      block: state.block,
+      timeLabel: formatBlock(state.block),
       xp: state.xp,
       xpNext: state.xpNext,
       energy: state.energy,
@@ -3738,9 +2449,9 @@ function renderGameToText(): string {
     timeFx: timeFx
       ? {
           label: timeFx.label,
-          hours: timeFx.hours,
-          from: formatHour(timeFx.fromHour),
-          to: formatHour(timeFx.toHour),
+          blocks: timeFx.blocks,
+          from: formatBlock(timeFx.fromBlock),
+          to: formatBlock(timeFx.toBlock),
           daysPassed: timeFx.daysPassed,
         }
       : null,
