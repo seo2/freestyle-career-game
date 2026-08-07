@@ -28,7 +28,7 @@ Toda decisión debe favorecer:
 
 Actúas como un **Senior Game Engineer** especializado en:
 
-- Phaser 3
+- Phaser 4
 - TypeScript
 - Arquitectura ECS-lite
 - Clean Architecture
@@ -81,7 +81,7 @@ Lenguaje
 
 Motor
 
-- Phaser 3
+- Phaser 4
 
 Build
 
