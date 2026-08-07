@@ -18,20 +18,24 @@ Simulador RPG de carrera de un MC/freestyler (pixel-art, web). El jugador admini
 ```bash
 npm run dev        # Vite dev server (host 0.0.0.0)
 npm run build      # tsc (estricto) + vite build
+npm run test       # Vitest (suite de systems/managers/data)
+npm run lint       # ESLint (Math.random prohibido; unused = error)
 npm run preview    # servir dist/
+node scripts/capture-traces.mjs <outDir>   # trazas deterministas de juego (arnés de paridad)
+node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
 ```
 
-No hay tests todavía; la Fase 1 del plan introduce Vitest (`npx vitest run`).
+## Arquitectura (Fases 1–2 completas)
 
-## Estado actual de la arquitectura
-
-- **Todo el juego vive en `src/main.ts` (~3.800 líneas)**: canvas 2D a 960×540, modos `start | career | battle`, vistas de carrera (`base/calendar/map/training/social/work/shop/stats`), reloj semana/día/hora, batallas por rondas, upgrades, metas.
-- Guardado en `localStorage`, clave `freestyle-career-save-v1`; carga pasa por `normalizeLoadedState()`.
-- Assets runtime en `public/assets/` (capas del menú, logo, fondos de escena). Casi todo lo demás se dibuja proceduralmente — esa es la principal deuda visual.
-- PWA: `public/manifest.webmanifest` + `public/sw.js`.
-- Hooks de test deterministas expuestos en `window`: `render_game_to_text()` (estado como texto) y `advanceTime(ms)`. Mantenerlos funcionando en cualquier refactor.
-
-**Arquitectura objetivo** (Fases 1–2 del plan, estructura completa en `AGENTS.md`): Systems puros y testeables (`src/systems/` + `src/core/` GameState + `src/data/` configs + `src/services/` RandomService) y escenas Phaser 3 solo-presentación (`src/scenes/`). Al tocar lógica de juego, moverla hacia systems en vez de engordar `main.ts`.
+- **Motor: Phaser 4** (960×540, pixelArt, FIT). `src/main.ts` es un bootstrap de ~58 líneas.
+- **Reglas** en `src/systems/` (Calendar, Progression, Battle, Store, Training, Social, Jobs, Actions): funciones puras sobre `GameState`, testeadas con Vitest. Ver convenciones y desviaciones documentadas en `src/systems/README.md`.
+- **Balance/data**: contenido en `src/data/`, todos los números de tuning en `src/data/config/*Config.ts` (cero números mágicos en systems).
+- **Orquestación**: `src/managers/GameController.ts` (estado vivo, RNG con seed vía `RandomService`, save, comandos, eventos) + `src/events/EventBus.ts` + `src/game/InputRouter.ts` (teclado global) + `src/game/SceneDirector.ts`.
+- **Presentación**: escenas en `src/scenes/` (Boot/Menu/CreateMc/Career+careerViews/Battle) — solo muestran y envían comandos al controller; assets siempre vía `src/game/AssetRegistry.ts`.
+- **Tiempo**: día en 3 bloques (Mañana/Tarde/Noche). **Etapas**: 7 (pieza→leyenda).
+- Guardado en `localStorage` clave `freestyle-career-save-v2` (migración automática desde v1 en `SaveManager`); PWA: `public/manifest.webmanifest` + `public/sw.js`.
+- Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas (`output/traces/baseline-v2/` es la referencia vigente).
+- Personajes/props aún en placeholders: la Fase 3 los reemplaza con sprites reales de `reference/`.
 
 ## Reglas del proyecto
 

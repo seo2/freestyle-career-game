@@ -15,7 +15,7 @@ Lo que existe funciona pero no se siente como el juego de los mockups:
 
 ## Decisión técnica
 
-**Phaser 3 + TypeScript + Vite, con la arquitectura de `AGENTS.md`:** Scenes (presentación) → Managers (coordinación) → Systems (toda la lógica) → GameState (única fuente de verdad), configuración en `/data` (cero números mágicos), comunicación por eventos, `RandomService` con seed (nunca `Math.random()` directo), todo serializable y testeable sin Phaser (Vitest). Lint con ESLint + Prettier.
+**Phaser 4 + TypeScript + Vite, con la arquitectura de `AGENTS.md`** (Fase 2 se construyó sobre Phaser 3.90; migrado a Phaser 4.2 el 2026-08-07 por decisión del owner tras la salida estable de abril 2026 — trazas byte-idénticas como compuerta): Scenes (presentación) → Managers (coordinación) → Systems (toda la lógica) → GameState (única fuente de verdad), configuración en `/data` (cero números mágicos), comunicación por eventos, `RandomService` con seed (nunca `Math.random()` directo), todo serializable y testeable sin Phaser (Vitest). Lint con ESLint + Prettier.
 
 Decisiones de diseño ya registradas (detalle en `docs/GDD.md`): tiempo por **bloques del día**, **web primero** (Steam vs. Capacitor se decide en beta), **7 etapas** (con Leyenda), mockups mandan en lo visual.
 
@@ -40,7 +40,7 @@ Las fases de abajo son los **hitos de entrega** (incluyen trabajo visual/assets 
 - Tests de los sistemas núcleo: avance de calendario, costos de energía, resolución de batalla, anti-repetición, desbloqueo de etapas, save/load round-trip.
 - **Criterio de cierre:** build + lint + tests verdes; el juego se ve igual y las partidas guardadas migran sin romperse.
 
-### Fase 2 — Cascarón Phaser 3 ✅ (2026-08-07)
+### Fase 2 — Cascarón Phaser (hoy Phaser 4) ✅ (2026-08-07)
 
 - Instalar `phaser`; crear `src/scenes/`: `BootScene` (preload + AssetRegistry), `MenuScene`, `CreateMcScene`, `CareerScene`, `BattleScene`; componentes UI comunes en `src/ui/` (panel pixel 9-slice, botón, barra, tarjeta).
 - Las escenas solo muestran, escuchan eventos y envían acciones a los systems (regla AGENTS.md).

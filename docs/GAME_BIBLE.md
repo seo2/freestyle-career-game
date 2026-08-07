@@ -3,7 +3,7 @@
 > Freestyle Game
 > Version: 0.1
 > Project Owner: Seo2
-> Engine Target: Phaser 3 + TypeScript
+> Engine Target: Phaser 4 + TypeScript
 > Architecture: ECS-lite + State Machine
 > Genre: Career RPG + Time Management + Strategy + Freestyle Battles
 

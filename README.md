@@ -13,7 +13,7 @@ El MVP es una PWA local: corre en navegador, guarda en `localStorage` y queda pr
 
 ## Stack
 
-TypeScript + Vite + canvas 2D (960×540). El plan de trabajo migra el render a **Phaser 3** con un núcleo de reglas puro y testeable — ver [docs/PLAN.md](docs/PLAN.md).
+TypeScript + Vite + **Phaser 4** (960×540, pixel-art). Núcleo de reglas puro y testeable en `src/systems` + escenas solo-presentación en `src/scenes` — ver [docs/PLAN.md](docs/PLAN.md).
 
 ## Desarrollo
 
@@ -52,7 +52,7 @@ npm run preview
 ## Roadmap resumido
 
 1. Extraer núcleo de reglas puro + tests (sin cambio visual).
-2. Migrar render a Phaser 3 (escenas: menú, crear MC, carrera, batalla).
+2. ✅ Migrar render a Phaser 4 (escenas: menú, crear MC, carrera, batalla).
 3. Pipeline de sprites reales desde `reference/` (adiós dibujo procedural).
 4. Pantallas 1:1 con los mockups.
 5. Batalla v2: timer, anti-repetición, arquetipos de rival, game feel.
