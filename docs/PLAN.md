@@ -40,7 +40,7 @@ Las fases de abajo son los **hitos de entrega** (incluyen trabajo visual/assets 
 - Tests de los sistemas núcleo: avance de calendario, costos de energía, resolución de batalla, anti-repetición, desbloqueo de etapas, save/load round-trip.
 - **Criterio de cierre:** build + lint + tests verdes; el juego se ve igual y las partidas guardadas migran sin romperse.
 
-### Fase 2 — Cascarón Phaser 3
+### Fase 2 — Cascarón Phaser 3 ✅ (2026-08-07)
 
 - Instalar `phaser`; crear `src/scenes/`: `BootScene` (preload + AssetRegistry), `MenuScene`, `CreateMcScene`, `CareerScene`, `BattleScene`; componentes UI comunes en `src/ui/` (panel pixel 9-slice, botón, barra, tarjeta).
 - Las escenas solo muestran, escuchan eventos y envían acciones a los systems (regla AGENTS.md).
