@@ -9,5 +9,5 @@ output/
 .DS_Store
 *.log
 
-.impeccable.md
-progress.md
+# External skill repo cloned locally (has its own .git) — not part of the game
+gauntlet-loop/
