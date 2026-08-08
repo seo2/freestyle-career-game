@@ -12,7 +12,7 @@ import { addPanel, addRect, addText } from "../ui/kit";
 import {
   CANVAS_W,
   addLogoLockup,
-  addMcPlaceholder,
+  addMcFigure,
   addStartButton,
   buildStartBackdrop,
   cloudDriftOffset,
@@ -71,7 +71,7 @@ export class CreateMcScene extends Phaser.Scene {
     addText(this, layer, 44, 40, "2. Crear MC", 30, palette.ink);
     addPanel(this, layer, 38, 94, 884, 382);
     addLogoLockup(this, layer, 126, 128, 0.68);
-    addMcPlaceholder(this, layer, 254, 356, 1.82);
+    addMcFigure(this, layer, 254, 356, 1.82, 150);
     addRect(this, layer, 409, 112, 3, 334, palette.borderLo);
     addText(this, layer, 500, 141, "Nombre", 15, palette.ink);
     this.nameText = this.addInputBox(640, 130, 214, 42, nameFieldText(controller.state));

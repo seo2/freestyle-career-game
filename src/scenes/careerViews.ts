@@ -6,19 +6,24 @@
 //
 // Legacy y-coordinates are alphabetic text baselines; the kit uses top-left
 // origin, so every text call subtracts the font size from the legacy y.
-// Character/prop pixel art (drawMc, mic stand, speaker stacks, crates) is NOT
-// ported — compact placeholder blocks hold the layout until Fase 3 sprites.
+// The MC is the real sprite (Fase 3). Props the legacy engine drew by hand
+// (mic stand, speaker stacks, warehouse crates, the isometric city map) are
+// still block placeholders — listed in docs/ASSETS.md > Pendientes and rebuilt
+// in Fase 4 against the mockups.
 
 import type Phaser from "phaser";
 import { gameContext } from "../game/context";
+import { AssetRegistry, actionIconKey } from "../game/AssetRegistry";
 import { palette } from "../ui/palette";
 import {
   addButton,
+  addDisplayText,
   addHitZone,
   addMeter,
   addPanel,
   addRect,
   addSoftPanel,
+  addSpriteImage,
   addText,
   addTextBlock,
 } from "../ui/kit";
@@ -82,7 +87,8 @@ function line(ctx: ViewCtx, x: number, y: number, content: string, size: number,
 }
 
 function viewTitle(ctx: ViewCtx, title: string, detail: string): void {
-  line(ctx, 40, 118, title, 27, palette.ink);
+  // Screen headings are large enough for the arcade face.
+  addDisplayText(ctx.scene, ctx.layer, 40, 118 - 27, title, 27, palette.ink);
   line(ctx, 42, 142, detail, 11, palette.muted, 560);
 }
 
@@ -163,9 +169,20 @@ function actionIcon(ctx: ViewCtx, id: string, x: number, y: number, color: strin
   rect(ctx, x + 10, y + 11, 6, 6, "#0d0f13");
 }
 
-// Compact stand-in for the legacy procedural pixel MC (real sprites land in
-// Fase 3). Anchor matches legacy drawMc: (x, y) at hip level, feet ~25*s below.
-function mcPlaceholder(ctx: ViewCtx, x: number, y: number, s: number): void {
+// MC figure where the legacy screens drew drawMc(x, y, s): idle sprite with
+// feet on the legacy foot line (y + 25*s, ~110px tall at the common scales);
+// the compact block placeholder stays as the missing-texture fallback.
+// The MC figure inside a panel: real sprite plus a grounding shadow (panels
+// have no floor art, so without it the sprite reads as floating).
+function mcFigure(ctx: ViewCtx, x: number, y: number, s: number): void {
+  const key = AssetRegistry.characters.mcIdle.key;
+  const feetY = y + 25 * s;
+  if (ctx.scene.textures.exists(key)) {
+    rect(ctx, x - 22 * s, feetY - 4 * s, 44 * s, 5 * s, "#05070f", 0.55);
+    rect(ctx, x - 16 * s, feetY - 3 * s, 32 * s, 3 * s, "#000000", 0.5);
+    addSpriteImage(ctx.scene, ctx.layer, key, x, feetY, Math.round(92 * s), 0.5, 1);
+    return;
+  }
   rect(ctx, x - 26 * s, y + 20 * s, 52 * s, 7 * s, "#000000", 0.22);
   rect(ctx, x - 14 * s, y - 7 * s, 28 * s, 32 * s, palette.borderLo);
   rect(ctx, x - 20 * s, y - 40 * s, 40 * s, 37 * s, palette.panelAlt);
@@ -203,7 +220,12 @@ function renderCalendar(ctx: ViewCtx): void {
       addHitZone(ctx.scene, ctx.layer, x, y, cardW, 206, () => controller.runCareerAction(action.id));
     }
     line(ctx, x + 22, y + 34, day, 16, palette.ink);
-    actionIcon(ctx, action?.id ?? "rest", x + 47, y + 58, disabled ? "#555b6d" : actionAccent(action?.id ?? "rest"));
+    // Sprite pictogram for the day's action; procedural glyph as fallback.
+    const iconId = action?.id ?? "rest";
+    const iconKey = actionIconKey(iconId);
+    const iconImage = iconKey ? addSpriteImage(ctx.scene, ctx.layer, iconKey, x + 60, y + 71, 32, 0.5, 0.5, 34) : null;
+    if (iconImage) iconImage.setAlpha(disabled ? 0.5 : 1);
+    else actionIcon(ctx, iconId, x + 47, y + 58, disabled ? "#555b6d" : actionAccent(iconId));
     line(
       ctx,
       x + 18,
@@ -302,7 +324,7 @@ function renderTraining(ctx: ViewCtx): void {
   addPanel(ctx.scene, ctx.layer, 638, 150, 286, 310);
   line(ctx, 690, 196, "Entrenar cada dia", 18, palette.ink);
   line(ctx, 718, 226, "te hace mejor.", 18, palette.ink);
-  mcPlaceholder(ctx, 780, 342, 1.2);
+  mcFigure(ctx, 780, 342, 1.2);
   line(ctx, 680, 424, "1-7 entrena una stat", 12, palette.muted, 210);
 }
 
@@ -380,7 +402,7 @@ function socialPreview(ctx: ViewCtx, x: number, y: number, w: number, h: number)
   }
   rect(ctx, x + 14, y + 14, 36, 36, "#171a20");
   line(ctx, x + 62, y + 36, state.playerName, 12, palette.ink, 120);
-  mcPlaceholder(ctx, x + 142, y + 120, 0.72);
+  mcFigure(ctx, x + 142, y + 120, 0.72);
   rect(ctx, x + 12, y + h - 34, w - 24, 1, "#2d356d");
   line(ctx, x + 18, y + h - 14, "Nuevo freestyle en la plaza.", 10, palette.ink, w - 36);
 }
@@ -422,7 +444,7 @@ function warehouseScene(ctx: ViewCtx, x: number, y: number, w: number, h: number
   // Legacy sketched crates + the pixel MC; a flat panel plus the compact
   // placeholder holds the composition until real sprites land (Fase 3).
   rect(ctx, x, y, w, h, "#323948");
-  mcPlaceholder(ctx, x + 170, y + 156, 1.05);
+  mcFigure(ctx, x + 170, y + 156, 1.05);
   line(ctx, x + 164, y + 36, "Enfoque + disciplina", 13, palette.ink, 130);
 }
 
@@ -486,7 +508,7 @@ function renderStats(ctx: ViewCtx): void {
   viewTitle(ctx, "13. Estadisticas", "Perfil del artista y metricas de carrera.");
   addPanel(ctx.scene, ctx.layer, 32, 152, 244, 312);
   line(ctx, 112, 184, "Perfil", 16, palette.ink);
-  mcPlaceholder(ctx, 154, 316, 1.28);
+  mcFigure(ctx, 154, 316, 1.28);
   line(ctx, 80, 394, state.playerName, 20, palette.yellow, 148);
   line(ctx, 66, 424, `Nivel ${state.level} · ${stageTitle(state.stage)}`, 12, palette.ink, 180);
   addMeter(ctx.scene, ctx.layer, 66, 444, 168, 10, state.xp, state.xpNext, palette.blue);
