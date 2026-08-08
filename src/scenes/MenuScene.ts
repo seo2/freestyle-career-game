@@ -11,7 +11,7 @@ import { addHitZone, addRect, addText } from "../ui/kit";
 import {
   CANVAS_W,
   addLogoLockup,
-  addMcPlaceholder,
+  addMcFigure,
   addMenuOverlay,
   buildStartBackdrop,
   cloudDriftOffset,
@@ -54,7 +54,7 @@ export class MenuScene extends Phaser.Scene {
     const { controller } = gameContext();
     this.layer.removeAll(true);
     addLogoLockup(this, this.layer, 244, 44, 1.9);
-    addMcPlaceholder(this, this.layer, 292, 432, 2.05);
+    addMcFigure(this, this.layer, 292, 432, 2.05, 130);
     this.menuButton(368, 224, "NUEVA CARRERA", () => controller.newCareerDraft(), true);
     this.menuButton(368, 278, "CARGAR PARTIDA", () => controller.continueCareer());
     // The legacy options/credits/exit entries only pushed an informational

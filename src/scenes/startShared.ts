@@ -7,7 +7,7 @@
 import Phaser from "phaser";
 import { AssetRegistry } from "../game/AssetRegistry";
 import { palette } from "../ui/palette";
-import { addHitZone, addRect, addText } from "../ui/kit";
+import { addHitZone, addRect, addSpriteImage, addText } from "../ui/kit";
 
 export const CANVAS_W = 960;
 export const CANVAS_H = 540;
@@ -275,15 +275,30 @@ export function addLogoLockup(scene: Phaser.Scene, layer: Phaser.GameObjects.Con
   addRect(scene, layer, x + 84 * scale, y + 102 * scale, 126 * scale, 3 * scale, palette.blue);
 }
 
-// --- Player placeholder -------------------------------------------------------
+// --- Player figure --------------------------------------------------------------
 
-// Compact stand-in for the MC where the legacy screens drew drawMc(x, y, s).
-// The procedural pixel performer is intentionally NOT ported: real character
-// sprites arrive in Fase 3.
-export function addMcPlaceholder(scene: Phaser.Scene, layer: Phaser.GameObjects.Container, x: number, y: number, scale: number): void {
+// MC where the legacy screens drew drawMc(x, y, s): the idle sprite with feet
+// on the legacy foot line (y + 22*scale), scaled to spriteHeight. The compact
+// 8-rect pixel placeholder stays as the missing-texture fallback.
+export function addMcFigure(
+  scene: Phaser.Scene,
+  layer: Phaser.GameObjects.Container,
+  x: number,
+  y: number,
+  scale: number,
+  spriteHeight = Math.round(79 * scale),
+): void {
   const px = (dx: number, dy: number, w: number, h: number, color: string, alpha = 1): void => {
     addRect(scene, layer, x + dx * scale, y + dy * scale, w * scale, h * scale, color, alpha);
   };
+  // Real sprite: narrow contact shadow drawn first so it sits under the shoes.
+  // The wider slab is only for the block placeholder (bigger silhouette).
+  const feetY = y + 22 * scale;
+  if (scene.textures.exists(AssetRegistry.characters.mcIdle.key)) {
+    addRect(scene, layer, x - 15 * scale, feetY - 3 * scale, 30 * scale, 4 * scale, "#000000", 0.3);
+    addSpriteImage(scene, layer, AssetRegistry.characters.mcIdle.key, x, feetY, spriteHeight, 0.5, 1);
+    return;
+  }
   px(-30, 20, 60, 7, "#000000", 0.25);
   px(-11, -57, 22, 6, palette.red);
   px(-9, -51, 18, 16, "#f0bd82");

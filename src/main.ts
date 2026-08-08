@@ -19,21 +19,30 @@ const controller = new GameController(localStorage);
 const input = new InputRouter(controller);
 setGameContext({ controller, input });
 
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: "game-root",
-  width: 960,
-  height: 540,
-  backgroundColor: hex(palette.deep),
-  pixelArt: true,
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene],
-});
+// The arcade display face must resolve before any scene measures text, or
+// Phaser caches metrics for the fallback font. Boot is gated on it, with a
+// timeout so a missing font file can never brick the game.
+const fontsReady = Promise.race([
+  document.fonts.load('16px "Press Start 2P"'),
+  new Promise((resolve) => setTimeout(resolve, 1500)),
+]);
 
-new SceneDirector(game, controller);
+fontsReady.then(() => {
+  const game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: "game-root",
+    width: 960,
+    height: 540,
+    backgroundColor: hex(palette.deep),
+    pixelArt: true,
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene],
+  });
+  new SceneDirector(game, controller);
+});
 
 // Deterministic test hooks (project rule: keep working across refactors).
 window.render_game_to_text = () => controller.renderGameToText();

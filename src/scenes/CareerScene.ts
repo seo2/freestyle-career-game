@@ -7,9 +7,9 @@
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
-import { stageBackdropKey } from "../game/AssetRegistry";
+import { AssetRegistry, actionIconKey, stageBackdropKey } from "../game/AssetRegistry";
 import { palette } from "../ui/palette";
-import { addHitZone, addRect, addSoftPanel, addText } from "../ui/kit";
+import { addHitZone, addRect, addSoftPanel, addSpriteImage, addText } from "../ui/kit";
 import { currentStage, maxEnergy } from "../core/derived";
 import { getCareerGoals } from "../systems/ProgressionSystem";
 import { formatBlock, formatDuration } from "../systems/CalendarSystem";
@@ -126,7 +126,7 @@ export class CareerScene extends Phaser.Scene {
     if (view === "base") {
       const hasBackdrop = this.drawStageBackdrop(state);
       this.drawSceneFrame(state, hasBackdrop);
-      this.drawMcPlaceholder(hasBackdrop);
+      this.drawMcFigure(hasBackdrop);
       this.drawHeader(state);
       this.drawStatusStrip(state);
       this.drawDossier(684, 92, 228, 232, state);
@@ -190,10 +190,11 @@ export class CareerScene extends Phaser.Scene {
     baselineText(this, this.layer, 56, 302, place, 11, palette.muted, 230);
   }
 
-  // Compact stand-in for the procedural MC (real sprite lands in Fase 3):
-  // 24x36 body plus a cap rect, feet on the legacy floor line (y=312).
-  private drawMcPlaceholder(hasBackdrop: boolean): void {
+  // Standing MC sprite, feet on the legacy floor line (y=312). Falls back to
+  // the compact placeholder rects when the texture is missing.
+  private drawMcFigure(hasBackdrop: boolean): void {
     const cx = hasBackdrop ? 392 : 284;
+    if (addSpriteImage(this, this.layer, AssetRegistry.characters.mcIdle.key, cx, 312, 120, 0.5, 1)) return;
     addRect(this, this.layer, cx - 12, 276, 24, 36, "#111318");
     addRect(this, this.layer, cx - 12, 268, 24, 8, palette.red);
   }
@@ -202,12 +203,14 @@ export class CareerScene extends Phaser.Scene {
 
   private drawHeader(state: GameState): void {
     this.drawHudFrame(12, 10, 936, 76);
-    // Bust well; the bust itself is a placeholder initial (sprite in Fase 3).
+    // Bust well: MC bust sprite centered inside; placeholder initial fallback.
     addRect(this, this.layer, 28, 18, 62, 60, "#070b1e");
     addRect(this, this.layer, 28, 18, 62, 4, palette.yellow);
     addRect(this, this.layer, 28, 74, 62, 3, "#050715");
-    const initial = (state.playerName.trim() || "MC").charAt(0).toUpperCase();
-    addText(this, this.layer, 59, 48, initial, 26, palette.yellow).setOrigin(0.5);
+    if (!addSpriteImage(this, this.layer, AssetRegistry.characters.mcBust.key, 59, 48, 52)) {
+      const initial = (state.playerName.trim() || "MC").charAt(0).toUpperCase();
+      addText(this, this.layer, 59, 48, initial, 26, palette.yellow).setOrigin(0.5);
+    }
 
     baselineText(this, this.layer, 112, 34, "ENERGIA", 16, palette.ink);
     baselineText(this, this.layer, 270, 35, `${state.energy}/${maxEnergy(state)}`, 16, palette.ink, 86);
@@ -271,7 +274,14 @@ export class CareerScene extends Phaser.Scene {
     addRect(this, this.layer, x, y, 3, h, "#5660b5");
     addRect(this, this.layer, x + w - 3, y, 3, h, "#1c2359");
 
-    if (icon === "cash") {
+    const resIconKeys = {
+      cash: AssetRegistry.icons.resCash.key,
+      fans: AssetRegistry.icons.resFans.key,
+      respect: AssetRegistry.icons.resRespect.key,
+    } as const;
+    if (addSpriteImage(this, this.layer, resIconKeys[icon], x + 34, y + 27, 32, 0.5, 0.5, 32)) {
+      // Sprite icon drawn; skip the procedural glyph fallback below.
+    } else if (icon === "cash") {
       baselineText(this, this.layer, x + 12, y + 40, "$", 36, color);
       addRect(this, this.layer, x + 34, y + 5, 3, 40, "#1d6f3c");
     } else if (icon === "fans") {
@@ -386,9 +396,12 @@ export class CareerScene extends Phaser.Scene {
       if (selected) addRect(this, this.layer, x - 2, y - 2, w + 4, h + 4, palette.yellow);
       addRect(this, this.layer, x, y, w, h, "#111836");
       addRect(this, this.layer, x, y, w, 3, item.accent);
-      // Simplified icon block (legacy pictograms return as sprites in Fase 3).
-      addRect(this, this.layer, x + 18, y + 20, 30, 30, item.accent);
-      addRect(this, this.layer, x + 22, y + 24, 22, 22, "#0b1026");
+      // Sprite pictogram in the tile's icon slot; drawn block as fallback.
+      const iconKey = item.id === "map" ? AssetRegistry.icons.actionExit.key : actionIconKey(item.id);
+      if (!iconKey || !addSpriteImage(this, this.layer, iconKey, x + 33, y + 35, 32, 0.5, 0.5, 34)) {
+        addRect(this, this.layer, x + 18, y + 20, 30, 30, item.accent);
+        addRect(this, this.layer, x + 22, y + 24, 22, 22, "#0b1026");
+      }
       baselineText(this, this.layer, x + 58, y + 46, item.label, 16, palette.ink, 92);
       addHitZone(this, this.layer, x, y, w, h, () => {
         if (item.runAction) gameContext().controller.runCareerAction(item.runAction);

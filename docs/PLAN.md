@@ -47,7 +47,7 @@ Las fases de abajo son los **hitos de entrega** (incluyen trabajo visual/assets 
 - Mantener los hooks de test (`render_game_to_text`, `advanceTime`); retirar el render canvas legado al final.
 - **Criterio de cierre:** flujo completo (menú → crear MC → carrera → batalla → volver) jugable en Phaser con teclado y mouse/touch, sin regresiones de guardado.
 
-### Fase 3 — Pipeline de assets reales
+### Fase 3 — Pipeline de assets reales ✅ (2026-08-07)
 
 - Recortar de `reference/` (o regenerar con IA cuando falte transparencia): personajes (MC con variantes de aspecto/piel, rivales por arquetipo), iconos (acciones, recursos, cartas), marcos/paneles/botones 9-slice, fondos por etapa, multitud, props; fuente pixel (bitmap font).
 - Organizar en `public/assets/` por dominio (`ui/`, `characters/`, `scenes/`, `icons/`); atlas donde convenga; **todas las rutas vía AssetRegistry** (regla AGENTS.md).

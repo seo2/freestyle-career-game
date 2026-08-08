@@ -5,8 +5,26 @@
 import Phaser from "phaser";
 import { hex, palette } from "./palette";
 
+// Body text keeps the system monospace stack the whole layout was measured
+// against. VT323 was tried as the body face in Fase 3 and reverted: at the
+// 10-14px sizes this UI uses it drops strokes ("SEM 1.1" rendered as
+// "SEN :.1"), a legibility regression no size tweak fixed. Press Start 2P is
+// used only where the type is large enough to stay crisp (see displayStyle);
+// re-tuning the layout for a chunky pixel body face belongs to Fase 4, where
+// every screen is rebuilt against its mockup.
 export const FONT_FAMILY =
   'ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+export const DISPLAY_FONT_FAMILY = '"Press Start 2P", ' + FONT_FAMILY;
+
+// Press Start 2P has no descender room and runs ~30% wider per glyph, so
+// display text is stepped down to keep the legacy boxes.
+const DISPLAY_SIZE_RATIO = 0.7;
+
+// Phaser sizes a Text object's canvas from font metrics and rounds down, which
+// shaves the last pixel row off glyphs that reach the baseline ("HYPE" rendered
+// as "HYPF"). A small padding gives every glyph room; addText subtracts it back
+// from the position so nothing moves on screen.
+export const TEXT_PAD = 2;
 
 export function textStyle(
   size: number,
@@ -17,9 +35,43 @@ export function textStyle(
     fontFamily: FONT_FAMILY,
     fontSize: `${size}px`,
     color,
-    resolution: 2,
+    resolution: 1,
+    padding: { x: TEXT_PAD, y: TEXT_PAD },
     ...extra,
   };
+}
+
+// Arcade face for big headings only (>= ~20px): screen titles, RONDA label,
+// the stimulus keyword. Anything smaller must use textStyle.
+export function displayStyle(
+  size: number,
+  color: string,
+  extra: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {},
+): Phaser.Types.GameObjects.Text.TextStyle {
+  return {
+    fontFamily: DISPLAY_FONT_FAMILY,
+    fontSize: `${Math.round(size * DISPLAY_SIZE_RATIO)}px`,
+    color,
+    resolution: 1,
+    padding: { x: TEXT_PAD, y: TEXT_PAD },
+    ...extra,
+  };
+}
+
+// Big heading helper: same signature as addText, arcade face.
+export function addDisplayText(
+  scene: Phaser.Scene,
+  layer: Phaser.GameObjects.Container,
+  x: number,
+  y: number,
+  content: string,
+  size: number,
+  color: string,
+  extra: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {},
+): Phaser.GameObjects.Text {
+  const text = scene.add.text(x - TEXT_PAD, y - TEXT_PAD, content, displayStyle(size, color, extra));
+  layer.add(text);
+  return text;
 }
 
 export function addText(
@@ -32,7 +84,7 @@ export function addText(
   color: string,
   extra: Partial<Phaser.Types.GameObjects.Text.TextStyle> = {},
 ): Phaser.GameObjects.Text {
-  const text = scene.add.text(x, y, content, textStyle(size, color, extra));
+  const text = scene.add.text(x - TEXT_PAD, y - TEXT_PAD, content, textStyle(size, color, extra));
   layer.add(text);
   return text;
 }
@@ -147,6 +199,32 @@ export function addButton(
     body.setInteractive({ useHandCursor: true });
     body.on("pointerdown", onClick);
   }
+}
+
+// Sprite image scaled to a target display height (aspect preserved), placed at
+// a whole-pixel anchor. Returns null when the texture is missing so callers
+// can keep their procedural fallback (Fase 3 asset wiring rule).
+export function addSpriteImage(
+  scene: Phaser.Scene,
+  layer: Phaser.GameObjects.Container,
+  key: string,
+  x: number,
+  y: number,
+  displayHeight: number,
+  originX = 0.5,
+  originY = 0.5,
+  maxWidth = 0,
+): Phaser.GameObjects.Image | null {
+  if (!scene.textures.exists(key)) return null;
+  const image = scene.add.image(Math.round(x), Math.round(y), key).setOrigin(originX, originY);
+  if (image.height > 0) {
+    // Contain inside the box when a maxWidth is given, so icons of different
+    // aspect ratios (wide dumbbell vs narrow phone) read at the same weight.
+    const scale = maxWidth > 0 ? Math.min(displayHeight / image.height, maxWidth / image.width) : displayHeight / image.height;
+    image.setScale(scale);
+  }
+  layer.add(image);
+  return image;
 }
 
 // Invisible interactive zone over custom-drawn content (legacy zones[]).

@@ -6,14 +6,16 @@
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
-import { stageBackdropKey } from "../game/AssetRegistry";
+import { AssetRegistry, battleBackdropKey, battleChoiceIconKey } from "../game/AssetRegistry";
 import { hex, palette } from "../ui/palette";
 import {
   addButton,
+  addDisplayText,
   addHitZone,
   addRect,
   addPanel,
   addSoftPanel,
+  addSpriteImage,
   addText,
   addTextBlock,
 } from "../ui/kit";
@@ -78,8 +80,11 @@ export class BattleScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(hex(palette.deep));
     this.buildBackdrop();
-    this.addPerformer(160, 302, "mc");
-    this.addPerformer(804, 302, "rival");
+    // Both performers stand on the plaza's pavement circle (the same ground
+    // plane, like the battle mockup), clear of the props on the terrace steps,
+    // of the stimulus card (x=338..622) and of the decision panel (y=324).
+    this.addPerformer(196, 320, "mc");
+    this.addPerformer(706, 316, "rival");
 
     this.layer = this.add.container(0, 0);
     const subs = [
@@ -114,7 +119,7 @@ export class BattleScene extends Phaser.Scene {
 
   private buildBackdrop(): void {
     const backdrop = this.add.container(0, 0);
-    const key = stageBackdropKey(gameContext().controller.state.stage);
+    const key = battleBackdropKey(gameContext().controller.state.stage);
     if (this.textures.exists(key)) {
       const image = this.add.image(W / 2, H / 2, key);
       image.setScale(Math.max(W / image.width, H / image.height));
@@ -129,9 +134,17 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  // Compact placeholder performers (real sprites arrive in Fase 3): a 28x44
-  // rounded body with a cap and a mic dot, bobbing gently in place.
+  // Performer sprites (MC left, rival right), feet on the legacy anchors and
+  // bobbing gently in place. Falls back to the compact placeholder figure
+  // (28x44 rounded body, cap and mic dot) when the texture is missing.
   private addPerformer(x: number, y: number, variant: "mc" | "rival"): void {
+    const key = variant === "mc" ? AssetRegistry.characters.mcIdle.key : AssetRegistry.characters.rivalIdle.key;
+    if (this.textures.exists(key)) {
+      const image = this.add.image(x, y, key).setOrigin(0.5, 1);
+      if (image.height > 0) image.setScale(120 / image.height);
+      this.addIdleBob(image, y, variant);
+      return;
+    }
     const container = this.add.container(x, y);
     const graphics = this.add.graphics();
     const bodyColor = variant === "mc" ? hex(palette.teal) : hex(palette.pink);
@@ -149,8 +162,13 @@ export class BattleScene extends Phaser.Scene {
     graphics.fillCircle(micX, -2, 2);
     container.add(graphics);
     container.setScale(1.62);
+    this.addIdleBob(container, y, variant);
+  }
+
+  // Legacy idle bob: 4px sine wave, rival slightly slower and offset.
+  private addIdleBob(target: Phaser.GameObjects.Image | Phaser.GameObjects.Container, y: number, variant: "mc" | "rival"): void {
     this.tweens.add({
-      targets: container,
+      targets: target,
       y: y - 4,
       duration: variant === "mc" ? 620 : 700,
       delay: variant === "mc" ? 0 : 180,
@@ -169,12 +187,12 @@ export class BattleScene extends Phaser.Scene {
     addText(this, this.layer, 792, 30, "RIVAL", 24, palette.ink);
     this.drawHudSide(202, 42, state.energy, maxEnergy(state), battle.hype, false);
     this.drawHudSide(600, 42, 70 + battle.rivalPower * 2, 100, Math.max(20, 100 - battle.hype / 2), true);
-    this.addLineText(396, 25, `RONDA ${battle.round}`, 30, palette.ink, 180);
+    addDisplayText(this, this.layer, 396, 25, `RONDA ${battle.round}`, 30, palette.ink);
     addText(this, this.layer, 452, 75, "HYPE", 17, "#ff9d2f");
     this.drawHudBar(390, 104, 188, 15, battle.hype, 100, palette.yellow, true);
     addSoftPanel(this, this.layer, 338, 144, 284, 88);
     addText(this, this.layer, 418, 154, "ESTIMULO", 16, palette.ink);
-    this.addLineText(388, 178, battleStimulusLabel(battle.prompt.text), 36, palette.yellow, 204);
+    addDisplayText(this, this.layer, 388, 178, battleStimulusLabel(battle.prompt.text), 36, palette.yellow);
   }
 
   // Legacy drawBattleHudSide: ENERGIA value + bar, HYPE bar per performer.
@@ -259,7 +277,10 @@ export class BattleScene extends Phaser.Scene {
     addRect(this, this.layer, x + 3, y + 3, w, h, "#000000", 0.24);
     addRect(this, this.layer, x, y, w, h, fill);
     addRect(this, this.layer, x, y, w, 3, accent);
-    this.addLineText(x + 12, y + 7, `${index + 1}. ${choice.label}`, 13, palette.ink, 122);
+    // Choice icon on the left edge; text shifts right when the sprite exists.
+    const iconKey = battleChoiceIconKey(choice.id);
+    const icon = iconKey ? addSpriteImage(this, this.layer, iconKey, x + 22, y + 24, 32, 0.5, 0.5, 32) : null;
+    this.addLineText(icon ? x + 40 : x + 12, y + 7, `${index + 1}. ${choice.label}`, 13, palette.ink, icon ? 100 : 122);
     this.addLineText(
       x + 144,
       y + 10,
