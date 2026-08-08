@@ -26,10 +26,12 @@ These are deliberate and contained, not oversights:
    pinned by mock-based tests. The `src/events/EventBus` introduced in Fase 2
    covers controller → scene communication; migrating system-to-system calls
    onto it is deferred until events carry gameplay value (Fase 7 EventSystem).
-3. **`src/scenes/careerViews.ts` slightly exceeds the 500-line rule (~516).**
-   Single responsibility (the seven career subviews), ~3% over; it will be
-   restructured anyway in Fase 4 when every screen is rebuilt 1:1 against the
-   mockups, so a pre-emptive split would just add churn.
+3. ~~`src/scenes/careerViews.ts` exceeds the 500-line rule~~ — **resolved in
+   Fase 4**: split into `src/scenes/views/*.ts` (one file per career sub-view
+   plus a shared `viewKit.ts`), with `careerViews.ts` left as a 33-line
+   dispatcher. The split was proven behavior-neutral (all 34 declarations
+   byte-identical, all 7 view screenshots and the 4 gameplay traces
+   pixel/byte-identical before and after).
 
 Resolved: the Fase 1 deviation for the 2.5k-line legacy `src/main.ts` is gone —
 Fase 2 replaced it with a 58-line bootstrap plus Phaser scenes under
