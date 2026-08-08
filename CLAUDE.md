@@ -49,11 +49,20 @@ node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev se
 
 ## Verificación (antes de dar por cerrado cualquier cambio)
 
-1. `npm run build` sin errores (TypeScript estricto).
+1. `npm run build` sin errores (TypeScript estricto) + `npm run lint` + `npm run test`.
 2. Levantar dev server y capturar con Playwright las pantallas afectadas hacia `output/web-game/<slug-descriptivo>/` (patrón existente: `shot-N.png` + `state-N.json` usando `render_game_to_text`).
 3. Revisar las capturas de verdad (leerlas): sin textos superpuestos, sin paneles rotos, consola sin errores.
-4. Si hubo cambio visual, comparar contra el mockup correspondiente de `reference/screens/`.
+4. Si hubo cambio visual, comparar contra el mockup correspondiente con `node scripts/compare-mockup.mjs <mockup> <captura> <salida>` y **leer** el resultado (el mapa de mockups por pantalla está en `docs/PANTALLAS.md`).
 5. Registrar el resultado en `progress.md`.
+
+**Trampas conocidas del arnés de captura:**
+
+- El arnés congela `Date.now` para que las corridas sean deterministas, y el
+  TweenManager de Phaser 4 deriva su delta de `Date.now` → **los tweens aparecen
+  congelados en las capturas**. Animar con el delta de frame (`update(_, delta)`)
+  en vez de tweens cuando el resultado deba ser verificable.
+- Los textos de Phaser usan `resolution: 1` a propósito (con `2` el escalado
+  pixelArt come filas de glifos: "HYPE" salía "HYPF"). No subirlo.
 
 ## Contexto de diseño
 

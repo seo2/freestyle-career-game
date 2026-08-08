@@ -34,3 +34,20 @@ These are deliberate and contained, not oversights:
 Resolved: the Fase 1 deviation for the 2.5k-line legacy `src/main.ts` is gone —
 Fase 2 replaced it with a 58-line bootstrap plus Phaser scenes under
 `src/scenes/` (presentation-only, per the rules above).
+
+## Fase 4 notes
+
+- **Store = items, upgrades = backbone.** `StoreSystem` sells the catalogue in
+  `src/data/items.ts` (`buyItem`, `buyRecommendedItem`). Item `grants` raise the
+  internal `outfitLevel`/`studioLevel`/`homeLevel` (clamped by
+  `src/data/upgrades.ts`) and/or call `addStat`, so `maxEnergy`, `recordCost`,
+  battle presence and the action formulas keep reading the same fields. The
+  by-key upgrade purchase stays exported as the internal level bump; the store
+  UI no longer shows the three abstract upgrades.
+- **Difficulty is the only mechanical choice of Crear MC.** `DifficultyConfig`
+  holds `rivalPowerBonus` (applied in `BattleSystem.getBattleTier`) and
+  `rewardMultiplier` (applied to the whole payout in `finishBattle`). Nickname,
+  look, skin and voice are cosmetic identity, stored and persisted.
+- **Save key stays `v2`.** The new identity/inventory fields are backfilled from
+  `NewGameConfig` in `SaveManager.normalize`, so pre-Fase-4 saves (and migrated
+  v1 saves) keep loading.

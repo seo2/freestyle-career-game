@@ -17,10 +17,39 @@ Las imágenes en `reference/screens/` son los mockups oficiales del juego (fuent
 | `06_43_47–49` | (1)–(5) | **9. Tienda** — tabs Equipo/Ropa/Beats/Otros, lista con precios, preview del ítem y su efecto | (1) |
 | `06_52_01–02` | (1)–(8) | **10. Batalla** — HUD Tú/Rival (energía + hype), ronda, estímulo central, 5 cartas de jugada con hype base, costo de energía. Variantes por etapa: (1) plaza de barrio, (4) evento grande con escenario ("Combate de Barrios") | (1), (4) |
 
-## Pendiente de verificar
+## Serie completa identificada (2026-08-07)
 
-- Los números 4, 6 y 7 de la serie (probablemente **Calendario**, **Entrenamiento** y **Redes sociales**) deben estar entre las imágenes no revisadas de los grupos grandes (`06_23`, `06_29`, `06_34`, `06_52`).
-- Al identificar una pantalla nueva, agregar la fila en la tabla de arriba.
+Se generó una hoja de contactos con el borde superior de los 51 mockups para leer
+sus títulos numerados. Resultado — archivos exactos por pantalla:
+
+| # | Pantalla | Archivo canónico |
+|---|---|---|
+| 1 | Menú principal | `06_23_13 a.m. (1).png` |
+| 2 | Crear MC | `06_29_41 a.m. (1).png` |
+| 3 | Pieza (base) | `06_34_33 a.m. (1).png` (inicial) · `06_34_34 a.m. (5).png` (avanzada) |
+| 4 | **Calendario semanal** | `06_23_14 a.m. (4).png` (sin número impreso) |
+| 5 | Mapa (progreso) | `06_23_15 a.m. (5).png` |
+| 6 | **Entrenamiento** | `06_23_15 a.m. (6).png` |
+| 7 | **Redes sociales** | `06_23_15 a.m. (7).png` |
+| 8 | Trabajo | `06_23_15 a.m. (8).png` · `06_37_39 a.m. (1).png` (variante con panel ilustrado) |
+| 9 | Tienda | `06_43_47 a.m. (1).png` · `06_23_16 a.m. (10).png` (variante) |
+| 10 | Batalla (ronda) | `06_52_01 a.m. (1).png` (plaza) · `06_52_02 a.m. (4).png` (evento grande) |
+| — | Batalla (resultado de ronda) | `06_25_07 a.m. (1).png` |
+| 13 | **Estadísticas** | `06_25_08 a.m. (3).png` |
+
+### Lo que revela el mockup 4 (calendario) — importante para el diseño
+
+- HUD arriba, luego **"◀ SEMANA 3 ▶"** centrado (se navegan semanas).
+- 7 tarjetas de día con **icono grande arriba** y label debajo (ENTRENAR, REDES,
+  TRABAJAR, DESCANSAR, ESCRIBIR, BATALLA LOCAL, LIBRE), selección con
+  **esquinas amarillas** en la tarjeta activa.
+- Bajo cada label hay una **ranura punteada**: es el hueco donde se *programa* la
+  acción. Confirma el loop "planificar la semana" de la Bible → el sistema de
+  planificación semanal es trabajo de la Fase 6; en Fase 4 la ranura se dibuja
+  como el marco punteado del mockup.
+- Panel **INFORMACIÓN** abajo-izquierda y botón **CONTINUAR** abajo-derecha.
+- Arriba a la derecha hay dos botones de icono (calendario y engranaje/ajustes)
+  que hoy no existen en el juego — anotados como pendientes.
 
 ## Otros recursos de referencia
 

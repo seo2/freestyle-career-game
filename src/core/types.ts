@@ -1,6 +1,9 @@
 // Shared game types. Pure data — no DOM, no Phaser, no side effects.
 
 export type GameMode = "start" | "career" | "battle";
+// Career difficulty picked once on the Crear MC screen. Mechanical effects live
+// in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
+export type Difficulty = "facil" | "normal" | "dificil";
 export type CareerView = "base" | "calendar" | "map" | "training" | "social" | "work" | "shop" | "stats";
 export type StageId = "pieza" | "plaza" | "regional" | "nacional" | "internacional" | "estrella" | "leyenda";
 export type StatKey =
@@ -73,6 +76,15 @@ export interface GameState {
   mode: GameMode;
   playerName: string;
   inputName: string;
+  // --- Identity (Crear MC). Cosmetic except `difficulty`, which is mechanical.
+  // look/skin/voice are 1-based option indexes; their counts live in
+  // NewGameConfig.identityOptions. Sprite variants per look/skin are a pending
+  // asset (see docs/ASSETS.md) — the state carries the choice regardless.
+  nickname: string;
+  look: number;
+  skin: number;
+  voice: number;
+  difficulty: Difficulty;
   week: number;
   day: number;
   block: number;
@@ -87,9 +99,13 @@ export interface GameState {
   fame: number;
   songs: number;
   discProgress: number;
+  // Internal upgrade backbone (maxEnergy, recordCost, battle presence and the
+  // action formulas read these). The store sells items; items raise the levels.
   outfitLevel: number;
   studioLevel: number;
   homeLevel: number;
+  // Owned store item ids (src/data/items.ts). Ids only — never item objects.
+  items: string[];
   momentum: number;
   lastActionId: string | null;
   actionStreak: number;

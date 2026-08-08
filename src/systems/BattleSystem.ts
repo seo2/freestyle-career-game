@@ -8,6 +8,7 @@ import { clamp } from "../utils/math";
 import type { RandomSource } from "../services/RandomService";
 import { battlePrompts, battleRivals } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
+import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
 import { advanceClock, formatDuration } from "./CalendarSystem";
 import { addXp, applyRhythm } from "./ProgressionSystem";
 
@@ -65,12 +66,20 @@ function getBattleTier(state: GameState): BattleTier {
   const idx = stageIndex(state);
   const picked = battleRivals[idx] ?? battleRivals[0];
   const tier = BattleConfig.tier;
+  // Difficulty is the one mechanical choice of the Crear MC screen: it shifts
+  // how strong every rival is (and, at payout time, how much a battle pays).
+  const difficulty = difficultyRules(state.difficulty);
   return {
     eventName: picked[0],
     rivalName: picked[1],
     rivalStyle: picked[2],
-    rivalPower:
-      tier.rivalPowerBase + idx * tier.rivalPowerPerStage + Math.floor(state.level / tier.rivalPowerLevelDivisor),
+    rivalPower: Math.max(
+      DifficultyConfig.rivalPowerFloor,
+      tier.rivalPowerBase +
+        idx * tier.rivalPowerPerStage +
+        Math.floor(state.level / tier.rivalPowerLevelDivisor) +
+        difficulty.rivalPowerBonus,
+    ),
     rewardCash: tier.rewardCashBase + idx * tier.rewardCashPerStage,
     rewardFans: tier.rewardFansBase + idx * tier.rewardFansPerStage,
     rewardRespect: tier.rewardRespectBase + idx * tier.rewardRespectPerStage,
@@ -165,27 +174,38 @@ export function finishBattle(state: GameState, rng: RandomSource): { parts: stri
   const won = battle.result === "win";
   const draw = battle.result === "draw";
   const payout = BattleConfig.payout;
-  const cash = won ? battle.rewardCash : draw ? Math.floor(battle.rewardCash * payout.cashDrawFraction) : 0;
-  const fans = won
-    ? battle.rewardFans
-    : draw
-      ? Math.floor(battle.rewardFans * payout.fansDrawFraction)
-      : Math.floor(battle.rewardFans * payout.fansLossFraction);
-  const respect = won
-    ? battle.rewardRespect
-    : draw
-      ? Math.floor(battle.rewardRespect * payout.respectDrawFraction)
-      : Math.floor(battle.rewardRespect * payout.respectLossFraction);
-  const fame = won
-    ? battle.rewardFame
-    : draw
-      ? Math.floor(battle.rewardFame * payout.fameDrawFraction)
-      : Math.floor(battle.rewardFame * payout.fameLossFraction);
-  const xp = won
-    ? battle.rewardXp
-    : draw
-      ? Math.floor(battle.rewardXp * payout.xpDrawFraction)
-      : Math.floor(battle.rewardXp * payout.xpLossFraction);
+  // Difficulty scales the whole payout (normal = 1, so the base tiers stay).
+  const reward = (amount: number): number =>
+    Math.floor(amount * difficultyRules(state.difficulty).rewardMultiplier);
+  const cash = reward(won ? battle.rewardCash : draw ? Math.floor(battle.rewardCash * payout.cashDrawFraction) : 0);
+  const fans = reward(
+    won
+      ? battle.rewardFans
+      : draw
+        ? Math.floor(battle.rewardFans * payout.fansDrawFraction)
+        : Math.floor(battle.rewardFans * payout.fansLossFraction),
+  );
+  const respect = reward(
+    won
+      ? battle.rewardRespect
+      : draw
+        ? Math.floor(battle.rewardRespect * payout.respectDrawFraction)
+        : Math.floor(battle.rewardRespect * payout.respectLossFraction),
+  );
+  const fame = reward(
+    won
+      ? battle.rewardFame
+      : draw
+        ? Math.floor(battle.rewardFame * payout.fameDrawFraction)
+        : Math.floor(battle.rewardFame * payout.fameLossFraction),
+  );
+  const xp = reward(
+    won
+      ? battle.rewardXp
+      : draw
+        ? Math.floor(battle.rewardXp * payout.xpDrawFraction)
+        : Math.floor(battle.rewardXp * payout.xpLossFraction),
+  );
 
   state.cash += cash;
   state.fans += fans;

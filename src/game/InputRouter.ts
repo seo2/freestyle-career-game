@@ -19,6 +19,8 @@ interface CareerNavItem {
   key: string;
 }
 
+// Hotkeys stay exactly as they were when the room drew an eight-tab nav bar
+// (Fase 4 removed the bar, not the keys).
 const careerNavKeys: CareerNavItem[] = [
   { id: "base", key: "B" },
   { id: "calendar", key: "C" },
@@ -30,7 +32,26 @@ const careerNavKeys: CareerNavItem[] = [
   { id: "stats", key: "S" },
 ];
 
+// Room dock slots (mockup navigation model): the five big tiles are the only
+// on-screen navigation in the room, left to right. A slot either runs a career
+// action or opens a career view. CareerScene renders one tile per slot and
+// highlights `actionFocus`, so tiles and keyboard cursor cannot drift apart.
+export interface CareerDockSlot {
+  id: string;
+  actionId?: string;
+  view?: CareerView;
+}
+
+export const careerDockSlots: readonly CareerDockSlot[] = [
+  { id: "rest", actionId: "rest" },
+  { id: "train", view: "training" },
+  { id: "write", actionId: "write" },
+  { id: "social", view: "social" },
+  { id: "exit", view: "map" },
+];
+
 export class InputRouter {
+  // In the room this is the dock slot cursor (0..careerDockSlots.length-1).
   actionFocus = 0;
   battleFocus = 0;
 
@@ -45,6 +66,21 @@ export class InputRouter {
   private setActionFocus(value: number, max: number): void {
     this.actionFocus = clamp(value, 0, max);
     eventBus.emit("FOCUS_CHANGED", undefined);
+  }
+
+  // Pointer and keyboard share one path: clicking a dock tile also moves the
+  // cursor there, so arrows continue from where the mouse left off.
+  activateDockSlot(index: number): void {
+    const slot = careerDockSlots[index];
+    if (!slot) return;
+    this.setActionFocus(index, careerDockSlots.length - 1);
+    if (slot.view) {
+      this.controller.setCareerView(slot.view);
+      return;
+    }
+    if (!slot.actionId) return;
+    const action = this.controller.careerActions().find((item) => item.id === slot.actionId);
+    if (action && !action.disabledReason) this.controller.runCareerAction(action.id);
   }
 
   private setBattleFocus(value: number): void {
@@ -123,29 +159,21 @@ export class InputRouter {
         if (isConfirm) event.preventDefault();
         return;
       }
-      if (event.key === "ArrowRight") {
-        this.setActionFocus(this.actionFocus + 1, actions.length - 1);
+      // The room is a single row of five dock tiles, so the cursor walks it
+      // horizontally; up/down are previous/next so nobody gets stuck.
+      const lastSlot = careerDockSlots.length - 1;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        this.setActionFocus(this.actionFocus + 1, lastSlot);
         event.preventDefault();
         return;
       }
-      if (event.key === "ArrowLeft") {
-        this.setActionFocus(this.actionFocus - 1, actions.length - 1);
-        event.preventDefault();
-        return;
-      }
-      if (event.key === "ArrowDown") {
-        this.setActionFocus(this.actionFocus + 2, actions.length - 1);
-        event.preventDefault();
-        return;
-      }
-      if (event.key === "ArrowUp") {
-        this.setActionFocus(this.actionFocus - 2, actions.length - 1);
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        this.setActionFocus(this.actionFocus - 1, lastSlot);
         event.preventDefault();
         return;
       }
       if (isConfirm) {
-        const action = actions[this.actionFocus];
-        if (action && !action.disabledReason) c.runCareerAction(action.id);
+        this.activateDockSlot(this.actionFocus);
         event.preventDefault();
         return;
       }
