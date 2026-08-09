@@ -14,7 +14,6 @@ import {
   itemPrice,
   itemsByCategory,
   missingCash,
-  nextUpgrade,
   recommendedItem,
   setUpgradeLevel,
   unownedItems,
@@ -383,36 +382,6 @@ describe("upgradeCost", () => {
   });
 });
 
-describe("nextUpgrade", () => {
-  it("picks the cheapest among equal levels (fresh state -> outfit)", () => {
-    const state = newState(0);
-    expect(nextUpgrade(state)?.key).toBe("outfit");
-  });
-
-  it("prefers lower level over cheaper cost", () => {
-    const state = newState(0);
-    state.outfitLevel = 2;
-    state.studioLevel = 3; // maxed, excluded
-    state.homeLevel = 1;
-    expect(nextUpgrade(state)?.key).toBe("home");
-  });
-
-  it("breaks level ties by current cost", () => {
-    const state = newState(0);
-    state.outfitLevel = 1; // cost 165
-    state.studioLevel = 1; // cost 215
-    state.homeLevel = 1; // cost 285
-    expect(nextUpgrade(state)?.key).toBe("outfit");
-  });
-
-  it("returns null when everything is maxed", () => {
-    const state = newState(0);
-    state.outfitLevel = 3;
-    state.studioLevel = 3;
-    state.homeLevel = 3;
-    expect(nextUpgrade(state)).toBeNull();
-  });
-});
 
 describe("buyUpgradeByKey", () => {
   it("returns none for an unknown key", () => {

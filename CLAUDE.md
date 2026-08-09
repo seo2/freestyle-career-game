@@ -25,17 +25,19 @@ node scripts/capture-traces.mjs <outDir>   # trazas deterministas de juego (arn�
 node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
 ```
 
-## Arquitectura (Fases 1–2 completas)
+## Arquitectura (Fases 1–4)
 
 - **Motor: Phaser 4** (960×540, pixelArt, FIT). `src/main.ts` es un bootstrap de ~58 líneas.
 - **Reglas** en `src/systems/` (Calendar, Progression, Battle, Store, Training, Social, Jobs, Actions): funciones puras sobre `GameState`, testeadas con Vitest. Ver convenciones y desviaciones documentadas en `src/systems/README.md`.
 - **Balance/data**: contenido en `src/data/`, todos los números de tuning en `src/data/config/*Config.ts` (cero números mágicos en systems).
 - **Orquestación**: `src/managers/GameController.ts` (estado vivo, RNG con seed vía `RandomService`, save, comandos, eventos) + `src/events/EventBus.ts` + `src/game/InputRouter.ts` (teclado global) + `src/game/SceneDirector.ts`.
-- **Presentación**: escenas en `src/scenes/` (Boot/Menu/CreateMc/Career+careerViews/Battle) — solo muestran y envían comandos al controller; assets siempre vía `src/game/AssetRegistry.ts`.
+- **Presentación**: escenas en `src/scenes/` (Boot/Menu/CreateMc/Career/Battle) y una vista por pantalla en `src/scenes/views/` (calendar/map/training/social/work/shop/stats + `viewKit` compartido) — solo muestran y envían comandos al controller; assets siempre vía `src/game/AssetRegistry.ts`.
 - **Tiempo**: día en 3 bloques (Mañana/Tarde/Noche). **Etapas**: 7 (pieza→leyenda).
 - Guardado en `localStorage` clave `freestyle-career-save-v2` (migración automática desde v1 en `SaveManager`); PWA: `public/manifest.webmanifest` + `public/sw.js`.
-- Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas (`output/traces/baseline-v2/` es la referencia vigente).
-- Personajes/props aún en placeholders: la Fase 3 los reemplaza con sprites reales de `reference/`.
+- Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas (`output/traces/baseline-v3/` es la referencia vigente (regenerarla con `node scripts/capture-traces.mjs output/traces/baseline-v3` cuando un cambio de conducta sea intencional)).
+- **Navegación (modelo del mockup, decisión del owner en Fase 4):** la pieza es HUD + escena + dock de 5 tiles; **no hay barra de pestañas**. El **mapa es el hub** (sus nodos llevan a Trabajo/Tienda/Gimnasio/Plaza/Estudio) y las metas de carrera viven ahí. Calendario y Stats se abren con los dos botones del HUD arriba a la derecha. Los atajos de letra (B/C/M/E/R/J/T/S) siguen activos.
+- **Identidad del MC** (nombre, apodo, aspecto, piel, voz) e **inventario de ítems** (`src/data/items.ts`) existen desde la Fase 4; la dificultad es la única elección con efecto mecánico (`DifficultyConfig`).
+- Personajes con sprites reales desde la Fase 3; el arte pendiente está listado en `docs/ASSETS.md`.
 
 ## Reglas del proyecto
 
@@ -63,6 +65,12 @@ node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev se
   en vez de tweens cuando el resultado deba ser verificable.
 - Los textos de Phaser usan `resolution: 1` a propósito (con `2` el escalado
   pixelArt come filas de glifos: "HYPE" salía "HYPF"). No subirlo.
+- **Las coordenadas de página NO son las del juego.** `#app` tiene padding y el
+  canvas escala con FIT, así que con un viewport de 960×540 el canvas real queda
+  en ~(21, 12) y 917×516. Un `mouse.click(x, y)` con coordenadas del juego cae
+  desplazado y la prueba "pasa" sin haber tocado nada. Mapear siempre:
+  `const r = canvas.getBoundingClientRect()` y
+  `page = r.x + gx / 960 * r.width, r.y + gy / 540 * r.height`.
 
 ## Contexto de diseño
 

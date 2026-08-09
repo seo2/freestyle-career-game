@@ -54,11 +54,19 @@ Las fases de abajo son los **hitos de entrega** (incluyen trabajo visual/assets 
 - Documentar cada asset en `docs/PANTALLAS.md` o `docs/ASSETS.md`.
 - **Criterio de cierre:** las pantallas clave no usan dibujo procedural para personajes, iconos ni paneles.
 
-### Fase 4 — Pantallas 1:1 con los mockups
+### Fase 4 — Pantallas 1:1 con los mockups ✅ parcial (2026-08-08)
 
 Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Crear MC, 3 Pieza (con variantes de progresión de la habitación), 4–7 Calendario / Mapa / Entrenamiento / Redes, 8 Trabajo, 9 Tienda, 10 Batalla.
 
 - **Criterio de cierre:** captura Playwright de cada pantalla comparada lado a lado con su mockup; layout, jerarquía y paleta coinciden.
+- **Resultado:** las 10 pantallas se reconstruyeron y el layout/jerarquía/paleta coinciden (evidencia en `output/web-game/fase4-*`). Se adoptó el modelo de navegación del mockup y se construyeron los dos sistemas que los mockups exigían (identidad del MC, inventario con ítems).
+- **Deuda abierta que el crítico dejó nombrada** (ninguna es de layout):
+  1. **HUD del rival inventado** — `BattleScene.rivalHudReadout()` fabrica energía/hype del rival porque `BattleState` no los tiene. Mover a `BattleState` + `BattleSystem` con tests.
+  2. **Reglas recompuestas en la escena de batalla** — `projectedHype()` y el costo de entrada re-derivan fórmulas de `BattleSystem`; exponer `projectedHypeGain(state, choice)` y `battleEnergyCost(state)` como lectores del sistema.
+  3. **Resultado por ronda** — el mockup `06_25_07` muestra el veredicto tras *cada* ronda; hoy solo aparece al terminar la batalla.
+  4. **El calendario insinúa una semana planificada que no existe** — hoy empareja día ↔ acción fija y ejecuta al instante. Se resuelve con el sistema de planificación semanal (Fase 6); hasta entonces la pantalla no debe leerse como agenda.
+  5. **Sin cursor de fila en tienda/trabajo** — las teclas numéricas compran/trabajan, pero no hay cursor visible ni flechas por fila.
+  6. **`OPCIONES`/`CREDITOS`/`SALIR`** del menú y las flechas de semana del calendario siguen inertes (ya se dibujan apagadas y sin zona de clic); necesitan comandos reales o desaparecer.
 
 ### Fase 5 — Batalla v2 (el corazón del juego) — gauntlets 9–10
 

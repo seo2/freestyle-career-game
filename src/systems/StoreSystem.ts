@@ -47,15 +47,6 @@ export function upgradeCost(def: UpgradeDef, level: number): number {
   return def.baseCost + def.costStep * level + level * level * StoreConfig.costCurve.quadraticCoefficientPerLevel;
 }
 
-export function nextUpgrade(state: GameState): UpgradeDef | null {
-  const available = upgrades.filter((upgrade) => upgradeLevel(state, upgrade.key) < upgrade.maxLevel);
-  if (available.length === 0) return null;
-  return [...available].sort((a, b) => {
-    const levelDelta = upgradeLevel(state, a.key) - upgradeLevel(state, b.key);
-    if (levelDelta !== 0) return levelDelta;
-    return upgradeCost(a, upgradeLevel(state, a.key)) - upgradeCost(b, upgradeLevel(state, b.key));
-  })[0];
-}
 
 // --- Item catalogue reads -----------------------------------------------------
 

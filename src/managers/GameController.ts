@@ -75,6 +75,12 @@ export class GameController {
     this.savedSnapshot = this.saveManager.load();
     this.creatingNew = !this.savedSnapshot;
     this.state = this.savedSnapshot ? this.saveManager.normalize(this.savedSnapshot) : createNewState();
+    if (!this.savedSnapshot) {
+      // Fresh install goes straight to Crear MC: start the name empty so the
+      // mockup's "TU NOMBRE" placeholder is honest and typing does not append
+      // to the fallback name. startCareerFromMenu restores the fallback.
+      this.state.inputName = "";
+    }
     // Bind the RNG to whatever GameState is currently active so the stream
     // survives save/continue/new-game swaps (accessor host).
     const liveState = () => this.state;

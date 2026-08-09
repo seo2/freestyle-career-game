@@ -8,10 +8,9 @@
 import type Phaser from "phaser";
 import { AssetRegistry } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
-import { addDisplayText, addRect, addSpriteImage, addText } from "../../ui/kit";
-import { stages } from "../../data/stages";
+import { addRect, addSpriteImage, addText } from "../../ui/kit";
 import { clamp } from "../../utils/math";
-import type { CareerGoal, StageId, StatKey } from "../../core/types";
+import type { CareerGoal, StatKey } from "../../core/types";
 import type { GameController } from "../../managers/GameController";
 
 export type Vec2 = readonly [number, number];
@@ -39,11 +38,6 @@ export function line(ctx: ViewCtx, x: number, y: number, content: string, size: 
   }
 }
 
-export function viewTitle(ctx: ViewCtx, title: string, detail: string): void {
-  // Screen headings are large enough for the arcade face.
-  addDisplayText(ctx.scene, ctx.layer, 40, 118 - 27, title, 27, palette.ink);
-  line(ctx, 42, 142, detail, 11, palette.muted, 560);
-}
 
 const statColors: Record<StatKey, string> = {
   flow: palette.teal,
@@ -59,9 +53,6 @@ export function statColor(stat: StatKey): string {
   return statColors[stat];
 }
 
-export function stageTitle(stageId: StageId): string {
-  return stages.find((stage) => stage.id === stageId)?.title ?? "Pieza";
-}
 
 const actionShortLabels: Record<string, string> = {
   practice: "Practicar",

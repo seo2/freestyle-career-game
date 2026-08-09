@@ -7,8 +7,8 @@ import type { CareerView } from "../core/types";
 import { battleChoices } from "../data/battle";
 import { socialPostOptions } from "../data/social";
 import { jobOptions } from "../data/jobs";
-import { upgrades } from "../data/upgrades";
 import { calendarActionIds } from "../data/actions";
+import { visibleShopItems } from "../scenes/views/shopView";
 import { trainingStats } from "../data/stats";
 import { clamp } from "../utils/math";
 import { eventBus } from "../events/EventBus";
@@ -54,6 +54,15 @@ export class InputRouter {
   // In the room this is the dock slot cursor (0..careerDockSlots.length-1).
   actionFocus = 0;
   battleFocus = 0;
+  // Main-menu cursor (0 = Nueva carrera, 1 = Cargar partida). Without it the
+  // mockup's ▶ cursor was a lie: Enter always continued the save, so "Nueva
+  // carrera" needed a mouse (project rule 5: reachable by keyboard).
+  //
+  // It defaults to CARGAR PARTIDA, deliberately deviating from the mockup's
+  // cursor position: "Nueva carrera" immediately saves over the existing
+  // career, so a returning player pressing Enter out of habit would destroy
+  // their save (project rule 3: never break a saved game silently).
+  menuFocus = 1;
 
   constructor(private readonly controller: GameController) {
     window.addEventListener("keydown", (event) => this.handleKey(event));
@@ -91,21 +100,42 @@ export class InputRouter {
   private handleKey(event: KeyboardEvent): void {
     const c = this.controller;
     const state = c.state;
-    const isConfirm = event.key === "Enter" || event.code === "Space";
+    // Space is a confirm everywhere EXCEPT the start screens, where it is a
+    // character: treating it as confirm committed the career mid-word (the
+    // name "Fabio Frio" started a run called "abio").
+    const isConfirm = event.key === "Enter" || (event.code === "Space" && state.mode !== "start");
 
-    if (event.key.toLowerCase() === "f") {
+    // Fullscreen is a letter shortcut, so it must not fire while a text field
+    // has focus — otherwise "f" is untypable in the MC's name.
+    if (event.key.toLowerCase() === "f" && state.mode !== "start") {
       this.toggleFullscreen();
       return;
     }
 
     if (state.mode === "start") {
+      const onMenu = c.hasSave() && !c.creatingNew;
+      if (onMenu) {
+        // Only the first two entries have commands today (options/credits/exit
+        // do not), so the cursor walks those two.
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          this.menuFocus = this.menuFocus === 0 ? 1 : 0;
+          eventBus.emit("FOCUS_CHANGED", undefined);
+          event.preventDefault();
+          return;
+        }
+        if (isConfirm) {
+          if (this.menuFocus === 0) c.newCareerDraft();
+          else c.continueCareer();
+          event.preventDefault();
+          return;
+        }
+        return;
+      }
       if (isConfirm) {
-        if (c.hasSave() && !c.creatingNew) c.continueCareer();
-        else c.startCareerFromMenu();
+        c.startCareerFromMenu();
         event.preventDefault();
         return;
       }
-      if (!c.creatingNew && c.hasSave()) return;
       if (event.key === "Backspace") {
         c.backspaceName();
         event.preventDefault();
@@ -149,8 +179,12 @@ export class InputRouter {
           const option = jobOptions[number - 1];
           if (option) c.performJob(option);
         } else if (c.careerView === "shop") {
-          const upgrade = upgrades[number - 1];
-          if (upgrade) c.buyUpgradeByKey(upgrade.key);
+          // Buy the row the player can actually see. This used to call
+          // buyUpgradeByKey(upgrades[n-1]), i.e. the abstract upgrades Fase 4
+          // removed from the UI, so a keyboard player spent money and a game
+          // day on purchases that appeared in no row of the shop.
+          const item = visibleShopItems()[number - 1];
+          if (item) c.buyItem(item.id);
         }
         event.preventDefault();
         return;

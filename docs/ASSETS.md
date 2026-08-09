@@ -98,19 +98,40 @@ Capas del cover: `bg_sky_night`, `bg_clouds`, `bg_city_back`, `bg_city_front`,
 
 ## Pendientes (anotar aquí, no improvisar — regla CLAUDE.md #2)
 
-### Placeholders que el jugador ve hoy (se resuelven en Fase 4, al reconstruir cada pantalla 1:1)
+### Assets que las pantallas ya reservan (Fase 4 dejó el hueco listo)
 
-- **Tienda:** el panel "Vista previa" son rectángulos planos (parlantes + pie de
-  micrófono); el mockup `06_43_47 (1)` trae una preview completa del micrófono en
-  escenario **y** los 4 iconos de ítem (micrófono, audífonos, interfaz,
-  monitores) que aún no se recortan.
-- **Redes:** la "Vista previa" es un bloque gris con edificios de rectángulos.
-- **Trabajo:** losa gris plana donde el mockup tiene cajas de bodega.
-- **Mapa:** 100 % procedural (nodos cuadrados + bloques de ciudad); el mockup
-  `06_23_15 (5)` tiene ciudad isométrica con edificios y pines.
-- **Calendario:** los 7 "wells" negros bajo cada día quedan siempre vacíos.
-- **Menú:** los parlantes del cover se dibujan dentro de cajas negras opacas
-  (recorte heredado de Fase pre-1, sin transparencia).
+Cada pantalla se reconstruyó contra su mockup y pide su arte por clave de
+`AssetRegistry`, cayendo a un marco neutro (a veces punteado = "pendiente")
+cuando falta. Cortar estos assets es enchufarlos, no rediseñar:
+
+- **Iconos de ítem de la tienda** (64 px de alto c/u): `item-interfaz`,
+  `item-monitores`, `item-gorra`, `item-zapatillas`, `item-chaqueta`,
+  `item-beat-boombap`, `item-beat-trap`, `item-pack-acapella`, `item-mesa`,
+  `item-cuaderno`. Ya cubiertos por cortes previos: micrófono → `battle-punchline`,
+  audífonos → `battle-flow`, colchón → `action-rest`.
+- **`ui-cart`**: el glifo de carrito de las filas de la tienda (hoy se usa "+").
+- **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario con
+  skyline): hueco de 306×164 reservado.
+- **Ilustraciones de trabajo** (4) e **iconos de fila** (portapapeles, platos,
+  martillo, percha): hueco de 406×168 reservado; hoy va el sprite del MC.
+- **Arte por stat** (libros/foco/manos-corazón/cerebro) y **por tipo de post**
+  (claqueta, cámara, marco de diálogo): hoy se reutilizan iconos ya cortados.
+- **Estrella y llama** para fama/rango (hoy una estrella compuesta con rects).
+- **Ciudad isométrica del mapa**: el mapa dibuja una grilla nocturna procedural.
+- **Fondo en formato retrato** para el marco de Crear MC (hoy recorta el 42 % central del cover 16:9).
+- **Variantes del MC por aspecto y color de piel**: los selectores ya cambian el
+  estado, pero el sprite es el mismo para toda combinación.
+
+### Placeholders resueltos en Fase 4
+
+Las cinco pantallas que en Fase 3 mostraban rectángulos desnudos (previews de
+Tienda y Redes, Trabajo, Mapa, "wells" del calendario) se reconstruyeron contra
+sus mockups; lo que queda es **arte pendiente** con su hueco ya reservado (lista
+de arriba), no maquetas vacías. También se corrigió el bug de los parlantes del
+menú: el cover es RGB opaco y se componía con `LIGHTEN`, que el renderer WebGL de
+Phaser 4 no implementa para game objects (caía a NORMAL en silencio y tapaba la
+ciudad con cajas negras); ahora cada capa se croma por color a una textura canvas
+cacheada.
 
 - Variantes del MC (aspecto/color de piel del Crear MC) y poses (rapeando, con mic).
 - Rivales por arquetipo (agresivo, técnico, humorístico…) — hoy un solo rival.

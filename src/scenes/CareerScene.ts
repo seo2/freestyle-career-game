@@ -275,7 +275,13 @@ export class CareerScene extends Phaser.Scene {
 
     this.drawResourceCard(362, 22, 138, 54, "cash", "", formatHudNumber(state.cash), palette.green);
     this.drawResourceCard(516, 22, 224, 54, "fans", "FANS", formatHudNumber(state.fans), palette.blue);
-    this.drawResourceCard(756, 22, 180, 54, "respect", "RESPETO", formatHudNumber(state.respect), "#7b63cc");
+    this.drawResourceCard(756, 22, 142, 54, "respect", "RESPETO", formatHudNumber(state.respect), "#7b63cc");
+    // The calendar mockup (06_23_14 (4)) carries two icon buttons at the top
+    // right; they are also the only POINTER entry to the calendar and the stats
+    // screens, which the removed tab bar used to provide (project rule 5: the
+    // game must be fully playable with the mouse alone).
+    this.drawHudIconButton(904, 20, "SEM", "calendar");
+    this.drawHudIconButton(904, 50, "STA", "stats");
   }
 
   // Legacy drawHudFrame: layered pixel frame with sheen.
@@ -304,6 +310,15 @@ export class CareerScene extends Phaser.Scene {
   }
 
   // Legacy drawHudResourceCard with simplified rect/glyph icons.
+  // Small square HUD button: pixel frame + short caption, opens a career view.
+  private drawHudIconButton(x: number, y: number, caption: string, view: CareerView): void {
+    const active = gameContext().controller.careerView === view;
+    addRect(this, this.layer, x - 1, y - 1, 34, 28, active ? palette.yellow : "#333a78");
+    addRect(this, this.layer, x, y, 32, 26, active ? "#1b2555" : "#0b1230");
+    addText(this, this.layer, x + 16, y + 13, caption, 10, active ? palette.yellow : palette.ink).setOrigin(0.5);
+    addHitZone(this, this.layer, x, y, 32, 26, () => gameContext().controller.setCareerView(view));
+  }
+
   private drawResourceCard(
     x: number,
     y: number,
