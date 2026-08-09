@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createNewState } from "../core/state";
 import { createSequenceRng, createStateRng } from "../services/RandomService";
 import { battleChoices, battlePrompts, battleRivals } from "../data/battle";
-import type { BattleChoice, GameState, StageId } from "../core/types";
+import { DifficultyConfig } from "../data/config/DifficultyConfig";
+import type { BattleChoice, Difficulty, GameState, StageId } from "../core/types";
 import { battleDurationBlocks, battleLabel, finishBattle, resolveBattle, startBattle } from "./BattleSystem";
 
 // BattleSystem unit tests mock its collaborators (Calendar/Progression) so
@@ -248,6 +249,96 @@ describe("resolveBattle", () => {
     const before = JSON.stringify(state);
     resolveBattle(state, createSequenceRng([0.4]), choiceById("flow"));
     expect(JSON.stringify(state)).toBe(before);
+  });
+});
+
+// Difficulty is the one mechanical choice of the Crear MC screen: it moves
+// rival power at tier setup and scales the payout at finish time.
+describe("difficulty", () => {
+  it("keeps a single source of truth for the three difficulty knobs", () => {
+    expect(DifficultyConfig.order).toEqual(["facil", "normal", "dificil"]);
+    expect(DifficultyConfig.levels.facil.rivalPowerBonus).toBe(-1);
+    expect(DifficultyConfig.levels.facil.rewardMultiplier).toBe(1.15);
+    expect(DifficultyConfig.levels.normal.rivalPowerBonus).toBe(0);
+    expect(DifficultyConfig.levels.normal.rewardMultiplier).toBe(1);
+    expect(DifficultyConfig.levels.dificil.rivalPowerBonus).toBe(2);
+    expect(DifficultyConfig.levels.dificil.rewardMultiplier).toBe(0.9);
+  });
+
+  it("shifts rival power at every stage (pieza base 3, plaza base 5)", () => {
+    const expected: [Difficulty, number, number][] = [
+      // difficulty, pieza rivalPower, plaza rivalPower
+      ["facil", 2, 4],
+      ["normal", 3, 5],
+      ["dificil", 5, 7],
+    ];
+    for (const [difficulty, pieza, plaza] of expected) {
+      const inRoom = stateAtStage("pieza", 80);
+      inRoom.difficulty = difficulty;
+      startBattle(inRoom, createSequenceRng([0]));
+      expect(inRoom.battle?.rivalPower).toBe(pieza);
+
+      const inPlaza = stateAtStage("plaza", 80);
+      inPlaza.difficulty = difficulty;
+      startBattle(inPlaza, createSequenceRng([0]));
+      expect(inPlaza.battle?.rivalPower).toBe(plaza);
+    }
+  });
+
+  it("never lets a generous difficulty push rival power below the floor", () => {
+    const state = stateAtStage("pieza", 80);
+    state.difficulty = "facil";
+    startBattle(state, createSequenceRng([0]));
+    expect(state.battle?.rivalPower).toBeGreaterThanOrEqual(DifficultyConfig.rivalPowerFloor);
+  });
+
+  it("scales the full win payout (pieza tier 35/18/10/3/48)", () => {
+    const expected: [Difficulty, number, number, number, number, number][] = [
+      // difficulty, cash, fans, respect, fame, xp
+      ["facil", 40, 20, 11, 3, 55],
+      ["normal", 35, 18, 10, 3, 48],
+      ["dificil", 31, 16, 9, 2, 43],
+    ];
+    for (const [difficulty, cash, fans, respect, fame, xp] of expected) {
+      const state = stateAtStage("pieza", 80);
+      state.difficulty = difficulty;
+      startBattle(state, createSequenceRng([0]));
+      if (!state.battle) throw new Error("battle missing");
+      state.battle.finished = true;
+      state.battle.result = "win";
+      const outcome = finishBattle(state, createSequenceRng([0]));
+      if (!outcome) throw new Error("expected outcome");
+      expect(state.cash).toBe(25 + cash);
+      expect(state.fans).toBe(fans);
+      expect(state.respect).toBe(respect);
+      expect(state.fame).toBe(fame);
+      expect(state.xp).toBe(xp);
+      expect(outcome.parts[0]).toBe(
+        `Ganaste en Cypher de pieza (1 bloque): +$${cash}, +${fans} fans, +${respect} respeto.`,
+      );
+    }
+  });
+
+  it("scales the loss consolation too", () => {
+    // Loss split on the pieza tier: 0 cash, floor(18*.22)=3 fans, floor(10*.25)=2 respeto.
+    const expected: [Difficulty, number, number][] = [
+      ["facil", 3, 2], // floor(3*1.15)=3, floor(2*1.15)=2
+      ["normal", 3, 2],
+      ["dificil", 2, 1], // floor(3*.9)=2, floor(2*.9)=1
+    ];
+    for (const [difficulty, fans, respect] of expected) {
+      const state = stateAtStage("pieza", 80);
+      state.difficulty = difficulty;
+      startBattle(state, createSequenceRng([0]));
+      if (!state.battle) throw new Error("battle missing");
+      state.battle.finished = true;
+      state.battle.result = "loss";
+      const outcome = finishBattle(state, createSequenceRng([0]));
+      expect(state.cash).toBe(25);
+      expect(state.fans).toBe(fans);
+      expect(state.respect).toBe(respect);
+      expect(outcome?.parts[0]).toBe(`Perdiste en Cypher de pieza (1 bloque): +$0, +${fans} fans, +${respect} respeto.`);
+    }
   });
 });
 

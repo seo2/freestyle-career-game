@@ -19,12 +19,18 @@ function createMemoryStorage(): StorageLike & { map: Map<string, string> } {
 }
 
 // A v1 save is today's GameState with a 0-23 `hour` field instead of `block`.
-function makeV1Save(hour: number): { raw: string; state: GameState } {
+// `stripIdentity` reproduces a real v1 blob, written before the Crear MC and
+// tienda fields existed.
+function makeV1Save(hour: number, options: { stripIdentity?: boolean } = {}): { raw: string; state: GameState } {
   const state = createNewState("MC Legacy", 99);
   state.mode = "career";
   state.cash = 44;
   const { block: _block, ...rest } = state;
-  return { raw: JSON.stringify({ ...rest, hour }), state };
+  const blob: Record<string, unknown> = { ...rest, hour };
+  if (options.stripIdentity) {
+    for (const key of ["nickname", "look", "skin", "voice", "difficulty", "items"]) delete blob[key];
+  }
+  return { raw: JSON.stringify(blob), state };
 }
 
 function fakeBattle(): BattleState {
@@ -229,6 +235,118 @@ describe("SaveManager", () => {
     expect(normalized.inputName).toBe("MC Barrio");
     // Verbatim legacy template: interpolates the raw (empty) saved name.
     expect(normalized.lastEvent).toBe("Partida encontrada: , nivel 1.");
+  });
+
+  // Project rule 3: the key stays at v2, so saves written before the Crear MC
+  // and tienda systems existed must keep loading with the config defaults.
+  it("normalize backfills the identity fields of a v2 save that predates them", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const saved = createNewState("MC Antiguo", 42);
+    saved.mode = "career";
+    saved.level = 3;
+    delete (saved as Partial<GameState>).nickname;
+    delete (saved as Partial<GameState>).look;
+    delete (saved as Partial<GameState>).skin;
+    delete (saved as Partial<GameState>).voice;
+    delete (saved as Partial<GameState>).difficulty;
+    delete (saved as Partial<GameState>).items;
+
+    const normalized = manager.normalize(saved);
+
+    expect(normalized.nickname).toBe("Freestyler");
+    expect(normalized.look).toBe(1);
+    expect(normalized.skin).toBe(1);
+    expect(normalized.voice).toBe(1);
+    expect(normalized.difficulty).toBe("normal");
+    expect(normalized.items).toEqual([]);
+    // The rest of the save survives untouched.
+    expect(normalized.playerName).toBe("MC Antiguo");
+    expect(normalized.level).toBe(3);
+  });
+
+  it("normalize clamps the cosmetic selectors and rejects unknown difficulties", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const saved = createNewState("MC Raro", 42);
+    saved.look = 99;
+    saved.skin = 0;
+    saved.voice = -3;
+    saved.difficulty = "imposible" as GameState["difficulty"];
+    const normalized = manager.normalize(saved);
+    expect(normalized.look).toBe(4); // 4 looks
+    expect(normalized.skin).toBe(1); // 5 skins, 1-based
+    expect(normalized.voice).toBe(1); // 3 voices
+    expect(normalized.difficulty).toBe("normal");
+
+    saved.look = 3;
+    saved.skin = 5;
+    saved.voice = 2;
+    saved.difficulty = "dificil";
+    const kept = manager.normalize(saved);
+    expect([kept.look, kept.skin, kept.voice, kept.difficulty]).toEqual([3, 5, 2, "dificil"]);
+  });
+
+  it("normalize keeps owned items, dedupes them and drops non-strings", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const saved = createNewState("MC Compras", 42);
+    saved.items = ["microfono", "microfono", "gorra", 7 as unknown as string];
+    expect(manager.normalize(saved).items).toEqual(["microfono", "gorra"]);
+    saved.items = "nope" as unknown as string[];
+    expect(manager.normalize(saved).items).toEqual([]);
+  });
+
+  it("normalize trims a nickname and falls back to the default when empty", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const saved = createNewState("MC Apodo", 42);
+    saved.nickname = "  El Duro  ";
+    expect(manager.normalize(saved).nickname).toBe("El Duro");
+    saved.nickname = "   ";
+    expect(manager.normalize(saved).nickname).toBe("Freestyler");
+    saved.nickname = "0123456789ABCDEFGHIJ"; // 20 chars, max is 16
+    expect(manager.normalize(saved).nickname).toBe("0123456789ABCDEF");
+  });
+
+  it("keeps migrating a v1 save that has none of the new fields", () => {
+    const storage = createMemoryStorage();
+    const manager = createSaveManager(storage);
+    const { raw } = makeV1Save(20, { stripIdentity: true });
+    storage.setItem(LEGACY_SAVE_KEY_V1, raw);
+
+    const loaded = manager.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded?.block).toBe(2);
+    expect(loaded && "hour" in loaded).toBe(false);
+    expect(loaded && "nickname" in loaded).toBe(false);
+
+    const normalized = manager.normalize(loaded as GameState);
+    expect(normalized.nickname).toBe("Freestyler");
+    expect(normalized.look).toBe(1);
+    expect(normalized.skin).toBe(1);
+    expect(normalized.voice).toBe(1);
+    expect(normalized.difficulty).toBe("normal");
+    expect(normalized.items).toEqual([]);
+    expect(normalized.playerName).toBe("MC Legacy");
+    expect(normalized.cash).toBe(44);
+  });
+
+  it("round-trips the identity fields and the owned items through save/load", () => {
+    const storage = createMemoryStorage();
+    const manager = createSaveManager(storage);
+    const state = createNewState("MC Ida", 5);
+    state.nickname = "El Duro";
+    state.look = 3;
+    state.skin = 4;
+    state.voice = 2;
+    state.difficulty = "dificil";
+    state.items = ["microfono", "gorra"];
+
+    manager.save(state);
+    const loaded = manager.load();
+    expect(loaded?.nickname).toBe("El Duro");
+    expect(loaded?.look).toBe(3);
+    expect(loaded?.skin).toBe(4);
+    expect(loaded?.voice).toBe(2);
+    expect(loaded?.difficulty).toBe("dificil");
+    expect(loaded?.items).toEqual(["microfono", "gorra"]);
   });
 
   it("delete removes both the v2 and v1 saves", () => {

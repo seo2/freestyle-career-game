@@ -59,8 +59,8 @@ const SCENARIOS = {
     { press: "Enter" },
     { press: "1" }, // practice
     { press: "3" }, // work
-    { reload: true }, // back to start screen with a save present
-    { press: "Enter" }, // continue career
+    { reload: true }, // back to the main menu with a save present
+    { press: "Enter" }, // continue career (menu cursor defaults to Cargar partida)
   ],
 };
 

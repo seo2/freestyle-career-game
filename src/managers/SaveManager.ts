@@ -3,9 +3,11 @@
 // globals are touched. v2 saves carry the day-block clock; v1 saves (24h
 // clock) are migrated on load and re-persisted under the v2 key.
 
-import type { GameState } from "../core/types";
+import type { Difficulty, GameState } from "../core/types";
 import { createNewState } from "../core/state";
 import { CalendarConfig } from "../data/config/CalendarConfig";
+import { DifficultyConfig } from "../data/config/DifficultyConfig";
+import { NewGameConfig } from "../data/config/NewGameConfig";
 import { clamp } from "../utils/math";
 
 export const SAVE_KEY = "freestyle-career-save-v2";
@@ -24,6 +26,33 @@ function migrateV1(saved: SaveV1): GameState {
   const { hour, ...rest } = saved;
   const block = hour < V1_MORNING_END_HOUR ? 0 : hour < V1_AFTERNOON_END_HOUR ? 1 : 2;
   return { ...rest, block };
+}
+
+// --- Field backfills (project rule 3: a save must never break) ----------------
+// Saves written before the Crear MC / tienda systems existed simply lack these
+// fields, so the key stays at v2 and every new field falls back to its config
+// default (and is clamped into range).
+
+function backfillOption(value: number | undefined, count: number, fallback: number): number {
+  return Number.isInteger(value) ? clamp(value as number, 1, count) : fallback;
+}
+
+function backfillDifficulty(value: Difficulty | undefined): Difficulty {
+  return value !== undefined && DifficultyConfig.order.includes(value)
+    ? value
+    : NewGameConfig.identity.difficulty;
+}
+
+// Owned item ids only: strings, no duplicates. Unknown ids are kept so a save
+// from a newer catalogue survives a downgrade.
+function backfillItems(value: string[] | undefined): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((id): id is string => typeof id === "string"))];
+}
+
+function backfillNickname(value: string | undefined): string {
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  return trimmed.slice(0, NewGameConfig.identity.nicknameMaxLength) || NewGameConfig.identity.nickname;
 }
 
 // Minimal subset of the Web Storage API the manager needs.
@@ -70,6 +99,12 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         animationTime: 0,
         battle: null,
         block: clamp(saved.block ?? 0, 0, CalendarConfig.clock.blocksPerDay - 1),
+        nickname: backfillNickname(saved.nickname),
+        look: backfillOption(saved.look, NewGameConfig.identityOptions.looks, NewGameConfig.identity.look),
+        skin: backfillOption(saved.skin, NewGameConfig.identityOptions.skins, NewGameConfig.identity.skin),
+        voice: backfillOption(saved.voice, NewGameConfig.identityOptions.voices, NewGameConfig.identity.voice),
+        difficulty: backfillDifficulty(saved.difficulty),
+        items: backfillItems(saved.items),
         outfitLevel: clamp(saved.outfitLevel ?? 0, 0, 3),
         studioLevel: clamp(saved.studioLevel ?? 0, 0, 3),
         homeLevel: clamp(saved.homeLevel ?? 0, 0, 3),

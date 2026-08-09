@@ -26,11 +26,28 @@ These are deliberate and contained, not oversights:
    pinned by mock-based tests. The `src/events/EventBus` introduced in Fase 2
    covers controller → scene communication; migrating system-to-system calls
    onto it is deferred until events carry gameplay value (Fase 7 EventSystem).
-3. **`src/scenes/careerViews.ts` slightly exceeds the 500-line rule (~516).**
-   Single responsibility (the seven career subviews), ~3% over; it will be
-   restructured anyway in Fase 4 when every screen is rebuilt 1:1 against the
-   mockups, so a pre-emptive split would just add churn.
 
 Resolved: the Fase 1 deviation for the 2.5k-line legacy `src/main.ts` is gone —
 Fase 2 replaced it with a 58-line bootstrap plus Phaser scenes under
-`src/scenes/` (presentation-only, per the rules above).
+`src/scenes/` (presentation-only, per the rules above). The Fase 3 deviation for
+the oversized `src/scenes/careerViews.ts` is gone too — Fase 4 split it into
+`src/scenes/views/*.ts` (one file per career sub-view plus a shared
+`viewKit.ts`), leaving `careerViews.ts` as a 33-line dispatcher. No file exceeds
+the 500-line rule now.
+
+## Fase 4 notes
+
+- **Store = items, upgrades = backbone.** `StoreSystem` sells the catalogue in
+  `src/data/items.ts` (`buyItem`, `buyRecommendedItem`). Item `grants` raise the
+  internal `outfitLevel`/`studioLevel`/`homeLevel` (clamped by
+  `src/data/upgrades.ts`) and/or call `addStat`, so `maxEnergy`, `recordCost`,
+  battle presence and the action formulas keep reading the same fields. The
+  by-key upgrade purchase stays exported as the internal level bump; the store
+  UI no longer shows the three abstract upgrades.
+- **Difficulty is the only mechanical choice of Crear MC.** `DifficultyConfig`
+  holds `rivalPowerBonus` (applied in `BattleSystem.getBattleTier`) and
+  `rewardMultiplier` (applied to the whole payout in `finishBattle`). Nickname,
+  look, skin and voice are cosmetic identity, stored and persisted.
+- **Save key stays `v2`.** The new identity/inventory fields are backfilled from
+  `NewGameConfig` in `SaveManager.normalize`, so pre-Fase-4 saves (and migrated
+  v1 saves) keep loading.
