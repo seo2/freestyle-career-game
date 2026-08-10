@@ -60,13 +60,13 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 
 - **Criterio de cierre:** captura Playwright de cada pantalla comparada lado a lado con su mockup; layout, jerarquía y paleta coinciden.
 - **Resultado:** las 10 pantallas se reconstruyeron y el layout/jerarquía/paleta coinciden (evidencia en `output/web-game/fase4-*`). Se adoptó el modelo de navegación del mockup y se construyeron los dos sistemas que los mockups exigían (identidad del MC, inventario con ítems).
-- **Deuda abierta que el crítico dejó nombrada** (ninguna es de layout):
-  1. **HUD del rival inventado** — `BattleScene.rivalHudReadout()` fabrica energía/hype del rival porque `BattleState` no los tiene. Mover a `BattleState` + `BattleSystem` con tests.
-  2. **Reglas recompuestas en la escena de batalla** — `projectedHype()` y el costo de entrada re-derivan fórmulas de `BattleSystem`; exponer `projectedHypeGain(state, choice)` y `battleEnergyCost(state)` como lectores del sistema.
-  3. **Resultado por ronda** — el mockup `06_25_07` muestra el veredicto tras *cada* ronda; hoy solo aparece al terminar la batalla.
-  4. **El calendario insinúa una semana planificada que no existe** — hoy empareja día ↔ acción fija y ejecuta al instante. Se resuelve con el sistema de planificación semanal (Fase 6); hasta entonces la pantalla no debe leerse como agenda.
-  5. **Sin cursor de fila en tienda/trabajo** — las teclas numéricas compran/trabajan, pero no hay cursor visible ni flechas por fila.
-  6. **`OPCIONES`/`CREDITOS`/`SALIR`** del menú y las flechas de semana del calendario siguen inertes (ya se dibujan apagadas y sin zona de clic); necesitan comandos reales o desaparecer.
+- **Deuda del crítico — cerrada el 2026-08-09** (rama `fase-4/cierre-deuda-batalla`), salvo las dos que pertenecen a fases futuras:
+  1. ✅ **HUD del rival real** — `BattleState` ganó `rivalEnergy`/`rivalEnergyMax`/`rivalHype`, inicializados y actualizados por `BattleSystem` desde los resultados reales de cada ronda (números en `BattleConfig.rival`); `rivalHudReadout()` eliminado.
+  2. ✅ **Reglas una sola vez** — `BattleSystem` exporta `battleEnergyCost(state)` y `projectedHypeGain(battle, choice)`; `startBattle`, `ActionsSystem` y `BattleScene` los consumen (tests fijan que la proyección iguala lo otorgado).
+  3. ✅ **Veredicto por ronda** — tras cada ronda la batalla se detiene en `pendingResult` y muestra el panel del mockup `06_25_07` (¡BUENISIMO!/BIEN/DEBIL + deltas + HYPE TOTAL); Enter o CONTINUAR avanzan (`advanceBattleRound`).
+  4. ⏳ **El calendario insinúa una semana planificada que no existe** — se resuelve con el sistema de planificación semanal (**Fase 6**); hasta entonces la pantalla no debe leerse como agenda.
+  5. ✅ **Cursor de fila en tienda/trabajo** — flechas mueven la selección (preview/panel siguen), Enter compra/trabaja con las mismas puertas que el clic, y las filas muestran el dígito de su atajo.
+  6. ⏳ **`OPCIONES`/`CREDITOS`/`SALIR`** del menú y las flechas de semana del calendario siguen inertes (dibujados apagados y sin zona de clic); necesitan comandos reales (opciones/créditos ≈ Fase 8–10, navegación de semanas ≈ Fase 6).
 
 ### Fase 5 — Batalla v2 (el corazón del juego) — gauntlets 9–10
 

@@ -6,13 +6,12 @@
 import type { ActionResult, CareerActionInfo, GameState, StatKey } from "../core/types";
 import { maxEnergy, recordCost, stageIndex, currentStage } from "../core/derived";
 import { ActionsConfig } from "../data/config/ActionsConfig";
-import { BattleConfig } from "../data/config/BattleConfig";
 import { statLabels } from "../data/stats";
 import type { RandomSource } from "../services/RandomService";
 import { clamp } from "../utils/math";
 import { advanceClock, formatDuration, spendActionTime } from "./CalendarSystem";
 import { addStat, addXp, applyRhythm, rhythmPreview } from "./ProgressionSystem";
-import { battleDurationBlocks, battleLabel, startBattle } from "./BattleSystem";
+import { battleDurationBlocks, battleEnergyCost, battleLabel, startBattle } from "./BattleSystem";
 
 export function getCareerActions(state: GameState): CareerActionInfo[] {
   const actions: CareerActionInfo[] = [];
@@ -86,7 +85,7 @@ export function getCareerActions(state: GameState): CareerActionInfo[] {
             : undefined,
   });
 
-  const battleCost = BattleConfig.entry.energyCostBase + stageIndex(state) * BattleConfig.entry.energyCostPerStage;
+  const battleCost = battleEnergyCost(state);
   actions.push({
     id: "battle",
     label: battleLabel(state),

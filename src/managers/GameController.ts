@@ -27,7 +27,11 @@ import { battleChoices } from "../data/battle";
 import { eventBus } from "../events/EventBus";
 import { finalizeEvent, getCareerGoals } from "../systems/ProgressionSystem";
 import { formatBlock } from "../systems/CalendarSystem";
-import { finishBattle as finishBattleSys, resolveBattle as resolveBattleSys } from "../systems/BattleSystem";
+import {
+  advanceBattleRound as advanceBattleRoundSys,
+  finishBattle as finishBattleSys,
+  resolveBattle as resolveBattleSys,
+} from "../systems/BattleSystem";
 import {
   buyItem as buyItemSys,
   buyRecommendedItem as buyRecommendedItemSys,
@@ -189,6 +193,13 @@ export class GameController {
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
+  // Confirms the round-result beat: next round, or the final verdict screen
+  // after the last round (finishBattle then collects it).
+  advanceBattleRound(): void {
+    advanceBattleRoundSys(this.state, this.rng);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
   finishBattle(): void {
     const result = finishBattleSys(this.state, this.rng);
     if (!result) return;
@@ -343,7 +354,30 @@ export class GameController {
           round: state.battle.round,
           score: `${state.battle.playerScore}-${state.battle.rivalScore}`,
           hype: state.battle.hype,
+          rivalEnergy: state.battle.rivalEnergy,
+          rivalEnergyMax: state.battle.rivalEnergyMax,
+          rivalHype: state.battle.rivalHype,
           prompt: state.battle.prompt.text,
+          // Round-result beat on screen (Enter/CONTINUAR advances past it).
+          pendingResult: state.battle.pendingResult
+            ? {
+                round: state.battle.pendingResult.round,
+                choice: state.battle.pendingResult.choice,
+                playerHypeDelta: state.battle.pendingResult.playerHypeDelta,
+                playerVerdict: state.battle.pendingResult.playerVerdict,
+                rivalHypeDelta: state.battle.pendingResult.rivalHypeDelta,
+                rivalVerdict: state.battle.pendingResult.rivalVerdict,
+              }
+            : null,
+          // Per-round verdicts of everything resolved so far.
+          results: state.battle.results.map((entry) => ({
+            round: entry.round,
+            choice: entry.choice,
+            playerHypeDelta: entry.playerHypeDelta,
+            playerVerdict: entry.playerVerdict,
+            rivalHypeDelta: entry.rivalHypeDelta,
+            rivalVerdict: entry.rivalVerdict,
+          })),
           finished: state.battle.finished,
           result: state.battle.result,
           choices: battleChoices.map((choice, index) => ({

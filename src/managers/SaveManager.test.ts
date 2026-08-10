@@ -39,6 +39,9 @@ function fakeBattle(): BattleState {
     rivalName: "Rival X",
     rivalStyle: "agresivo",
     rivalPower: 10,
+    rivalEnergy: 90,
+    rivalEnergyMax: 100,
+    rivalHype: 40,
     rewardCash: 20,
     rewardFans: 5,
     rewardRespect: 3,
@@ -51,6 +54,7 @@ function fakeBattle(): BattleState {
     rivalScore: 0,
     prompt: { text: "Tema", best: ["flow"] },
     results: [],
+    pendingResult: null,
     finished: false,
     result: null,
   };

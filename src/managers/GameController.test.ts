@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GameController } from "./GameController";
+import { battleChoices } from "../data/battle";
+import { BattleConfig } from "../data/config/BattleConfig";
 import { storeItems } from "../data/items";
 import type { StorageLike } from "./SaveManager";
 
@@ -210,5 +212,46 @@ describe("GameController.renderGameToText", () => {
     controller.startCareerFromMenu();
     controller.state.items = storeItems.map((item) => item.id);
     expect(JSON.parse(controller.renderGameToText()).recommendedItem).toBeNull();
+  });
+
+  it("exposes the rival meters, the round-result beat, and per-round verdicts", () => {
+    const { controller } = createController();
+    controller.newCareerDraft();
+    controller.startCareerFromMenu();
+    controller.runCareerAction("battle"); // starting energy 86 covers the entry
+    const verdictWords = Object.values(BattleConfig.verdict.labels);
+
+    // Cards on screen: real rival meters, no pending result yet.
+    let battle = JSON.parse(controller.renderGameToText()).battle;
+    expect(battle).not.toBeNull();
+    expect(battle.rivalEnergy).toBe(76); // pieza power 3: 70 + 3*2
+    expect(battle.rivalEnergyMax).toBe(100);
+    expect(battle.rivalHype).toBe(50);
+    expect(battle.pendingResult).toBeNull();
+    expect(battle.results).toEqual([]);
+
+    // One round resolved (seeded from Date.now, so pin outcome-independent
+    // facts): the beat is on screen with graded deltas and honest meters.
+    controller.resolveBattle(battleChoices[0]);
+    battle = JSON.parse(controller.renderGameToText()).battle;
+    expect(battle.round).toBe(1);
+    expect(battle.finished).toBe(false);
+    expect(battle.pendingResult).not.toBeNull();
+    expect(battle.pendingResult.round).toBe(1);
+    expect(battle.pendingResult.choice).toBe("respuesta");
+    expect(verdictWords).toContain(battle.pendingResult.playerVerdict);
+    expect(verdictWords).toContain(battle.pendingResult.rivalVerdict);
+    expect(battle.hype).toBe(50 + battle.pendingResult.playerHypeDelta);
+    expect(battle.rivalHype).toBe(50 + battle.pendingResult.rivalHypeDelta);
+    expect(battle.rivalEnergy).toBe(68); // 76 - round drain 8
+    expect(battle.results).toHaveLength(1);
+    expect(battle.results[0]).toEqual(battle.pendingResult);
+
+    // CONTINUAR: the beat clears and the next round begins.
+    controller.advanceBattleRound();
+    battle = JSON.parse(controller.renderGameToText()).battle;
+    expect(battle.pendingResult).toBeNull();
+    expect(battle.round).toBe(2);
+    expect(battle.results).toHaveLength(1);
   });
 });

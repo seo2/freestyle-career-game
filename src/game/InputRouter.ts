@@ -226,6 +226,15 @@ export class InputRouter {
         event.preventDefault();
         return;
       }
+      // Round-result beat: the verdict panel swallows navigation; Enter (or
+      // clicking CONTINUAR in the scene) advances to the next round.
+      if (battle.pendingResult) {
+        if (isConfirm) {
+          c.advanceBattleRound();
+          event.preventDefault();
+        }
+        return;
+      }
       if (event.key === "ArrowRight") {
         this.setBattleFocus(this.battleFocus + 1);
         event.preventDefault();

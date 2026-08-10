@@ -49,6 +49,13 @@ export interface RoundResult {
   player: number;
   rival: number;
   note: string;
+  // Round-result panel data (mockup 06_25_07): how much hype each answer
+  // earned this round and its one-word grade. Verdict vocabulary and the
+  // thresholds that pick a word live in BattleConfig.verdict.
+  playerHypeDelta: number;
+  playerVerdict: string;
+  rivalHypeDelta: number;
+  rivalVerdict: string;
 }
 
 export interface BattleState {
@@ -56,6 +63,12 @@ export interface BattleState {
   rivalName: string;
   rivalStyle: string;
   rivalPower: number;
+  // Real rival meters (mockup HUD right side). Initialized by
+  // BattleSystem.startBattle from BattleConfig.rival and updated every round
+  // from actual outcomes — the scene only reads them.
+  rivalEnergy: number;
+  rivalEnergyMax: number;
+  rivalHype: number;
   rewardCash: number;
   rewardFans: number;
   rewardRespect: number;
@@ -68,6 +81,9 @@ export interface BattleState {
   rivalScore: number;
   prompt: BattlePrompt;
   results: RoundResult[];
+  // Round-result beat: set when a round has resolved and its verdict panel is
+  // on screen; advanceBattleRound clears it (next round or final verdict).
+  pendingResult: RoundResult | null;
   finished: boolean;
   result: "win" | "loss" | "draw" | null;
 }
