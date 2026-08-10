@@ -46,13 +46,19 @@ const SCENARIOS = {
     { press: "c" }, // calendar view
     { press: "Escape" },
   ],
+  // Fase 4 round-result beat: every resolved round parks the battle on its
+  // verdict panel (battle.pendingResult), so each round needs one extra Enter
+  // to CONTINUAR before the next cards (or the final screen) appear.
   "battle-flow": [
     { press: "Enter" },
     { press: "c" },
     { press: "6" }, // battle (calendar slot 6)
     { press: "1" }, // round 1: responder
+    { press: "Enter" }, // continue past round 1 verdict
     { press: "2" }, // round 2: punchline
+    { press: "Enter" }, // continue past round 2 verdict
     { press: "3" }, // round 3: flow
+    { press: "Enter" }, // continue past round 3 verdict -> final screen
     { press: "Enter" }, // collect result
   ],
   "save-continue": [

@@ -54,6 +54,32 @@ export const BattleConfig = {
     winPromptBonusDivisor: 3,
     lossDrop: 7,
   },
+  // Real rival meters (they replaced BattleScene's fabricated readout, which
+  // showed 70 + rivalPower*2 energy on a /100 bar — these values keep that
+  // opening picture but clamp at the max and actually move during the match).
+  rival: {
+    energyBase: 70,
+    energyPerPower: 2,
+    energyMax: 100,
+    // Performing a round tires the rival regardless of who takes it.
+    roundEnergyDrain: 8,
+    // Crowd swing of the rival's answer: a strong round earns full hype, a
+    // weak answer still earns a little (mockup round panel: "DEBIL +4").
+    hypeWinGain: 12,
+    hypeLossGain: 4,
+  },
+  // One-word grade for each side's answer on the round-result panel, picked by
+  // hype-delta thresholds: boosted win (+16) reads great, plain win (+12)
+  // reads good, anything under goodMin reads weak.
+  verdict: {
+    greatMin: 14,
+    goodMin: 8,
+    labels: {
+      great: "¡BUENISIMO!",
+      good: "BIEN",
+      weak: "DEBIL",
+    },
+  },
   payout: {
     cashDrawFraction: 0.35,
     fansDrawFraction: 0.45,

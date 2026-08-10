@@ -2,7 +2,7 @@
 // Pure state mutation — the orchestrator owns UI focus, views, and event
 // finalization (this module never touches state.lastEvent or saves).
 
-import type { BattleChoice, BattlePrompt, BattleState, GameState, TimeAdvance } from "../core/types";
+import type { BattleChoice, BattlePrompt, BattleState, GameState, RoundResult, TimeAdvance } from "../core/types";
 import { maxEnergy, stageIndex } from "../core/derived";
 import { clamp } from "../utils/math";
 import type { RandomSource } from "../services/RandomService";
@@ -35,15 +35,33 @@ export function battleDurationBlocks(state: GameState): number {
   return stageIndex(state) === 0 ? BattleConfig.duration.piezaBlocks : BattleConfig.duration.otherStagesBlocks;
 }
 
+// Energy the battle entry charges at the current stage. Single source of the
+// rule: startBattle deducts it, ActionsSystem gates on it, BattleScene shows it.
+export function battleEnergyCost(state: GameState): number {
+  return BattleConfig.entry.energyCostBase + stageIndex(state) * BattleConfig.entry.energyCostPerStage;
+}
+
+// Hype resolveBattle awards for winning the current round with this choice
+// (read-only preview for the choice cards; the resolver consumes it too, so
+// the projection can never drift from the payout).
+export function projectedHypeGain(battle: BattleState, choice: BattleChoice): number {
+  const promptBonus = battle.prompt.best.includes(choice.id) ? BattleConfig.roll.promptBonus : 0;
+  return BattleConfig.hype.winGain + promptBonus / BattleConfig.hype.winPromptBonusDivisor;
+}
+
 // Returns false (no mutation, no RNG consumed) when too tired to enter.
 export function startBattle(state: GameState, rng: RandomSource): boolean {
-  const cost = BattleConfig.entry.energyCostBase + stageIndex(state) * BattleConfig.entry.energyCostPerStage;
+  const cost = battleEnergyCost(state);
   if (state.energy < cost) return false;
   state.energy = clamp(state.energy - cost, 0, maxEnergy(state));
   const tier = getBattleTier(state);
+  const rival = BattleConfig.rival;
   state.mode = "battle";
   state.battle = {
     ...tier,
+    rivalEnergy: clamp(rival.energyBase + tier.rivalPower * rival.energyPerPower, 0, rival.energyMax),
+    rivalEnergyMax: rival.energyMax,
+    rivalHype: BattleConfig.rounds.openingHype,
     round: 1,
     maxRounds: BattleConfig.rounds.maxRounds,
     hype: BattleConfig.rounds.openingHype,
@@ -51,6 +69,7 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
     rivalScore: 0,
     prompt: pickPrompt(rng),
     results: [],
+    pendingResult: null,
     finished: false,
     result: null,
   };
@@ -59,7 +78,19 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
 
 type BattleTier = Omit<
   BattleState,
-  "round" | "maxRounds" | "hype" | "playerScore" | "rivalScore" | "prompt" | "results" | "finished" | "result"
+  | "rivalEnergy"
+  | "rivalEnergyMax"
+  | "rivalHype"
+  | "round"
+  | "maxRounds"
+  | "hype"
+  | "playerScore"
+  | "rivalScore"
+  | "prompt"
+  | "results"
+  | "pendingResult"
+  | "finished"
+  | "result"
 >;
 
 function getBattleTier(state: GameState): BattleTier {
@@ -92,9 +123,18 @@ function pickPrompt(rng: RandomSource): BattlePrompt {
   return battlePrompts[rng.int(0, battlePrompts.length - 1)];
 }
 
+// One-word grade for a hype delta (round-result panel vocabulary).
+function verdictFor(delta: number): string {
+  const verdict = BattleConfig.verdict;
+  return delta >= verdict.greatMin ? verdict.labels.great : delta >= verdict.goodMin ? verdict.labels.good : verdict.labels.weak;
+}
+
+// Resolves the current round and parks the battle on its round-result beat
+// (pendingResult); advanceBattleRound moves the match forward. Consumes
+// exactly two RNG draws (player roll, rival roll).
 export function resolveBattle(state: GameState, rng: RandomSource, choice: BattleChoice): void {
   const battle = state.battle;
-  if (!battle || battle.finished) return;
+  if (!battle || battle.finished || battle.pendingResult) return;
   const roll = BattleConfig.roll;
   const statValue = state.stats[choice.stat];
   const promptBonus = battle.prompt.best.includes(choice.id) ? roll.promptBonus : 0;
@@ -130,26 +170,39 @@ export function resolveBattle(state: GameState, rng: RandomSource, choice: Battl
     rng.int(roll.rivalRandomMin, roll.rivalRandomMax);
   const wonRound = playerRoll >= rivalRoll;
 
-  if (wonRound) {
-    battle.playerScore += 1;
-    battle.hype = clamp(
-      battle.hype + BattleConfig.hype.winGain + promptBonus / BattleConfig.hype.winPromptBonusDivisor,
-      0,
-      100,
-    );
-  } else {
-    battle.rivalScore += 1;
-    battle.hype = clamp(battle.hype - BattleConfig.hype.lossDrop, 0, 100);
-  }
+  // Hype deltas grade the answers, so they stay raw; the meters clamp below.
+  const playerHypeDelta = wonRound ? projectedHypeGain(battle, choice) : -BattleConfig.hype.lossDrop;
+  const rivalHypeDelta = wonRound ? BattleConfig.rival.hypeLossGain : BattleConfig.rival.hypeWinGain;
 
-  battle.results.push({
+  if (wonRound) battle.playerScore += 1;
+  else battle.rivalScore += 1;
+  battle.hype = clamp(battle.hype + playerHypeDelta, 0, 100);
+  battle.rivalHype = clamp(battle.rivalHype + rivalHypeDelta, 0, 100);
+  battle.rivalEnergy = clamp(battle.rivalEnergy - BattleConfig.rival.roundEnergyDrain, 0, battle.rivalEnergyMax);
+
+  const result: RoundResult = {
     round: battle.round,
     choice: choice.id,
     player: playerRoll,
     rival: rivalRoll,
     note: wonRound ? "El publico reacciona a tu ronda." : "El rival conecto mas fuerte.",
-  });
+    playerHypeDelta,
+    playerVerdict: verdictFor(playerHypeDelta),
+    rivalHypeDelta,
+    rivalVerdict: verdictFor(rivalHypeDelta),
+  };
+  battle.results.push(result);
+  battle.pendingResult = result;
+}
 
+// Advances past the round-result beat (Enter / CONTINUAR): next round with a
+// fresh prompt, or the final verdict after the last round. The next-prompt RNG
+// draw moved here from resolveBattle with the Fase 4 result beat — same draws
+// in the same order per battle, only deferred to the player's confirm.
+export function advanceBattleRound(state: GameState, rng: RandomSource): void {
+  const battle = state.battle;
+  if (!battle || battle.finished || !battle.pendingResult) return;
+  battle.pendingResult = null;
   if (battle.round >= battle.maxRounds) {
     battle.finished = true;
     battle.result =

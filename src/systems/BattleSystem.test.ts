@@ -2,9 +2,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createNewState } from "../core/state";
 import { createSequenceRng, createStateRng } from "../services/RandomService";
 import { battleChoices, battlePrompts, battleRivals } from "../data/battle";
+import { BattleConfig } from "../data/config/BattleConfig";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import type { BattleChoice, Difficulty, GameState, StageId } from "../core/types";
-import { battleDurationBlocks, battleLabel, finishBattle, resolveBattle, startBattle } from "./BattleSystem";
+import {
+  advanceBattleRound,
+  battleDurationBlocks,
+  battleEnergyCost,
+  battleLabel,
+  finishBattle,
+  projectedHypeGain,
+  resolveBattle,
+  startBattle,
+} from "./BattleSystem";
 
 // BattleSystem unit tests mock its collaborators (Calendar/Progression) so
 // the suite stays hermetic: it verifies battle math, message templates, and
@@ -112,8 +122,28 @@ describe("startBattle", () => {
     expect(state.battle?.playerScore).toBe(0);
     expect(state.battle?.rivalScore).toBe(0);
     expect(state.battle?.results).toEqual([]);
+    expect(state.battle?.pendingResult).toBeNull();
     expect(state.battle?.finished).toBe(false);
     expect(state.battle?.result).toBeNull();
+  });
+
+  it("initializes the real rival meters from the tier power", () => {
+    const state = stateAtStage("pieza", 80);
+    startBattle(state, createSequenceRng([0]));
+    // Pieza tier power 3: energy 70 + 3*2 = 76 of 100, hype at the opening 50.
+    expect(state.battle?.rivalEnergy).toBe(76);
+    expect(state.battle?.rivalEnergyMax).toBe(100);
+    expect(state.battle?.rivalHype).toBe(50);
+  });
+
+  it("clamps rival energy at its max for overpowered rivals", () => {
+    // The old fabricated HUD showed 70 + power*2 on a /100 bar, exceeding it.
+    const state = stateAtStage("estrella", 80);
+    state.level = 60; // power = 3 + 5*2 + floor(60/3) = 33 -> raw energy 136
+    startBattle(state, createSequenceRng([0]));
+    expect(state.battle?.rivalPower).toBe(33);
+    expect(state.battle?.rivalEnergy).toBe(100);
+    expect(state.battle?.rivalEnergyMax).toBe(100);
   });
 
   it("picks the opening prompt with rng.int(0, prompts-1)", () => {
@@ -151,11 +181,66 @@ describe("startBattle", () => {
   });
 });
 
+// The two read-only helpers exist so the entry cost and the hype preview live
+// in exactly one place (BattleScene and ActionsSystem consume them).
+describe("battleEnergyCost", () => {
+  it("equals what startBattle deducts, across stages", () => {
+    const stages: StageId[] = ["pieza", "plaza", "regional", "nacional", "internacional", "estrella", "leyenda"];
+    stages.forEach((stage, idx) => {
+      const state = stateAtStage(stage, 80);
+      const cost = battleEnergyCost(state);
+      expect(cost).toBe(22 + idx * 3);
+      startBattle(state, createSequenceRng([0]));
+      expect(state.energy).toBe(80 - cost);
+    });
+  });
+
+  it("is the exact gate between refused and accepted entry", () => {
+    const state = stateAtStage("plaza", 0);
+    state.energy = battleEnergyCost(state) - 1;
+    expect(startBattle(state, createSequenceRng([0]))).toBe(false);
+    state.energy = battleEnergyCost(state);
+    expect(startBattle(state, createSequenceRng([0]))).toBe(true);
+  });
+});
+
+describe("projectedHypeGain", () => {
+  it("equals the hype actually awarded on a won round with the prompt bonus", () => {
+    const state = stateAtStage("pieza", 86);
+    // start prompt(0) -> battlePrompts[0] (best: respuesta/humor), then a
+    // forced player win (.99 player roll, 0 rival roll).
+    const rng = createSequenceRng([0, 0.99, 0]);
+    startBattle(state, rng);
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+    const projected = projectedHypeGain(battle, choiceById("respuesta"));
+    expect(projected).toBe(16); // winGain 12 + promptBonus 12/3
+    resolveBattle(state, rng, choiceById("respuesta"));
+    expect(battle.results[0].playerHypeDelta).toBe(projected);
+    expect(battle.hype).toBe(50 + projected);
+  });
+
+  it("equals the hype actually awarded on a won round without the bonus", () => {
+    const state = stateAtStage("pieza", 86);
+    const rng = createSequenceRng([0, 0.99, 0]);
+    startBattle(state, rng);
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+    const projected = projectedHypeGain(battle, choiceById("flow")); // off-prompt
+    expect(projected).toBe(12); // winGain only
+    resolveBattle(state, rng, choiceById("flow"));
+    expect(battle.results[0].playerHypeDelta).toBe(projected);
+    expect(battle.hype).toBe(50 + projected);
+  });
+});
+
 describe("resolveBattle", () => {
-  it("plays a full win-loss-win match with exact rolls, hype, and notes", () => {
+  it("plays a full win-loss-win match with exact rolls, hype, meters, and verdicts", () => {
     const state = stateAtStage("pieza", 86); // fresh-state stats, momentum 42, health 88
-    // Sequence: start prompt(0) | r1 player(.99) rival(0) prompt(0)
-    //           | r2 player(0) rival(.99) prompt(0) | r3 player(.99) rival(0)
+    // Sequence: start prompt(0) | r1 player(.99) rival(0), advance prompt(0)
+    //           | r2 player(0) rival(.99), advance prompt(0) | r3 player(.99) rival(0)
+    // Same draw count and order as before the round-result beat: the next
+    // prompt pick moved from resolveBattle into advanceBattleRound.
     const rng = createSequenceRng([0, 0.99, 0, 0, 0, 0.99, 0, 0.99, 0]);
     startBattle(state, rng); // energy 86 - 22 = 64, prompt = battlePrompts[0]
     const battle = state.battle;
@@ -173,9 +258,23 @@ describe("resolveBattle", () => {
       player: 69,
       rival: 38,
       note: "El publico reacciona a tu ronda.",
+      playerHypeDelta: 16, // winGain 12 + promptBonus 12/3
+      playerVerdict: "¡BUENISIMO!",
+      rivalHypeDelta: 4, // weak answer still earns a little
+      rivalVerdict: "DEBIL",
     });
     expect(battle.playerScore).toBe(1);
-    expect(battle.hype).toBe(66); // 50 + 12 + 12/3
+    expect(battle.hype).toBe(66); // 50 + 16
+    expect(battle.rivalHype).toBe(54); // 50 + 4
+    expect(battle.rivalEnergy).toBe(68); // 76 - 8 round drain
+    // The battle parks on the round-result beat: same round, same prompt.
+    expect(battle.pendingResult).toBe(battle.results[0]);
+    expect(battle.round).toBe(1);
+    expect(battle.prompt).toBe(battlePrompts[0]);
+    expect(battle.finished).toBe(false);
+
+    advanceBattleRound(state, rng); // consumes the next-prompt draw (0)
+    expect(battle.pendingResult).toBeNull();
     expect(battle.round).toBe(2);
     expect(battle.prompt).toBe(battlePrompts[0]);
 
@@ -189,9 +288,17 @@ describe("resolveBattle", () => {
       player: 40,
       rival: 62,
       note: "El rival conecto mas fuerte.",
+      playerHypeDelta: -7, // lossDrop
+      playerVerdict: "DEBIL",
+      rivalHypeDelta: 12, // rival win gain
+      rivalVerdict: "BIEN",
     });
     expect(battle.rivalScore).toBe(1);
     expect(battle.hype).toBe(59); // 66 - 7
+    expect(battle.rivalHype).toBe(66); // 54 + 12
+    expect(battle.rivalEnergy).toBe(60);
+
+    advanceBattleRound(state, rng);
     expect(battle.round).toBe(3);
 
     // Round 3: "respuesta" again, forced win -> match decided 2-1.
@@ -204,13 +311,35 @@ describe("resolveBattle", () => {
       player: 70,
       rival: 42,
       note: "El publico reacciona a tu ronda.",
+      playerHypeDelta: 16,
+      playerVerdict: "¡BUENISIMO!",
+      rivalHypeDelta: 4,
+      rivalVerdict: "DEBIL",
     });
+    // Last round still shows its verdict first; the advance settles the match.
+    expect(battle.finished).toBe(false);
+    expect(battle.pendingResult).toBe(battle.results[2]);
+    expect(battle.hype).toBe(75); // 59 + 16
+    expect(battle.rivalHype).toBe(70); // 66 + 4
+    expect(battle.rivalEnergy).toBe(52);
+
+    advanceBattleRound(state, rng); // final round: no prompt draw
+    expect(battle.pendingResult).toBeNull();
     expect(battle.finished).toBe(true);
     expect(battle.result).toBe("win");
     expect(battle.round).toBe(3); // no increment, no extra prompt pick
-    expect(battle.hype).toBe(75); // 59 + 12 + 4
     expect(battle.playerScore).toBe(2);
     expect(battle.rivalScore).toBe(1);
+  });
+
+  it("ignores choices while a round result is pending", () => {
+    const state = stateAtStage("pieza", 86);
+    const rng = createSequenceRng([0, 0.99, 0]);
+    startBattle(state, rng);
+    resolveBattle(state, rng, choiceById("respuesta"));
+    const before = JSON.stringify(state);
+    resolveBattle(state, createSequenceRng([0.4, 0.4]), choiceById("flow"));
+    expect(JSON.stringify(state)).toBe(before);
   });
 
   it("declares a draw when scores tie after the last round", () => {
@@ -226,6 +355,8 @@ describe("resolveBattle", () => {
     // player = flow 16 + 3 + 0 + energy 4 + health 3 - 1 + 0 + 6 + roll 7 = 38
     // rival  = 24 + 6 + roll 34 = 64
     resolveBattle(state, createSequenceRng([0, 0.99]), choiceById("flow"));
+    expect(battle.finished).toBe(false); // verdict beat first
+    advanceBattleRound(state, createSequenceRng([0]));
     expect(battle.finished).toBe(true);
     expect(battle.playerScore).toBe(1);
     expect(battle.rivalScore).toBe(1);
@@ -249,6 +380,45 @@ describe("resolveBattle", () => {
     const before = JSON.stringify(state);
     resolveBattle(state, createSequenceRng([0.4]), choiceById("flow"));
     expect(JSON.stringify(state)).toBe(before);
+  });
+});
+
+describe("advanceBattleRound", () => {
+  it("is a no-op without a pending round result", () => {
+    const state = stateAtStage("pieza", 86);
+    advanceBattleRound(state, createSequenceRng([0])); // no battle
+    expect(state.battle).toBeNull();
+    startBattle(state, createSequenceRng([0]));
+    const before = JSON.stringify(state);
+    advanceBattleRound(state, createSequenceRng([0])); // cards on screen
+    expect(JSON.stringify(state)).toBe(before);
+  });
+
+  it("is a no-op once the battle is finished", () => {
+    const state = stateAtStage("pieza", 86);
+    startBattle(state, createSequenceRng([0]));
+    if (!state.battle) throw new Error("battle missing");
+    state.battle.finished = true;
+    state.battle.result = "win";
+    const before = JSON.stringify(state);
+    advanceBattleRound(state, createSequenceRng([0]));
+    expect(JSON.stringify(state)).toBe(before);
+  });
+});
+
+// The verdict vocabulary is data: the panel words and their thresholds live in
+// BattleConfig so tuning them never touches the system.
+describe("verdict config", () => {
+  it("keeps the mockup vocabulary and threshold ordering", () => {
+    expect(BattleConfig.verdict.labels).toEqual({ great: "¡BUENISIMO!", good: "BIEN", weak: "DEBIL" });
+    expect(BattleConfig.verdict.greatMin).toBeGreaterThan(BattleConfig.verdict.goodMin);
+    // The boosted win reads great, the plain win reads good, the loss weak.
+    expect(BattleConfig.hype.winGain + BattleConfig.roll.promptBonus / BattleConfig.hype.winPromptBonusDivisor).toBeGreaterThanOrEqual(BattleConfig.verdict.greatMin);
+    expect(BattleConfig.hype.winGain).toBeGreaterThanOrEqual(BattleConfig.verdict.goodMin);
+    expect(-BattleConfig.hype.lossDrop).toBeLessThan(BattleConfig.verdict.goodMin);
+    // Rival: a won round reads good, the weak-answer consolation reads weak.
+    expect(BattleConfig.rival.hypeWinGain).toBeGreaterThanOrEqual(BattleConfig.verdict.goodMin);
+    expect(BattleConfig.rival.hypeLossGain).toBeLessThan(BattleConfig.verdict.goodMin);
   });
 });
 

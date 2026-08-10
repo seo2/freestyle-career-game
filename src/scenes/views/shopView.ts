@@ -16,10 +16,12 @@
 // CareerScene keeps drawing the career HUD over y 10..86 on every sub-view and
 // the mockup's own header has to land under it.
 
+import type Phaser from "phaser";
 import { eventBus } from "../../events/EventBus";
 import { AssetRegistry } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
 import { addButton, addDisplayText, addHitZone, addPanel, addSpriteImage, addText } from "../../ui/kit";
+import { clamp } from "../../utils/math";
 import { itemCategories, itemCategoryLabels } from "../../data/items";
 import type { ItemCategory, ItemDef } from "../../data/items";
 import {
@@ -156,6 +158,7 @@ export function renderShop(ctx: ViewCtx): void {
   const items = visibleItems();
   const selected = selectedItem(items);
 
+  bindShopKeys(ctx);
   header(ctx, state.cash);
   addPanel(ctx.scene, ctx.layer, FRAME.x, FRAME.y, FRAME.w, FRAME.h);
   rect(ctx, DIVIDER.x, DIVIDER.y, DIVIDER.w, DIVIDER.h, palette.line);
@@ -207,6 +210,60 @@ function redraw(): void {
   eventBus.emit("FOCUS_CHANGED", undefined);
 }
 
+// --- Keyboard row cursor ---------------------------------------------------------
+
+// Fase 4 debt: arrows and Enter did nothing here. The global InputRouter owns
+// the letter/digit hotkeys and preventDefaults Enter/Space while a sub-view is
+// open, so Phaser's keyboard plugin never sees them. Same solution as
+// mapView.bindNodeKeys: one window-level keydown listener bound per scene
+// life, dropped on scene SHUTDOWN ("shutdown" is Phaser.Scenes.Events.SHUTDOWN,
+// kept as a string to avoid a value import), that no-ops unless the shop is
+// the open career view. The cursor clamps at both ends, like the room dock.
+let boundScene: Phaser.Scene | null = null;
+
+function bindShopKeys(ctx: ViewCtx): void {
+  if (boundScene === ctx.scene) return;
+  boundScene = ctx.scene;
+  const { controller } = ctx;
+  // Same module-local selection the row clicks drive, so ▶ and the preview
+  // panel follow; selectItem/setCategory emit the click path's FOCUS_CHANGED.
+  const moveRow = (dir: 1 | -1): void => {
+    const items = visibleItems();
+    const current = selectedItem(items);
+    const index = current ? items.findIndex((item) => item.id === current.id) : 0;
+    const next = items[clamp(index + dir, 0, items.length - 1)];
+    if (next) selectItem(next);
+  };
+  const moveTab = (dir: 1 | -1): void => {
+    const index = itemCategories.indexOf(activeCategory);
+    const next = itemCategories[clamp(index + dir, 0, itemCategories.length - 1)];
+    if (next) setCategory(next);
+  };
+  // Exactly the row's own buy control: owned rows have none and unaffordable
+  // rows draw it disabled, so Enter respects the same two gates and no-ops.
+  const buySelected = (): void => {
+    const state = controller.state;
+    const item = selectedItem(visibleItems());
+    if (!item || isOwned(state, item.id) || !canAffordItem(state, item)) return;
+    controller.buyItem(item.id);
+  };
+  const onKey = (event: KeyboardEvent): void => {
+    if (controller.state.mode !== "career" || controller.careerView !== "shop") return;
+    if (event.key === "ArrowDown") moveRow(1);
+    else if (event.key === "ArrowUp") moveRow(-1);
+    else if (event.key === "ArrowRight") moveTab(1);
+    else if (event.key === "ArrowLeft") moveTab(-1);
+    else if (event.key === "Enter" || event.code === "Space") buySelected();
+    else return;
+    event.preventDefault();
+  };
+  window.addEventListener("keydown", onKey);
+  ctx.scene.events.once("shutdown", () => {
+    window.removeEventListener("keydown", onKey);
+    boundScene = null;
+  });
+}
+
 function header(ctx: ViewCtx, cash: number): void {
   addDisplayText(ctx.scene, ctx.layer, HEAD.titleX, HEAD.titleY, "9. TIENDA", HEAD.titleSize, palette.ink);
   const label = addText(ctx.scene, ctx.layer, HEAD.cashLabelX, HEAD.cashCenterY, "DINERO", HEAD.cashLabelSize, palette.ink);
@@ -249,6 +306,10 @@ function itemRow(ctx: ViewCtx, item: ItemDef, index: number, selected: boolean, 
   rect(ctx, ROW.x + 2, y + 2, ROW.w - 4, ROW.h - 4, dim ? ROW_COLORS.dimFill : selected ? ROW_COLORS.fillSelected : ROW_COLORS.fill);
   addHitZone(ctx.scene, ctx.layer, ROW.x, y, ROW.w, ROW.h, () => selectItem(item));
   if (selected) cursor(ctx, cy);
+  // Digit affordance: InputRouter's number keys buy visibleShopItems()[n-1],
+  // which was invisible because no row printed its index. The mockup has no
+  // numbers, so it stays a small muted digit tucked before the icon.
+  line(ctx, ROW.x + 8, cy + 5, String(index + 1), 10, ROW_COLORS.dimInk);
   // Cheapest thing the player can actually pay for right now (StoreSystem's own
   // recommendation, the U hotkey target).
   if (recommended && !owned) rect(ctx, ROW.x + 4, y + 8, 4, ROW.h - 16, palette.yellow);

@@ -5,8 +5,11 @@
 //
 // Layout: HUD (energia + hype per side, RONDA, ESTIMULO) over the live scene,
 // two big performers on the ground, and a dock of vertical choice cards that
-// float over the backdrop (no opaque panel). Presentation only: every click and
-// key is a GameController command; numbers come from state + BattleConfig.
+// float over the backdrop (no opaque panel). After every round the battle
+// parks on its round-result beat (battle.pendingResult) and this scene draws
+// the mockup's verdict panel until CONTINUAR/Enter advances the match.
+// Presentation only: every click and key is a GameController command; numbers
+// come from state, BattleConfig, and BattleSystem's read-only helpers.
 
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
@@ -16,8 +19,9 @@ import { hex, palette } from "../ui/palette";
 import { addButton, addDisplayText, addHitZone, addRect, addSpriteImage, addText, TEXT_PAD } from "../ui/kit";
 import { battleChoices } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
-import { maxEnergy, stageIndex } from "../core/derived";
-import type { BattleChoice, BattleState, GameState } from "../core/types";
+import { battleEnergyCost, projectedHypeGain } from "../systems/BattleSystem";
+import { maxEnergy } from "../core/derived";
+import type { BattleChoice, BattleState, GameState, RoundResult } from "../core/types";
 
 const W = 960;
 const H = 540;
@@ -67,34 +71,6 @@ function battleStimulusLabel(prompt: string): string {
   return "CORONA";
 }
 
-// Hype the systems would award for winning the round with this play:
-// BattleSystem.resolveBattle() adds hype.winGain plus the prompt bonus when the
-// choice is one of prompt.best. Recomposed here from the published config
-// because BattleSystem exposes no preview helper yet (handoff:
-// projectedHypeGain(state, choice)).
-function projectedHype(battle: BattleState, choice: BattleChoice): number {
-  const boosted = battle.prompt.best.includes(choice.id);
-  const bonus = boosted ? BattleConfig.roll.promptBonus / BattleConfig.hype.winPromptBonusDivisor : 0;
-  return Math.round(BattleConfig.hype.winGain + bonus);
-}
-
-// Energy the systems charge to fight at this stage (BattleSystem.startBattle).
-// Same recomposition caveat as projectedHype (handoff: battleEnergyCost(state)).
-function battleEnergyCost(state: GameState): number {
-  return BattleConfig.entry.energyCostBase + stageIndex(state) * BattleConfig.entry.energyCostPerStage;
-}
-
-// Rival HUD readout. BattleState has no rival energy/hype yet, so the mockup's
-// right-hand bars are still a presentation stand-in derived from the rival tier
-// (handoff: move rival energy/hype into BattleState).
-function rivalHudReadout(battle: BattleState): { energy: number; max: number; hype: number } {
-  return {
-    energy: 70 + battle.rivalPower * 2,
-    max: 100,
-    hype: Math.max(20, 100 - battle.hype / 2),
-  };
-}
-
 export class BattleScene extends Phaser.Scene {
   private layer!: Phaser.GameObjects.Container;
 
@@ -134,6 +110,8 @@ export class BattleScene extends Phaser.Scene {
     this.drawStageHud(battle);
     if (battle.finished) {
       this.drawResultPanel(battle);
+    } else if (battle.pendingResult) {
+      this.drawRoundResultPanel(battle, battle.pendingResult);
     } else {
       this.drawChoiceDock(battle, input.battleFocus, controller.state);
     }
@@ -211,16 +189,16 @@ export class BattleScene extends Phaser.Scene {
 
   private drawStageHud(battle: BattleState): void {
     const state = gameContext().controller.state;
-    const rival = rivalHudReadout(battle);
     this.drawScreenPixelBorder();
     this.addCenteredText(134, 33, "TU", 18, palette.ink);
     this.addCenteredText(824, 33, "RIVAL", 18, palette.ink);
     this.drawHudSide(202, 42, state.energy, maxEnergy(state), battle.hype);
-    this.drawHudSide(600, 42, rival.energy, rival.max, rival.hype);
+    this.drawHudSide(600, 42, battle.rivalEnergy, battle.rivalEnergyMax, battle.rivalHype);
     this.addCenteredDisplayText(483, 29, `RONDA ${battle.round}`, 26, palette.ink);
     this.addCenteredText(483, 68, "HYPE", 17, HYPE_ORANGE);
     this.drawHudBar(390, 88, 188, 14, battle.hype, 100, palette.yellow, true);
-    this.drawStimulus(battle, battle.finished ? STIMULUS_TOP_RESULT : STIMULUS_TOP_ROUND);
+    const onResultScreen = battle.finished || battle.pendingResult !== null;
+    this.drawStimulus(battle, onResultScreen ? STIMULUS_TOP_RESULT : STIMULUS_TOP_ROUND);
   }
 
   // ESTIMULO label + framed keyword box (mockup: no prompt sentence here).
@@ -286,7 +264,7 @@ export class BattleScene extends Phaser.Scene {
 
   private drawChoiceDock(battle: BattleState, battleFocus: number, state: GameState): void {
     battleChoices.forEach((choice, index) => {
-      this.drawChoiceCard(choice, this.cardX(index), projectedHype(battle, choice), index === battleFocus);
+      this.drawChoiceCard(choice, this.cardX(index), projectedHypeGain(battle, choice), index === battleFocus);
     });
     this.addValueLine(
       W / 2,
@@ -331,7 +309,46 @@ export class BattleScene extends Phaser.Scene {
     this.layer.add(graphics);
   }
 
-  // --- Round result -----------------------------------------------------------
+  // --- Round result beat (mockup 06_25_07: verdict after EVERY round) ---------
+
+  // Round verdict per the mockup: TU JUGADA (choice + icon), the big one-word
+  // grade with the hype the answer earned, RESPUESTA RIVAL with the rival's
+  // grade and hype, HYPE TOTAL, and CONTINUAR to advance the match.
+  private drawRoundResultPanel(battle: BattleState, result: RoundResult): void {
+    const played = battleChoices.find((choice) => choice.id === result.choice) ?? battleChoices[0];
+    const playerColor = result.playerHypeDelta > 0 ? palette.green : palette.red;
+
+    this.drawResultSeparator();
+    this.drawPlayedPanel(played);
+
+    // Centre box: player verdict + hype delta (mockup rows 275/322/372).
+    addRect(this, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
+    this.drawFrame(340, 262, 266, 141, FRAME);
+    this.addCenteredDisplayText(473, 274, result.playerVerdict, 32, playerColor);
+    this.addCenteredDisplayText(473, 318, this.signed(result.playerHypeDelta), 44, playerColor);
+    this.addCenteredText(473, 372, "HYPE", 20, HYPE_ORANGE);
+
+    // Rival box: their grade and the hype their answer earned (rows 303/336/377).
+    addRect(this, this.layer, 642, 262, 184, 141, palette.deep, 0.94);
+    this.drawFrame(642, 262, 184, 141, FRAME);
+    this.addCenteredText(734, 272, "RESPUESTA RIVAL", 11, palette.muted);
+    this.addCenteredDisplayText(734, 301, result.rivalVerdict, 24, palette.red);
+    this.addCenteredDisplayText(734, 334, this.signed(result.rivalHypeDelta), 40, palette.red);
+    this.addCenteredText(734, 375, "HYPE", 14, HYPE_ORANGE);
+
+    this.drawHypeTotal(battle.hype);
+    addButton(this, this.layer, 390, 492, 180, 26, "Continuar", () => gameContext().controller.advanceBattleRound(), {
+      fill: "#11183a",
+      size: 13,
+    });
+  }
+
+  // "+18" / "-7": hype deltas always carry their sign, like the mockup.
+  private signed(value: number): string {
+    return `${value >= 0 ? "+" : ""}${value}`;
+  }
+
+  // --- Final result (battle over) ----------------------------------------------
 
   private drawResultPanel(battle: BattleState): void {
     const last = battle.results[battle.results.length - 1];
@@ -377,7 +394,7 @@ export class BattleScene extends Phaser.Scene {
     addRect(this, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
     this.drawFrame(340, 262, 266, 141, FRAME);
     this.addCenteredDisplayText(473, 272, verdict, 38, color);
-    this.addCenteredDisplayText(473, 318, `${hypeDelta >= 0 ? "+" : ""}${hypeDelta}`, 40, color);
+    this.addCenteredDisplayText(473, 318, this.signed(hypeDelta), 40, color);
     this.addCenteredText(473, 372, "HYPE", 20, HYPE_ORANGE);
   }
 

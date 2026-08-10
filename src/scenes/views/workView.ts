@@ -14,9 +14,11 @@
 // because CareerScene keeps drawing the career HUD over y 10..86 on every
 // sub-view and the mockup's own header has to land under it.
 
+import type Phaser from "phaser";
 import { eventBus } from "../../events/EventBus";
 import { palette } from "../../ui/palette";
 import { addButton, addDisplayText, addHitZone, addPanel, addText } from "../../ui/kit";
+import { clamp } from "../../utils/math";
 import { jobOptions } from "../../data/jobs";
 import { formatDuration } from "../../systems/CalendarSystem";
 import type { JobOption } from "../../core/types";
@@ -139,6 +141,7 @@ export function renderWork(ctx: ViewCtx): void {
   const state = ctx.controller.state;
   const selected = clampSelection();
 
+  bindJobKeys(ctx);
   header(ctx, state.cash);
   addPanel(ctx.scene, ctx.layer, LIST.x, LIST.y, LIST.w, LIST.h);
   jobOptions.forEach((option, index) => jobRow(ctx, option, index, index === selected));
@@ -157,6 +160,40 @@ function selectJob(index: number): void {
   // FOCUS_CHANGED is the bus event CareerScene already redraws on for cursor
   // moves; the view never emits state changes.
   eventBus.emit("FOCUS_CHANGED", undefined);
+}
+
+// Fase 4 debt: arrows and Enter did nothing here. The global InputRouter owns
+// the letter/digit hotkeys and preventDefaults Enter/Space while a sub-view is
+// open, so Phaser's keyboard plugin never sees them. Same solution as
+// mapView.bindNodeKeys: one window-level keydown listener bound per scene
+// life, dropped on scene SHUTDOWN ("shutdown" is Phaser.Scenes.Events.SHUTDOWN,
+// kept as a string to avoid a value import), that no-ops unless TRABAJO is the
+// open career view. The cursor clamps at both ends, like the room dock.
+let boundScene: Phaser.Scene | null = null;
+
+function bindJobKeys(ctx: ViewCtx): void {
+  if (boundScene === ctx.scene) return;
+  boundScene = ctx.scene;
+  const { controller } = ctx;
+  // Same energy gate as the row's hit zone and "+" button: a dimmed (blocked)
+  // shift takes no Enter. The rule itself stays in JobsSystem.
+  const confirm = (): void => {
+    const option = jobOptions[clampSelection()];
+    if (option && controller.state.energy >= option.energy) controller.performJob(option);
+  };
+  const onKey = (event: KeyboardEvent): void => {
+    if (controller.state.mode !== "career" || controller.careerView !== "work") return;
+    if (event.key === "ArrowDown") selectJob(clamp(clampSelection() + 1, 0, jobOptions.length - 1));
+    else if (event.key === "ArrowUp") selectJob(clamp(clampSelection() - 1, 0, jobOptions.length - 1));
+    else if (event.key === "Enter" || event.code === "Space") confirm();
+    else return;
+    event.preventDefault();
+  };
+  window.addEventListener("keydown", onKey);
+  ctx.scene.events.once("shutdown", () => {
+    window.removeEventListener("keydown", onKey);
+    boundScene = null;
+  });
 }
 
 function header(ctx: ViewCtx, cash: number): void {
@@ -201,6 +238,10 @@ function jobRow(ctx: ViewCtx, option: JobOption, index: number, selected: boolea
   if (!blocked) addHitZone(ctx.scene, ctx.layer, ROW.x, y, ROW.w, ROW.h, take);
 
   jobIcon(ctx, ROW.x + ROW.iconDx, y + ROW.iconDy, option.label, blocked);
+  // Digit affordance: InputRouter's number keys already run jobOptions[n-1],
+  // which was invisible because no row printed its index. The mockup has no
+  // numbers, so it stays a small muted digit between the icon and the label.
+  line(ctx, ROW.x + 75, y + ROW.h / 2 + 5, String(index + 1), 10, ROW_COLORS.blockedInk);
   const ink = blocked ? ROW_COLORS.blockedInk : palette.ink;
   line(ctx, ROW.labelX, y + ROW.labelDy + ROW.labelSize, option.label.toUpperCase(), ROW.labelSize, ink, 210);
   line(
