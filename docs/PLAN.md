@@ -68,12 +68,15 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
   5. ✅ **Cursor de fila en tienda/trabajo** — flechas mueven la selección (preview/panel siguen), Enter compra/trabaja con las mismas puertas que el clic, y las filas muestran el dígito de su atajo.
   6. ⏳ **`OPCIONES`/`CREDITOS`/`SALIR`** del menú y las flechas de semana del calendario siguen inertes (dibujados apagados y sin zona de clic); necesitan comandos reales (opciones/créditos ≈ Fase 8–10, navegación de semanas ≈ Fase 6).
 
-### Fase 5 — Batalla v2 (el corazón del juego) — gauntlets 9–10
+### Fase 5 — Batalla v2 (el corazón del juego) — gauntlets 9–10 · **gauntlet 9 ✅ (2026-08-12)**
 
 - Los 10 recursos de batalla de la Bible; timer de decisión por ronda; bonus por responder el ataque del rival; penalización por repetición; bonus por usar el estímulo.
 - `AI Rivals`: perfiles con personalidad (agresividad, humor, métrica, frecuencia de riesgo) y los 7 arquetipos; público/jueces que valoran distinto según evento.
 - Game feel: tweens de cartas, shake al recibir punchline, reacción de multitud ligada al hype, pantalla de resultado por ronda como el mockup.
 - **Criterio de cierre:** una batalla completa se siente tensa y legible; el test de la Bible: "dan ganas de jugar otra".
+- **Gauntlet 9 (Battle Engine) ✅:** los 10 recursos y los 10 estímulos de la Bible, mano de 5 por ronda con sus dos reglas, el rival juega un recurso visible, reglas de tensión (respuesta al ataque, penalización por repetir, bonus por estímulo) y timer de decisión por ronda con su "Pasada". Decisiones registradas en `docs/GDD.md` › "Decisiones de Batalla v2". Evidencia: `output/web-game/fase5-engine/`.
+- **Gauntlet 10 (AI Rivals) — lo que sigue:** reemplazar `chooseRivalMove()` en `BattleSystem` (hoy elección uniforme con seed) por perfiles de personalidad (agresividad, humor, métrica, frecuencia de riesgo) y los 7 arquetipos de la Bible; público/jueces que valoran distinto según el evento.
+- **Game feel (después del 10):** tweens de cartas **con delta de frame** (`Date.now` congelado en el arnés congela los tweens de Phaser), shake al recibir punchline, reacción de multitud ligada al hype.
 
 ### Fase 6 — Tiempo, calendario y semana — gauntlet 3 v2
 

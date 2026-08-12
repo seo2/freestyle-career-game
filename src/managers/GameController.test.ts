@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GameController } from "./GameController";
-import { battleChoices } from "../data/battle";
+import { resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { storeItems } from "../data/items";
 import type { StorageLike } from "./SaveManager";
@@ -230,15 +230,23 @@ describe("GameController.renderGameToText", () => {
     expect(battle.pendingResult).toBeNull();
     expect(battle.results).toEqual([]);
 
+    // The dealt hand is what the player can actually play (5 cards, digit
+    // hotkeys 1..5), so the round is resolved from it rather than from the
+    // full catalogue.
+    expect(battle.hand).toHaveLength(5);
+    expect(battle.hand.map((card: { key: string }) => card.key)).toEqual(["1", "2", "3", "4", "5"]);
+    const played = battle.hand[0].id;
+
     // One round resolved (seeded from Date.now, so pin outcome-independent
     // facts): the beat is on screen with graded deltas and honest meters.
-    controller.resolveBattle(battleChoices[0]);
+    controller.resolveBattle(resourceById(played));
     battle = JSON.parse(controller.renderGameToText()).battle;
     expect(battle.round).toBe(1);
     expect(battle.finished).toBe(false);
     expect(battle.pendingResult).not.toBeNull();
     expect(battle.pendingResult.round).toBe(1);
-    expect(battle.pendingResult.choice).toBe("respuesta");
+    expect(battle.pendingResult.choice).toBe(played);
+    expect(battle.pendingResult.rivalChoice).not.toBeUndefined();
     expect(verdictWords).toContain(battle.pendingResult.playerVerdict);
     expect(verdictWords).toContain(battle.pendingResult.rivalVerdict);
     expect(battle.hype).toBe(50 + battle.pendingResult.playerHypeDelta);
@@ -253,5 +261,7 @@ describe("GameController.renderGameToText", () => {
     expect(battle.pendingResult).toBeNull();
     expect(battle.round).toBe(2);
     expect(battle.results).toHaveLength(1);
+    expect(battle.hand).toHaveLength(5);
+    expect(battle.timerSeconds).toBeGreaterThan(0);
   });
 });

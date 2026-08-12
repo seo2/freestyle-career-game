@@ -10,6 +10,34 @@ export const BattleConfig = {
     maxRounds: 3,
     openingHype: 50,
   },
+  // Hand of 5 per round (battle mockup shows exactly 5 cards). Dealt by
+  // BattleSystem via RandomService; rules live there, the size lives here.
+  hand: {
+    size: 5,
+  },
+  // Per-round decision timer. Runs only while choosing a card (paused on the
+  // verdict beat); DifficultyConfig scales the seconds per difficulty. On
+  // expiry the round auto-resolves as a "Pasada": skipped turn, hype penalty,
+  // DEBIL-style verdict (BattleSystem.expireBattleRound).
+  timer: {
+    roundSeconds: 15,
+    passHypePenalty: 10,
+    passLabel: "PASADA",
+  },
+  // Tension rules (Bible): the counter pays, boring the crowd costs, and both
+  // surface as verdict-panel notes.
+  tension: {
+    // Playing Respuesta the round after the rival played Ataque.
+    responseBonus: 6,
+    // Playing the same resource you played the previous round (applies to the
+    // win gain and deepens the loss drop).
+    repetitionPenalty: 5,
+    notes: {
+      response: "Respondiste el ataque del rival.",
+      repetition: "Repites recurso: aburres al publico.",
+      timeout: "Se acabo el tiempo: pasaste la ronda.",
+    },
+  },
   tier: {
     rivalPowerBase: 3,
     rivalPowerPerStage: 2,
@@ -49,8 +77,9 @@ export const BattleConfig = {
     rivalRandomMin: 12,
     rivalRandomMax: 34,
   },
+  // Win hype now starts from each card's baseHype (src/data/battle.ts, mockup
+  // values); these knobs shape the swing around it.
   hype: {
-    winGain: 12,
     winPromptBonusDivisor: 3,
     lossDrop: 7,
   },

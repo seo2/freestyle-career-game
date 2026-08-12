@@ -46,18 +46,22 @@ const SCENARIOS = {
     { press: "c" }, // calendar view
     { press: "Escape" },
   ],
-  // Fase 4 round-result beat: every resolved round parks the battle on its
-  // verdict panel (battle.pendingResult), so each round needs one extra Enter
-  // to CONTINUAR before the next cards (or the final screen) appear.
+  // Fase 5 battle engine v2: each round deals a hand of 5 of the 10 resources
+  // (digits 1..5 pick a card) and parks on its verdict panel after resolving
+  // (battle.pendingResult), so each round needs one extra Enter to CONTINUAR
+  // before the next hand (or the final screen) appears. The per-round decision
+  // timer cannot expire here: steps settle in ~40-190ms against a >=12s timer,
+  // and render_game_to_text exposes it as whole seconds only, so the traces
+  // stay byte-identical across runs.
   "battle-flow": [
     { press: "Enter" },
     { press: "c" },
     { press: "6" }, // battle (calendar slot 6)
-    { press: "1" }, // round 1: responder
+    { press: "1" }, // round 1: play hand card 1
     { press: "Enter" }, // continue past round 1 verdict
-    { press: "2" }, // round 2: punchline
+    { press: "2" }, // round 2: play hand card 2
     { press: "Enter" }, // continue past round 2 verdict
-    { press: "3" }, // round 3: flow
+    { press: "3" }, // round 3: play hand card 3
     { press: "Enter" }, // continue past round 3 verdict -> final screen
     { press: "Enter" }, // collect result
   ],

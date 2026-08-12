@@ -87,6 +87,35 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
 - **Recursos de batalla (10):** Punchline, Flow, Humor, Ataque, Defensa, Métrica, Doble Tempo, Respuesta, Storytelling, Improvisación.
 - **Valores de referencia (mockups):** cartas con hype base (Punchline +15, Respuesta +10, Humor +8, Ataque +12, Métrica +8), costo de energía por ronda (10). La resolución por ronda muestra: tu jugada, calificación ("¡BUENÍSIMO! +18 HYPE"), respuesta del rival ("DÉBIL +4") y barra de HYPE TOTAL (56/100).
 - **Reglas de tensión:** responder al ataque del rival da bonus; repetir recurso aburre al público (penalización); usar bien el estímulo sube el hype; decidir bajo presión (timer por ronda).
+
+### Decisiones de Batalla v2 (Fase 5 · gauntlet 9, 2026-08-12)
+
+- **Los 10 recursos existen** (`src/data/battle.ts`): cada uno declara las stats
+  que alimentan su tirada (varias stats se promedian para que ninguna carta
+  escale más que las otras) y su `baseHype` — los valores del mockup donde el
+  mockup los muestra (Punchline +15, Ataque +12, Respuesta +10, Humor +8,
+  Métrica +8) y hermanos coherentes para el resto.
+- **Mano de 5 por ronda** (decisión de diseño, no estaba en la Bible): el mockup
+  de batalla muestra exactamente 5 cartas, así que cada ronda se reparte una mano
+  de 5 de los 10 recursos con el RNG con seed. Dos reglas la gobiernan:
+  **(a)** si el rival atacó la ronda anterior, la mano **siempre** incluye
+  Respuesta, para que la decisión de contragolpear exista de verdad; **(b)** la
+  mano **no** garantiza un recurso premiado por el estímulo — leer el estímulo es
+  reconocer cuándo tu mano le calza. Se reparte de nuevo cada ronda.
+- **El rival juega un recurso visible**: el panel de resultado nombra con qué
+  respondió. En el gauntlet 9 la elección es uniforme con seed; el gauntlet 10
+  (AI Rivals) reemplaza `chooseRivalMove()` por personalidades.
+- **Reglas de tensión** (knobs en `BattleConfig.tension`): responder al Ataque da
+  bonus; repetir el recurso de la ronda anterior penaliza (y la penalización ya
+  viene incluida en el `+N` que muestra la carta, así que la vista previa nunca
+  miente); el bonus por estímulo sigue vivo sobre los 10 recursos.
+- **Timer de decisión por ronda** (`BattleConfig.timer`, escalado por
+  `DifficultyConfig.timerMultiplier`: fácil 21s, normal 15s, difícil 12s). Corre
+  solo mientras eliges (se pausa en el veredicto). Al expirar la ronda se
+  resuelve como **"Pasada"**: no juegas carta, el rival se lleva la ronda y el
+  público se enfría. Vive en `GameController.update(dt)` para que
+  `window.advanceTime(ms)` lo pueda testear, y `render_game_to_text` solo expone
+  segundos enteros para que las trazas deterministas no dependan de milisegundos.
 - **Hype** modifica votos, presión y público.
 
 ### IA del rival

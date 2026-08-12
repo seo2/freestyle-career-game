@@ -3,13 +3,15 @@
 // round result). Geometry is the mockup measured at 1672x941 and scaled by
 // 0.574 to the 960x540 canvas.
 //
-// Layout: HUD (energia + hype per side, RONDA, ESTIMULO) over the live scene,
-// two big performers on the ground, and a dock of vertical choice cards that
-// float over the backdrop (no opaque panel). After every round the battle
-// parks on its round-result beat (battle.pendingResult) and this scene draws
-// the mockup's verdict panel until CONTINUAR/Enter advances the match.
+// Layout: HUD (energia + hype per side, RONDA, decision timer, ESTIMULO) over
+// the live scene, two big performers on the ground, and the round's hand of 5
+// vertical resource cards floating over the backdrop (no opaque panel). After
+// every round the battle parks on its round-result beat (battle.pendingResult)
+// and this scene draws the mockup's verdict panel — now naming the rival's
+// resource and any tension note — until CONTINUAR/Enter advances the match.
 // Presentation only: every click and key is a GameController command; numbers
-// come from state, BattleConfig, and BattleSystem's read-only helpers.
+// come from state, BattleConfig, and BattleSystem's read-only helpers; the
+// hand itself is dealt by BattleSystem (no hand logic here).
 
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
@@ -17,11 +19,11 @@ import { gameContext } from "../game/context";
 import { AssetRegistry, battleBackdropKey, battleChoiceIconKey } from "../game/AssetRegistry";
 import { hex, palette } from "../ui/palette";
 import { addButton, addDisplayText, addHitZone, addRect, addSpriteImage, addText, TEXT_PAD } from "../ui/kit";
-import { battleChoices } from "../data/battle";
+import { resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
-import { battleEnergyCost, projectedHypeGain } from "../systems/BattleSystem";
+import { battleEnergyCost, battleRoundSeconds, projectedHypeGain } from "../systems/BattleSystem";
 import { maxEnergy } from "../core/derived";
-import type { BattleChoice, BattleState, GameState, RoundResult } from "../core/types";
+import type { BattleResource, BattleState, GameState, RoundResult } from "../core/types";
 
 const W = 960;
 const H = 540;
@@ -33,15 +35,26 @@ const FRAME_DIM = "#4e5470";
 const LABEL_CYAN = "#6ec6ec";
 const HYPE_ORANGE = "#ff9d2f";
 
-// Choice dock: six vertical cards, mockup card proportions (126x169, gap 24)
-// centered on the canvas. The mockup shows five; the sixth fits by trimming the
-// side margins, never the card or gap sizes.
+// Choice dock: the hand of 5 vertical cards, mockup card proportions
+// (126x169, gap 24) centered on the canvas — exactly the mockup's five.
 const CARD_W = 126;
 const CARD_H = 169;
 const CARD_GAP = 24;
 const CARD_TOP = 284;
 const CARD_SELECT_PAD = 5;
 const CURSOR_H = 12;
+
+// Decision-timer bar: a discreet countdown right under RONDA n (the mockup
+// has no timer, so it borrows the HUD bar language at pocket size, in the
+// 13px gap between the RONDA line and the central HYPE label). The fill is
+// animated per-frame from battle.timeLeft — frame delta, never tweens, so the
+// harness (frozen Date.now) still shows honest progress.
+const TIMER_W = 120;
+const TIMER_H = 5;
+const TIMER_Y = 60;
+const TIMER_CX = 483;
+// Below this fraction of time left the fill turns red.
+const TIMER_ALERT_FRACTION = 0.25;
 
 // Performers: mockup scale and anchors (MC ~186px tall, feet clear of both the
 // card dock and the result panels).
@@ -59,20 +72,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-// Legacy battleStimulusLabel(): big keyword for the stimulus card. The mockup
-// prints only this keyword on the battle screen (the full prompt sentence stays
-// in state for the result/event text).
-function battleStimulusLabel(prompt: string): string {
-  if (prompt.includes("barrio") || prompt.includes("canciones")) return "BARRIO";
-  if (prompt.includes("beat") || prompt.includes("tempo")) return "TEMPO";
-  if (prompt.includes("dificil")) return "PALABRA";
-  if (prompt.includes("tarima") || prompt.includes("publico")) return "ESCENA";
-  if (prompt.includes("nuevo")) return "NOVATO";
-  return "CORONA";
-}
-
 export class BattleScene extends Phaser.Scene {
   private layer!: Phaser.GameObjects.Container;
+  // Live handle to the timer bar's fill so update() can animate it with the
+  // frame delta between redraws (null whenever no card choice is on screen).
+  private timerFill: Phaser.GameObjects.Rectangle | null = null;
 
   constructor() {
     super("Battle");
@@ -98,11 +102,17 @@ export class BattleScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    gameContext().controller.update(delta / 1000);
+    const controller = gameContext().controller;
+    controller.update(delta / 1000);
+    // Countdown bar follows battle.timeLeft every frame (the controller ticks
+    // it); everything else redraws only on events.
+    const battle = controller.state.battle;
+    if (battle && !battle.finished && !battle.pendingResult) this.updateTimerFill(battle);
   }
 
   private redraw(): void {
     this.layer.removeAll(true);
+    this.timerFill = null;
     const { controller, input } = gameContext();
     const battle = controller.state.battle;
     if (!battle) return;
@@ -198,7 +208,27 @@ export class BattleScene extends Phaser.Scene {
     this.addCenteredText(483, 68, "HYPE", 17, HYPE_ORANGE);
     this.drawHudBar(390, 88, 188, 14, battle.hype, 100, palette.yellow, true);
     const onResultScreen = battle.finished || battle.pendingResult !== null;
+    if (!onResultScreen) this.drawDecisionTimer(battle);
     this.drawStimulus(battle, onResultScreen ? STIMULUS_TOP_RESULT : STIMULUS_TOP_ROUND);
+  }
+
+  // Discreet countdown bar under RONDA n. Only exists while choosing a card
+  // (the timer pauses on the verdict beats, so the bar leaves with the cards).
+  private drawDecisionTimer(battle: BattleState): void {
+    const x = Math.round(TIMER_CX - TIMER_W / 2);
+    addRect(this, this.layer, x + 1, TIMER_Y + 1, TIMER_W, TIMER_H, "#000000", 0.3);
+    addRect(this, this.layer, x, TIMER_Y, TIMER_W, TIMER_H, "#060814");
+    this.timerFill = addRect(this, this.layer, x, TIMER_Y, TIMER_W, TIMER_H, palette.yellow);
+    this.updateTimerFill(battle);
+  }
+
+  // Frame-delta animation of the countdown fill (harness-safe: no tweens).
+  private updateTimerFill(battle: BattleState): void {
+    if (!this.timerFill) return;
+    const total = battleRoundSeconds(gameContext().controller.state);
+    const fraction = total > 0 ? clamp(battle.timeLeft / total, 0, 1) : 0;
+    this.timerFill.setScale(fraction, 1);
+    this.timerFill.setFillStyle(hex(fraction <= TIMER_ALERT_FRACTION ? palette.red : palette.yellow));
   }
 
   // ESTIMULO label + framed keyword box (mockup: no prompt sentence here).
@@ -206,7 +236,7 @@ export class BattleScene extends Phaser.Scene {
     this.addCenteredText(483, top - 23, "ESTIMULO", 16, palette.ink);
     addRect(this, this.layer, 338, top, 290, 71, palette.deep, 0.9);
     this.drawFrame(338, top, 290, 71, FRAME);
-    this.addCenteredDisplayText(483, top + 18, battleStimulusLabel(battle.prompt.text), 37, palette.yellow);
+    this.addCenteredDisplayText(483, top + 18, battle.prompt.label.toUpperCase(), 37, palette.yellow);
   }
 
   // ENERGIA value + bar and the HYPE bar for one performer.
@@ -254,17 +284,22 @@ export class BattleScene extends Phaser.Scene {
     addRect(this, this.layer, 18, 18, W - 36, 2, "#ffffff", 0.11);
   }
 
-  // --- Choice dock ------------------------------------------------------------
+  // --- Choice dock (the dealt hand of 5) ---------------------------------------
 
-  private cardX(index: number): number {
-    const count = battleChoices.length;
+  private cardX(index: number, count: number): number {
     const total = count * CARD_W + (count - 1) * CARD_GAP;
     return Math.round((W - total) / 2) + index * (CARD_W + CARD_GAP);
   }
 
   private drawChoiceDock(battle: BattleState, battleFocus: number, state: GameState): void {
-    battleChoices.forEach((choice, index) => {
-      this.drawChoiceCard(choice, this.cardX(index), projectedHypeGain(battle, choice), index === battleFocus);
+    const hand = battle.hand.map((id) => resourceById(id));
+    hand.forEach((resource, index) => {
+      this.drawChoiceCard(
+        resource,
+        this.cardX(index, hand.length),
+        projectedHypeGain(battle, resource),
+        index === battleFocus,
+      );
     });
     this.addValueLine(
       W / 2,
@@ -280,7 +315,7 @@ export class BattleScene extends Phaser.Scene {
 
   // Vertical card: name on top, big icon, projected hype in large type, HYPE
   // caption. Selected card gets the yellow ring plus the cursor above it.
-  private drawChoiceCard(choice: BattleChoice, x: number, hype: number, focused: boolean): void {
+  private drawChoiceCard(choice: BattleResource, x: number, hype: number, focused: boolean): void {
     const y = CARD_TOP;
     const cx = x + CARD_W / 2;
     addRect(this, this.layer, x + 3, y + 4, CARD_W, CARD_H, "#000000", 0.34);
@@ -292,13 +327,36 @@ export class BattleScene extends Phaser.Scene {
     }
     addRect(this, this.layer, x, y, CARD_W, CARD_H, palette.deep, 0.94);
     this.drawFrame(x, y, CARD_W, CARD_H, focused ? palette.yellow : FRAME);
-    this.addCenteredText(cx, y + 17, choice.label.toUpperCase(), 15, palette.ink);
+    // Long resource names (IMPROVISACION, STORYTELLING) shrink to the card.
+    this.addFittedCenteredText(cx, y + 17, choice.label.toUpperCase(), 15, palette.ink, CARD_W - 10);
     const iconKey = battleChoiceIconKey(choice.id);
     const icon = iconKey ? addSpriteImage(this, this.layer, iconKey, cx, y + 72, 50, 0.5, 0.5, 52) : null;
-    if (!icon) addRect(this, this.layer, cx - 14, y + 65, 28, 14, FRAME_DIM);
+    // Four of the ten resources have no cut icon yet (docs/ASSETS.md): a dashed
+    // frame reads as "pending art", the way the shop's preview slot does, so a
+    // missing sprite can never be mistaken for a broken card.
+    if (!icon) this.drawPendingIconSlot(cx, y + 72);
     this.addCenteredDisplayText(cx, y + 110, `+${hype}`, 30, palette.ink);
     this.addCenteredText(cx, y + 142, "HYPE", 13, HYPE_ORANGE);
     addHitZone(this, this.layer, x, y, CARD_W, CARD_H, () => gameContext().controller.resolveBattle(choice));
+  }
+
+  // Dashed placeholder for a battle resource whose icon is still pending.
+  private drawPendingIconSlot(cx: number, cy: number): void {
+    const w = 44;
+    const h = 44;
+    const x = cx - w / 2;
+    const y = cy - h / 2;
+    const dash = 4;
+    for (let dx = 0; dx < w; dx += dash * 2) {
+      const run = Math.min(dash, w - dx);
+      addRect(this, this.layer, x + dx, y, run, 1, FRAME_DIM);
+      addRect(this, this.layer, x + dx, y + h - 1, run, 1, FRAME_DIM);
+    }
+    for (let dy = 0; dy < h; dy += dash * 2) {
+      const run = Math.min(dash, h - dy);
+      addRect(this, this.layer, x, y + dy, 1, run, FRAME_DIM);
+      addRect(this, this.layer, x + w - 1, y + dy, 1, run, FRAME_DIM);
+    }
   }
 
   // Selection cursor: yellow triangle pointing down at the focused card.
@@ -311,11 +369,12 @@ export class BattleScene extends Phaser.Scene {
 
   // --- Round result beat (mockup 06_25_07: verdict after EVERY round) ---------
 
-  // Round verdict per the mockup: TU JUGADA (choice + icon), the big one-word
-  // grade with the hype the answer earned, RESPUESTA RIVAL with the rival's
-  // grade and hype, HYPE TOTAL, and CONTINUAR to advance the match.
+  // Round verdict per the mockup: TU JUGADA (resource + icon, or PASADA when
+  // the timer expired), the big one-word grade with the hype the answer
+  // earned, RESPUESTA RIVAL naming the rival's resource with its grade and
+  // hype, the tension note when a rule fired, HYPE TOTAL, and CONTINUAR.
   private drawRoundResultPanel(battle: BattleState, result: RoundResult): void {
-    const played = battleChoices.find((choice) => choice.id === result.choice) ?? battleChoices[0];
+    const played = result.choice ? resourceById(result.choice) : null;
     const playerColor = result.playerHypeDelta > 0 ? palette.green : palette.red;
 
     this.drawResultSeparator();
@@ -328,19 +387,47 @@ export class BattleScene extends Phaser.Scene {
     this.addCenteredDisplayText(473, 318, this.signed(result.playerHypeDelta), 44, playerColor);
     this.addCenteredText(473, 372, "HYPE", 20, HYPE_ORANGE);
 
-    // Rival box: their grade and the hype their answer earned (rows 303/336/377).
-    addRect(this, this.layer, 642, 262, 184, 141, palette.deep, 0.94);
-    this.drawFrame(642, 262, 184, 141, FRAME);
-    this.addCenteredText(734, 272, "RESPUESTA RIVAL", 11, palette.muted);
-    this.addCenteredDisplayText(734, 301, result.rivalVerdict, 24, palette.red);
-    this.addCenteredDisplayText(734, 334, this.signed(result.rivalHypeDelta), 40, palette.red);
-    this.addCenteredText(734, 375, "HYPE", 14, HYPE_ORANGE);
-
+    this.drawRivalAnswerPanel(result);
+    this.drawTensionNotes(result);
     this.drawHypeTotal(battle.hype);
     addButton(this, this.layer, 390, 492, 180, 26, "Continuar", () => gameContext().controller.advanceBattleRound(), {
       fill: "#11183a",
       size: 13,
     });
+  }
+
+  // Rival box: which resource they answered with, their grade and the hype
+  // their answer earned.
+  private drawRivalAnswerPanel(result: RoundResult): void {
+    const rivalPlayed = resourceById(result.rivalChoice);
+    addRect(this, this.layer, 642, 262, 184, 141, palette.deep, 0.94);
+    this.drawFrame(642, 262, 184, 141, FRAME);
+    this.addCenteredText(734, 271, "RESPUESTA RIVAL", 11, palette.muted);
+    // Icon + name read as one centred group: the label shifts right by half
+    // the icon block so the pair sits on the panel's centre line, not the text.
+    const iconKey = battleChoiceIconKey(rivalPlayed.id);
+    const iconBlock = iconKey ? 22 : 0;
+    const label = this.addFittedCenteredText(
+      734 + iconBlock / 2,
+      288,
+      rivalPlayed.label.toUpperCase(),
+      12,
+      palette.ink,
+      140 - iconBlock,
+    );
+    if (iconKey) {
+      addSpriteImage(this, this.layer, iconKey, label.x - label.width / 2 - 11, 295, 16, 0.5, 0.5, 18);
+    }
+    this.addCenteredDisplayText(734, 307, result.rivalVerdict, 20, palette.red);
+    this.addCenteredDisplayText(734, 334, this.signed(result.rivalHypeDelta), 34, palette.red);
+    this.addCenteredText(734, 376, "HYPE", 14, HYPE_ORANGE);
+  }
+
+  // Tension-rule notes ("aburres al publico", response bonus, timer expiry):
+  // one discreet line between the verdict boxes and the HYPE TOTAL bar.
+  private drawTensionNotes(result: RoundResult): void {
+    if (result.tensionNotes.length === 0) return;
+    this.addCenteredText(W / 2, 412, result.tensionNotes.join("  "), 11, palette.yellow);
   }
 
   // "+18" / "-7": hype deltas always carry their sign, like the mockup.
@@ -352,7 +439,7 @@ export class BattleScene extends Phaser.Scene {
 
   private drawResultPanel(battle: BattleState): void {
     const last = battle.results[battle.results.length - 1];
-    const played = battleChoices.find((choice) => choice.id === last?.choice) ?? battleChoices[0];
+    const played = last?.choice ? resourceById(last.choice) : null;
     const verdict = battle.result === "win" ? "GANASTE" : battle.result === "draw" ? "REPLICA" : "DERROTA";
     const color = battle.result === "win" ? palette.green : battle.result === "draw" ? palette.teal : palette.red;
     const hypeDelta = battle.hype - BattleConfig.rounds.openingHype;
@@ -379,13 +466,14 @@ export class BattleScene extends Phaser.Scene {
     addRect(this, this.layer, 624, 275, 1, 115, FRAME_DIM);
   }
 
-  // TU JUGADA: the choice the player just used, with its icon.
-  private drawPlayedPanel(played: BattleChoice): void {
+  // TU JUGADA: the resource the player just used, with its icon — or PASADA
+  // when the decision timer expired and no card was played.
+  private drawPlayedPanel(played: BattleResource | null): void {
     addRect(this, this.layer, 139, 262, 160, 141, palette.panel, 0.94);
     this.drawFrame(139, 262, 160, 141, FRAME);
     this.addCenteredText(219, 270, "TU JUGADA:", 12, LABEL_CYAN);
-    this.addCenteredText(219, 294, played.label.toUpperCase(), 16, palette.ink);
-    const iconKey = battleChoiceIconKey(played.id);
+    this.addCenteredText(219, 294, played ? played.label.toUpperCase() : BattleConfig.timer.passLabel, 16, palette.ink);
+    const iconKey = played ? battleChoiceIconKey(played.id) : null;
     if (iconKey) addSpriteImage(this, this.layer, iconKey, 219, 356, 66, 0.5, 0.5, 96);
   }
 
@@ -421,6 +509,22 @@ export class BattleScene extends Phaser.Scene {
   private addCenteredText(cx: number, y: number, content: string, size: number, color: string): Phaser.GameObjects.Text {
     const text = addText(this, this.layer, 0, y, content, size, color);
     text.setX(Math.round(cx - text.width / 2));
+    return text;
+  }
+
+  // Centered text that shrinks (uniformly) when wider than maxWidth, so long
+  // resource names never bleed out of their card or panel.
+  private addFittedCenteredText(
+    cx: number,
+    y: number,
+    content: string,
+    size: number,
+    color: string,
+    maxWidth: number,
+  ): Phaser.GameObjects.Text {
+    const text = addText(this, this.layer, 0, y, content, size, color);
+    if (text.width > maxWidth) text.setScale(maxWidth / text.width);
+    text.setX(Math.round(cx - text.displayWidth / 2));
     return text;
   }
 

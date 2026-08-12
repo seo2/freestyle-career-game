@@ -1,68 +1,159 @@
-import type { BattleChoice, BattlePrompt } from "../core/types";
+// Battle content data (gauntlet 9): the Bible's 10 resources and 10 stimuli.
+// Pure data — rules that consume it live in src/systems/BattleSystem.ts and
+// every tuning number in src/data/config/BattleConfig.ts.
 
-export const battleChoices: BattleChoice[] = [
-  {
-    id: "respuesta",
-    label: "Responder",
-    stat: "improvisacion",
-    detail: "Castiga el ataque del rival.",
-  },
+import type { BattleResource, BattleResourceId, BattleStimulus } from "../core/types";
+
+// The 10 battle resources, in Bible order. `stats` feed the roll (averaged so
+// multi-stat resources stay comparable), `baseHype` is the card's win hype —
+// mockup values where the mockup shows them (Punchline +15, Respuesta +10,
+// Humor +8, Ataque +12, Metrica +8), coherent siblings for the rest.
+export const battleResources: BattleResource[] = [
   {
     id: "punchline",
     label: "Punchline",
-    stat: "punchline",
     detail: "Busca el remate mas fuerte.",
+    stats: ["punchline"],
+    baseHype: 15,
   },
   {
     id: "flow",
     label: "Flow",
-    stat: "flow",
     detail: "Gana al publico con ritmo.",
+    stats: ["flow"],
+    baseHype: 9,
   },
   {
     id: "humor",
     label: "Humor",
-    stat: "carisma",
     detail: "Desarma la tension con gracia.",
+    stats: ["carisma"],
+    baseHype: 8,
   },
   {
-    id: "tecnica",
-    label: "Tecnica",
-    stat: "metrica",
+    id: "ataque",
+    label: "Ataque",
+    detail: "Presiona directo al rival.",
+    stats: ["punchline", "escena"],
+    baseHype: 12,
+  },
+  {
+    id: "defensa",
+    label: "Defensa",
+    detail: "Aguanta el golpe sin perder pie.",
+    stats: ["disciplina", "escena"],
+    baseHype: 8,
+  },
+  {
+    id: "metrica",
+    label: "Metrica",
     detail: "Juega con estructuras y multis.",
+    stats: ["metrica"],
+    baseHype: 8,
   },
   {
-    id: "escena",
-    label: "Escena",
-    stat: "escena",
-    detail: "Domina el escenario y el hype.",
+    id: "dobletempo",
+    label: "Doble Tempo",
+    detail: "Acelera el beat al doble.",
+    stats: ["flow", "metrica"],
+    baseHype: 11,
+  },
+  {
+    id: "respuesta",
+    label: "Respuesta",
+    detail: "Castiga el ataque del rival.",
+    stats: ["improvisacion"],
+    baseHype: 10,
+  },
+  {
+    id: "storytelling",
+    label: "Storytelling",
+    detail: "Cuenta una historia que pega.",
+    stats: ["metrica", "carisma"],
+    baseHype: 9,
+  },
+  {
+    id: "improvisacion",
+    label: "Improvisacion",
+    detail: "Usa lo que hay en la tarima.",
+    stats: ["improvisacion", "flow"],
+    baseHype: 10,
   },
 ];
 
-export const battlePrompts: BattlePrompt[] = [
+const resourceIndex = new Map(battleResources.map((resource) => [resource.id, resource]));
+
+// Safe lookup for the closed BattleResourceId union (throwing keeps a typo in
+// data or a stale save id loud instead of silently wrong).
+export function resourceById(id: BattleResourceId): BattleResource {
+  const found = resourceIndex.get(id);
+  if (!found) throw new Error(`unknown battle resource: ${id}`);
+  return found;
+}
+
+// The 10 stimuli of the Bible. `label` is the big keyword of the round card;
+// `text` the flavor sentence (event copy); `best` the resources the crowd
+// rewards on that stimulus (stimulus bonus in BattleSystem).
+export const battleStimuli: BattleStimulus[] = [
   {
-    text: "El rival se burla de que eres nuevo en el circuito.",
-    best: ["respuesta", "humor"],
+    id: "barrio",
+    label: "Barrio",
+    text: "El estimulo apunta a tu barrio y tus calles.",
+    best: ["storytelling", "ataque"],
   },
   {
-    text: "El beat cambia y el publico espera doble tempo.",
-    best: ["flow", "tecnica"],
+    id: "familia",
+    label: "Familia",
+    text: "Sale la familia al medio: tocan lo personal.",
+    best: ["storytelling", "humor"],
   },
   {
-    text: "Te tiran una palabra dificil como estimulo.",
-    best: ["tecnica", "punchline"],
+    id: "escuela",
+    label: "Escuela",
+    text: "Recuerdan tus notas y tus dias de escuela.",
+    best: ["humor", "metrica"],
   },
   {
-    text: "El host prende a la gente y la tarima se calienta.",
-    best: ["escena", "flow"],
+    id: "dinero",
+    label: "Dinero",
+    text: "El tema es plata: quien la tiene y quien no.",
+    best: ["punchline", "ataque"],
   },
   {
-    text: "El rival ataca tu barrio y tus primeras canciones.",
-    best: ["respuesta", "punchline"],
+    id: "corona",
+    label: "Corona",
+    text: "La corona esta en juego y todos lo saben.",
+    best: ["ataque", "dobletempo"],
   },
   {
-    text: "La ronda va pareja y queda una barra para cerrar.",
-    best: ["punchline", "escena"],
+    id: "respeto",
+    label: "Respeto",
+    text: "Piden respeto: el publico mide cada palabra.",
+    best: ["respuesta", "defensa"],
+  },
+  {
+    id: "tiempo",
+    label: "Tiempo",
+    text: "El beat marca el tiempo y exige velocidad.",
+    best: ["dobletempo", "flow"],
+  },
+  {
+    id: "rival",
+    label: "Rival",
+    text: "Todo gira en torno a tu rival y su historial.",
+    best: ["respuesta", "ataque"],
+  },
+  {
+    id: "trabajo",
+    label: "Trabajo",
+    text: "Hablan de trabajo, oficio y sacrificio.",
+    best: ["defensa", "storytelling"],
+  },
+  {
+    id: "cultura",
+    label: "Cultura",
+    text: "La cultura manda: conocimiento y raices.",
+    best: ["metrica", "improvisacion"],
   },
 ];
 

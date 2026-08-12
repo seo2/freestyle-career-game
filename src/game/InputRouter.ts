@@ -4,7 +4,7 @@
 // highlights. Pointer input is handled per-scene via Phaser interactives.
 
 import type { CareerView } from "../core/types";
-import { battleChoices } from "../data/battle";
+import { resourceById } from "../data/battle";
 import { socialPostOptions } from "../data/social";
 import { jobOptions } from "../data/jobs";
 import { calendarActionIds } from "../data/actions";
@@ -92,8 +92,8 @@ export class InputRouter {
     if (action && !action.disabledReason) this.controller.runCareerAction(action.id);
   }
 
-  private setBattleFocus(value: number): void {
-    this.battleFocus = clamp(value, 0, battleChoices.length - 1);
+  private setBattleFocus(value: number, lastCard: number): void {
+    this.battleFocus = clamp(value, 0, lastCard);
     eventBus.emit("FOCUS_CHANGED", undefined);
   }
 
@@ -235,34 +235,29 @@ export class InputRouter {
         }
         return;
       }
-      if (event.key === "ArrowRight") {
-        this.setBattleFocus(this.battleFocus + 1);
+      // The hand is a single row of 5 cards, so the cursor walks it
+      // horizontally; up/down are previous/next (like the room dock) so a
+      // vertical press never strands the cursor.
+      const lastCard = battle.hand.length - 1;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        this.setBattleFocus(this.battleFocus + 1, lastCard);
         event.preventDefault();
         return;
       }
-      if (event.key === "ArrowLeft") {
-        this.setBattleFocus(this.battleFocus - 1);
-        event.preventDefault();
-        return;
-      }
-      if (event.key === "ArrowDown") {
-        this.setBattleFocus(this.battleFocus + 3);
-        event.preventDefault();
-        return;
-      }
-      if (event.key === "ArrowUp") {
-        this.setBattleFocus(this.battleFocus - 3);
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        this.setBattleFocus(this.battleFocus - 1, lastCard);
         event.preventDefault();
         return;
       }
       if (isConfirm) {
-        c.resolveBattle(battleChoices[this.battleFocus]);
+        const focusedId = battle.hand[clamp(this.battleFocus, 0, lastCard)];
+        if (focusedId) c.resolveBattle(resourceById(focusedId));
         event.preventDefault();
         return;
       }
       const number = Number(event.key);
-      if (Number.isInteger(number) && number >= 1 && number <= battleChoices.length) {
-        c.resolveBattle(battleChoices[number - 1]);
+      if (Number.isInteger(number) && number >= 1 && number <= battle.hand.length) {
+        c.resolveBattle(resourceById(battle.hand[number - 1]));
       }
     }
   }

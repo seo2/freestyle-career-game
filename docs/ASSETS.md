@@ -110,6 +110,13 @@ cuando falta. Cortar estos assets es enchufarlos, no rediseñar:
   `item-cuaderno`. Ya cubiertos por cortes previos: micrófono → `battle-punchline`,
   audífonos → `battle-flow`, colchón → `action-rest`.
 - **`ui-cart`**: el glifo de carrito de las filas de la tienda (hoy se usa "+").
+- **Iconos de recurso de batalla que faltan** (4 de los 10 de la Bible;
+  las cartas dibujan un marco punteado mientras no existan):
+  `battle-defensa` (guardia/escudo), `battle-dobletempo` (doble corchea o
+  metrónomo), `battle-storytelling` (libro o bocadillo de historia),
+  `battle-improvisacion` (chispa/bombilla). Ya cortados: punchline (micrófono),
+  flow (audífonos), humor (cara), ataque (puño), metrica (nota), respuesta
+  (bocadillo).
 - **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario con
   skyline): hueco de 306×164 reservado.
 - **Ilustraciones de trabajo** (4) e **iconos de fila** (portapapeles, platos,
