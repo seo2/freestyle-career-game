@@ -77,14 +77,16 @@ export function actionIconKey(id: string): string | null {
   return actionIconKeys[id] ?? null;
 }
 
-// Battle choice id -> card icon texture key (null when unknown).
+// Battle resource id -> card icon texture key (null when no icon cut yet).
+// Pending art: battle-defensa, battle-dobletempo, battle-storytelling and
+// battle-improvisacion — those cards draw the neutral framed placeholder.
 const battleChoiceIconKeys: Record<string, string> = {
   respuesta: AssetRegistry.icons.battleRespuesta.key,
   punchline: AssetRegistry.icons.battlePunchline.key,
   flow: AssetRegistry.icons.battleFlow.key,
   humor: AssetRegistry.icons.battleHumor.key,
-  tecnica: AssetRegistry.icons.battleMetrica.key,
-  escena: AssetRegistry.icons.battleAtaque.key,
+  metrica: AssetRegistry.icons.battleMetrica.key,
+  ataque: AssetRegistry.icons.battleAtaque.key,
 };
 
 export function battleChoiceIconKey(id: string): string | null {

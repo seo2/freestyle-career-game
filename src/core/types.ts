@@ -17,7 +17,19 @@ export type StatKey =
 
 export type Stats = Record<StatKey, number>;
 
-export type BattleChoiceId = "respuesta" | "punchline" | "flow" | "humor" | "tecnica" | "escena";
+// The 10 battle resources of the Bible (gauntlet 9). Their data — labels,
+// feeding stats, base hype — lives in src/data/battle.ts.
+export type BattleResourceId =
+  | "punchline"
+  | "flow"
+  | "humor"
+  | "ataque"
+  | "defensa"
+  | "metrica"
+  | "dobletempo"
+  | "respuesta"
+  | "storytelling"
+  | "improvisacion";
 export type UpgradeKey = "outfit" | "studio" | "home";
 
 export interface StageDef {
@@ -31,24 +43,39 @@ export interface StageDef {
   minFame: number;
 }
 
-export interface BattlePrompt {
+// Per-round stimulus (the Bible's "Estimulo"): the big keyword of the round.
+// `best` lists the resources the crowd rewards on it — the hand is dealt
+// independently, so reading the stimulus means recognizing when the hand fits.
+export interface BattleStimulus {
+  id: string;
+  label: string;
   text: string;
-  best: BattleChoiceId[];
+  best: BattleResourceId[];
 }
 
-export interface BattleChoice {
-  id: BattleChoiceId;
+// One playable battle resource (a card of the hand). `stats` feed its roll
+// (averaged), `baseHype` is the card's win hype before tension bonuses.
+export interface BattleResource {
+  id: BattleResourceId;
   label: string;
-  stat: StatKey;
   detail: string;
+  stats: StatKey[];
+  baseHype: number;
 }
 
 export interface RoundResult {
   round: number;
-  choice: BattleChoiceId;
+  // null = "Pasada": the decision timer expired and the round was skipped.
+  choice: BattleResourceId | null;
+  // The resource the rival performed this round (gauntlet 9: seeded uniform
+  // pick; gauntlet 10 replaces the picker with rival personalities).
+  rivalChoice: BattleResourceId;
   player: number;
   rival: number;
   note: string;
+  // Tension rules that fired this round (response bonus, repetition penalty,
+  // timer expiry), as the visible notes of the verdict panel.
+  tensionNotes: string[];
   // Round-result panel data (mockup 06_25_07): how much hype each answer
   // earned this round and its one-word grade. Verdict vocabulary and the
   // thresholds that pick a word live in BattleConfig.verdict.
@@ -79,7 +106,14 @@ export interface BattleState {
   hype: number;
   playerScore: number;
   rivalScore: number;
-  prompt: BattlePrompt;
+  prompt: BattleStimulus;
+  // Hand of 5 dealt each round by BattleSystem (mockup shows exactly 5 cards).
+  // The scene renders whatever the state holds — no hand logic in scenes.
+  hand: BattleResourceId[];
+  // Decision timer in seconds (float internally; test hooks expose only whole
+  // seconds). Ticks in GameController.update while choosing, pauses on the
+  // verdict beat. Never persisted: saves always write battle: null.
+  timeLeft: number;
   results: RoundResult[];
   // Round-result beat: set when a round has resolved and its verdict panel is
   // on screen; advanceBattleRound clears it (next round or final verdict).

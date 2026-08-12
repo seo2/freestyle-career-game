@@ -6,7 +6,7 @@
 
 import type {
   ActionResult,
-  BattleChoice,
+  BattleResource,
   CareerActionInfo,
   CareerView,
   Difficulty,
@@ -23,13 +23,15 @@ import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
 import { createStateRng, type RandomSource } from "../services/RandomService";
 import { createSaveManager, type SaveManagerApi } from "./SaveManager";
-import { battleChoices } from "../data/battle";
+import { resourceById } from "../data/battle";
 import { eventBus } from "../events/EventBus";
 import { finalizeEvent, getCareerGoals } from "../systems/ProgressionSystem";
 import { formatBlock } from "../systems/CalendarSystem";
 import {
   advanceBattleRound as advanceBattleRoundSys,
+  expireBattleRound as expireBattleRoundSys,
   finishBattle as finishBattleSys,
+  projectedHypeGain,
   resolveBattle as resolveBattleSys,
 } from "../systems/BattleSystem";
 import {
@@ -102,16 +104,29 @@ export class GameController {
     return this.savedSnapshot !== null;
   }
 
-  // --- Frame update (agenda-strip animation + idle clock) --------------------
+  // --- Frame update (agenda-strip animation + battle timer + idle clock) -----
 
   update(dt: number): void {
     this.state.animationTime += dt;
+    this.tickBattleTimer(dt);
     if (this.timeFx) {
       this.timeFx.elapsed += dt;
       if (this.timeFx.elapsed >= this.timeFx.duration) {
         this.timeFx = null;
       }
     }
+  }
+
+  // Decision timer: ticks only while the player is choosing a card (never on
+  // the verdict/result beats) and expires the round into its Pasada verdict.
+  // Living in update() keeps it testable through window.advanceTime(ms).
+  private tickBattleTimer(dt: number): void {
+    const battle = this.state.battle;
+    if (this.state.mode !== "battle" || !battle || battle.finished || battle.pendingResult) return;
+    battle.timeLeft = Math.max(0, battle.timeLeft - dt);
+    if (battle.timeLeft > 0) return;
+    expireBattleRoundSys(this.state, this.rng);
+    eventBus.emit("STATE_CHANGED", undefined);
   }
 
   // --- Event/save plumbing ----------------------------------------------------
@@ -188,7 +203,7 @@ export class GameController {
 
   // --- Battle commands -----------------------------------------------------------
 
-  resolveBattle(choice: BattleChoice): void {
+  resolveBattle(choice: BattleResource): void {
     resolveBattleSys(this.state, this.rng, choice);
     eventBus.emit("STATE_CHANGED", undefined);
   }
@@ -347,45 +362,61 @@ export class GameController {
             reason: action.disabledReason ?? null,
           }))
         : [];
-    const battle = state.battle
+    const liveBattle = state.battle;
+    const battle = liveBattle
       ? {
-          event: state.battle.eventName,
-          rival: state.battle.rivalName,
-          round: state.battle.round,
-          score: `${state.battle.playerScore}-${state.battle.rivalScore}`,
-          hype: state.battle.hype,
-          rivalEnergy: state.battle.rivalEnergy,
-          rivalEnergyMax: state.battle.rivalEnergyMax,
-          rivalHype: state.battle.rivalHype,
-          prompt: state.battle.prompt.text,
+          event: liveBattle.eventName,
+          rival: liveBattle.rivalName,
+          round: liveBattle.round,
+          score: `${liveBattle.playerScore}-${liveBattle.rivalScore}`,
+          hype: liveBattle.hype,
+          rivalEnergy: liveBattle.rivalEnergy,
+          rivalEnergyMax: liveBattle.rivalEnergyMax,
+          rivalHype: liveBattle.rivalHype,
+          stimulus: liveBattle.prompt.label,
+          prompt: liveBattle.prompt.text,
+          // Whole seconds only (determinism contract): the millisecond
+          // remainder varies run to run, whole seconds cannot within a
+          // capture step. Frozen while a verdict beat is on screen.
+          timerSeconds: Math.ceil(liveBattle.timeLeft),
           // Round-result beat on screen (Enter/CONTINUAR advances past it).
-          pendingResult: state.battle.pendingResult
+          pendingResult: liveBattle.pendingResult
             ? {
-                round: state.battle.pendingResult.round,
-                choice: state.battle.pendingResult.choice,
-                playerHypeDelta: state.battle.pendingResult.playerHypeDelta,
-                playerVerdict: state.battle.pendingResult.playerVerdict,
-                rivalHypeDelta: state.battle.pendingResult.rivalHypeDelta,
-                rivalVerdict: state.battle.pendingResult.rivalVerdict,
+                round: liveBattle.pendingResult.round,
+                choice: liveBattle.pendingResult.choice,
+                rivalChoice: liveBattle.pendingResult.rivalChoice,
+                tensionNotes: [...liveBattle.pendingResult.tensionNotes],
+                playerHypeDelta: liveBattle.pendingResult.playerHypeDelta,
+                playerVerdict: liveBattle.pendingResult.playerVerdict,
+                rivalHypeDelta: liveBattle.pendingResult.rivalHypeDelta,
+                rivalVerdict: liveBattle.pendingResult.rivalVerdict,
               }
             : null,
           // Per-round verdicts of everything resolved so far.
-          results: state.battle.results.map((entry) => ({
+          results: liveBattle.results.map((entry) => ({
             round: entry.round,
             choice: entry.choice,
+            rivalChoice: entry.rivalChoice,
+            tensionNotes: [...entry.tensionNotes],
             playerHypeDelta: entry.playerHypeDelta,
             playerVerdict: entry.playerVerdict,
             rivalHypeDelta: entry.rivalHypeDelta,
             rivalVerdict: entry.rivalVerdict,
           })),
-          finished: state.battle.finished,
-          result: state.battle.result,
-          choices: battleChoices.map((choice, index) => ({
-            key: String(index + 1),
-            id: choice.id,
-            label: choice.label,
-            boosted: state.battle?.prompt.best.includes(choice.id) ?? false,
-          })),
+          finished: liveBattle.finished,
+          result: liveBattle.result,
+          // The dealt hand of 5, digit hotkeys 1..5. projectedHype is the
+          // exact hype a win would award (single source in BattleSystem).
+          hand: liveBattle.hand.map((id, index) => {
+            const resource = resourceById(id);
+            return {
+              key: String(index + 1),
+              id,
+              label: resource.label,
+              boosted: liveBattle.prompt.best.includes(id),
+              projectedHype: projectedHypeGain(liveBattle, resource),
+            };
+          }),
         }
       : null;
     return JSON.stringify({
