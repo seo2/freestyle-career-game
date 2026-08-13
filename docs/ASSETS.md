@@ -98,36 +98,65 @@ Capas del cover: `bg_sky_night`, `bg_clouds`, `bg_city_back`, `bg_city_front`,
 
 ## Pendientes (anotar aquí, no improvisar — regla CLAUDE.md #2)
 
-### Assets que las pantallas ya reservan (Fase 4 dejó el hueco listo)
+### Iconos generados (2026-08-13) — 17 nuevos
 
-Cada pantalla se reconstruyó contra su mockup y pide su arte por clave de
-`AssetRegistry`, cayendo a un marco neutro (a veces punteado = "pendiente")
-cuando falta. Cortar estos assets es enchufarlos, no rediseñar:
+Los 17 iconos que faltaban **existen** y están enchufados. No se recortaron de
+`reference/` porque **no había fuente**: los mockups solo muestran 5-6 iconos de
+batalla y ninguno de ítem, así que se **generaron** en el estilo de los
+existentes y se pasaron por un pipeline nuevo.
 
-- **Iconos de ítem de la tienda** (64 px de alto c/u): `item-interfaz`,
-  `item-monitores`, `item-gorra`, `item-zapatillas`, `item-chaqueta`,
-  `item-beat-boombap`, `item-beat-trap`, `item-pack-acapella`, `item-mesa`,
-  `item-cuaderno`. Ya cubiertos por cortes previos: micrófono → `battle-punchline`,
-  audífonos → `battle-flow`, colchón → `action-rest`.
-- **`ui-cart`**: el glifo de carrito de las filas de la tienda (hoy se usa "+").
-- **Iconos de recurso de batalla que faltan** (4 de los 10 de la Bible;
-  las cartas dibujan un marco punteado mientras no existan):
-  `battle-defensa` (guardia/escudo), `battle-dobletempo` (doble corchea o
-  metrónomo), `battle-storytelling` (libro o bocadillo de historia),
-  `battle-improvisacion` (chispa/bombilla). Ya cortados: punchline (micrófono),
-  flow (audífonos), humor (cara), ataque (puño), metrica (nota), respuesta
-  (bocadillo).
-- **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario con
-  skyline): hueco de 306×164 reservado.
-- **Ilustraciones de trabajo** (4) e **iconos de fila** (portapapeles, platos,
-  martillo, percha): hueco de 406×168 reservado; hoy va el sprite del MC.
-- **Arte por stat** (libros/foco/manos-corazón/cerebro) y **por tipo de post**
-  (claqueta, cámara, marco de diálogo): hoy se reutilizan iconos ya cortados.
-- **Estrella y llama** para fama/rango (hoy una estrella compuesta con rects).
+- **Batalla (4):** `battle-defensa`, `battle-dobletempo`, `battle-storytelling`,
+  `battle-improvisacion`. Con esto los **10 recursos de la Bible** tienen arte y
+  ninguna carta cae al marco punteado.
+- **Ítems de tienda (11):** `item-interfaz`, `item-monitores`, `item-gorra`,
+  `item-zapatillas`, `item-chaqueta`, `item-mesa`, `item-cuaderno`,
+  `item-beat-boombap`, `item-beat-trap`, `item-pack-acapella` (micrófono y
+  audífonos siguen usando los cortes del mockup, porque **son** esos objetos).
+- **UI (3):** `ui-cart` (carrito de la tienda), `action-offer` (la oportunidad
+  agendada de la Fase 6) y `res-fame` (la estrella de fama, que antes se
+  componía con rects).
+
+**Cómo se hicieron, para poder repetirlo:** se pidió cada icono con el mismo
+prompt base ("pixel art, píxel grueso en grilla 32x32, contorno negro grueso,
+sombreado plano de tres tonos, objeto único centrado, fondo plano") y se procesó
+con `node scripts/process-icon.mjs <in> <out>`, que hace dos cosas que un recorte
+ingenuo hace mal:
+
+1. **Quita el fondo por flood fill desde el borde**, igualando el color que el
+   borde tenga de verdad (el generador ignora "fondo negro" y suele devolver
+   blanco). Los píxeles interiores de ese mismo color **sobreviven** — es el
+   error que en Fase 3 convirtió el micrófono en confeti.
+2. **Encaja el arte en su grilla nativa** (promedia a 32px de alto y luego escala
+   x2 con vecino más cercano). Bajar directo de 1024 a 64 deja bloques de 2px y
+   de 1px mezclados, que se lee como un icono borroso al lado de los recortados.
+
+Se verificó lo mismo que exige el proyecto: **64px de alto exactos, esquinas
+transparentes**, y los iconos vistos **dentro del juego** (batalla y las cuatro
+pestañas de la tienda) junto a los del mockup para comparar estilo. Evidencia en
+`output/web-game/arte-iconos/`.
+
+Dos notas honestas: son **arte generado, no recortado del diseño oficial**, así
+que si alguno no calza con tu idea, reemplazarlo es un prompt; y el filtro de
+contenido rebotó tres veces (gorra, mesa, chaqueta) con falsos positivos —
+salieron reformulando el prompt.
+
+### Sigue pendiente (ilustraciones, no iconos)
+
+Esto es lo que queda, y es de otra escala: son **ilustraciones**, con más riesgo
+de no calzar con el estilo del mockup.
+
+- **Multitud de batalla**: el mockup tiene público rodeando el cypher; hoy
+  reacciona la **luz** de la escena al hype, no una multitud.
 - **Ciudad isométrica del mapa**: el mapa dibuja una grilla nocturna procedural.
-- **Fondo en formato retrato** para el marco de Crear MC (hoy recorta el 42 % central del cover 16:9).
-- **Variantes del MC por aspecto y color de piel**: los selectores ya cambian el
-  estado, pero el sprite es el mismo para toda combinación.
+- **Ilustraciones de trabajo (4)** y sus iconos de fila, con el hueco de 406×168
+  ya reservado.
+- **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario);
+  hoy escala el icono de la fila.
+- **Variantes del MC por aspecto y color de piel**: los selectores de Crear MC
+  cambian el estado, pero el sprite es el mismo.
+- **Fondo en formato retrato** para el marco de Crear MC.
+- **Arte por stat** (libros, foco, manos-corazón, cerebro) para Entrenamiento.
+- **"Cypher en la pieza"** como fondo de batalla temprana.
 
 ### Placeholders resueltos en Fase 4
 

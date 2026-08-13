@@ -132,10 +132,23 @@ const BACK = { x: 560, y: 96, w: 142, h: 34 } as const;
 // straight out of this mockup's own rows, the notebook and the bed out of the
 // room dock. Everything else is a pending asset and falls back to the neutral
 // framed slot — no improvised shapes (project rule 2).
+// Every catalogue item has its own icon now: the ten that were missing were
+// generated and processed through scripts/process-icon.mjs (2026-08-13), so no
+// row falls back to the neutral placeholder. Two keep the cuts they borrowed
+// from the mockups, because those ARE their objects.
 const ITEM_ICON_KEYS: Record<string, string> = {
   microfono: AssetRegistry.icons.battlePunchline.key,
   audifonos: AssetRegistry.icons.battleFlow.key,
-  cuaderno: AssetRegistry.icons.actionWrite.key,
+  interfaz: AssetRegistry.icons.itemInterfaz.key,
+  monitores: AssetRegistry.icons.itemMonitores.key,
+  gorra: AssetRegistry.icons.itemGorra.key,
+  zapatillas: AssetRegistry.icons.itemZapatillas.key,
+  chaqueta: AssetRegistry.icons.itemChaqueta.key,
+  "beat-boombap": AssetRegistry.icons.itemBeatBoombap.key,
+  "beat-trap": AssetRegistry.icons.itemBeatTrap.key,
+  "pack-acapella": AssetRegistry.icons.itemPackAcapella.key,
+  cuaderno: AssetRegistry.icons.itemCuaderno.key,
+  mesa: AssetRegistry.icons.itemMesa.key,
   colchon: AssetRegistry.icons.actionRest.key,
 };
 
