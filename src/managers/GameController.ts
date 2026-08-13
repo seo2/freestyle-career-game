@@ -45,6 +45,20 @@ import { trainSpecificStat as trainSpecificStatSys } from "../systems/TrainingSy
 import { publishSocialPost as publishSocialPostSys } from "../systems/SocialSystem";
 import { performJob as performJobSys } from "../systems/JobsSystem";
 import { executeAction, getCareerActions } from "../systems/ActionsSystem";
+import {
+  battleDay,
+  clearPlan as clearPlanSys,
+  dayAlreadyLived,
+  lastWeekSummary,
+  openDays,
+  planDay as planDaySys,
+  plannedActionFor,
+  recordBattleOutcome,
+  recordDay,
+  todaysPlan,
+} from "../systems/PlanSystem";
+import { PlanConfig } from "../data/config/PlanConfig";
+import { calendarActionIds } from "../data/actions";
 
 export interface TimeAdvanceFx extends TimeAdvance {
   elapsed: number;
@@ -162,6 +176,85 @@ export class GameController {
     this.applyResult(executeAction(this.state, this.rng, actionId));
   }
 
+  // --- Weekly plan (Fase 6) ---------------------------------------------------
+
+  // The label the UI shows for an action id, taken from the same source the
+  // action list uses so the calendar can never name an action differently.
+  private actionLabel(actionId: string): string {
+    return this.careerActions().find((action) => action.id === actionId)?.label ?? actionId;
+  }
+
+  // Writing intent into a day. Free and reversible: the cost is in living it.
+  planDay(day: number, actionId: string | null): void {
+    if (!planDaySys(this.state, day, actionId)) return;
+    this.state.lastEvent = actionId === null ? `Dia ${day} liberado.` : `Dia ${day}: ${this.actionLabel(actionId)}.`;
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // Walks a day through the actions it can hold and back to open. Lives here so
+  // the click and the digit key cannot drift apart, and so the battle's
+  // weekday rule is applied in one place.
+  cyclePlanForDay(day: number): void {
+    const options: (string | null)[] = [
+      null,
+      ...calendarActionIds.filter((id) => id !== "battle" || day === battleDay()),
+    ];
+    const current = plannedActionFor(this.state, day);
+    const index = options.indexOf(current);
+    this.planDay(day, options[(index + 1) % options.length]);
+  }
+
+  clearWeekPlan(): void {
+    clearPlanSys(this.state);
+    this.state.lastEvent = "Agenda de la semana borrada.";
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // Living today: run what the week says and record what actually happened.
+  // This is the Bible's "execute" step and the only place a planned day turns
+  // into consequences.
+  runPlannedDay(): void {
+    if (dayAlreadyLived(this.state)) {
+      // The day's commitment is spent: the blocks left are for room actions, so
+      // the plan cannot be farmed by pressing the button again.
+      this.state.lastEvent = "Ya viviste el plan de hoy. Lo que quede del dia se hace desde la pieza.";
+      eventBus.emit("STATE_CHANGED", undefined);
+      return;
+    }
+    const planned = todaysPlan(this.state);
+    if (planned === null) {
+      // A day nobody planned still passes. Saying so out loud beats letting the
+      // player think the button was broken.
+      const drift = PlanConfig.idleDay;
+      this.state.momentum = Math.max(0, this.state.momentum - drift.momentumPenalty);
+      recordDay(this.state, null, null, drift.message);
+      this.runDayAs("rest", drift.message);
+      return;
+    }
+    const info = this.careerActions().find((action) => action.id === planned);
+    if (info?.disabledReason) {
+      // The plan broke: you scheduled more than the week could carry, so the day
+      // falls through to rest instead of the plan vanishing silently.
+      recordDay(this.state, planned, "rest", PlanConfig.brokenPlan.message);
+      this.runDayAs("rest", PlanConfig.brokenPlan.message);
+      return;
+    }
+    const result = executeAction(this.state, this.rng, planned);
+    recordDay(this.state, planned, planned, result.type === "event" ? result.parts[0] : this.actionLabel(planned));
+    this.applyResult(result);
+  }
+
+  // Runs a fallback action for the day and puts the reason in front of the
+  // event line, so the player always learns why the day went the way it did.
+  private runDayAs(actionId: string, reason: string): void {
+    const result = executeAction(this.state, this.rng, actionId);
+    if (result.type === "event") {
+      if (result.fx) this.startTimeFx(result.fx);
+      this.setEvent([reason, ...result.parts]);
+    }
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
   trainSpecificStat(stat: StatKey): void {
     this.applyResult(trainSpecificStatSys(this.state, this.rng, stat));
   }
@@ -216,8 +309,13 @@ export class GameController {
   }
 
   finishBattle(): void {
+    // The day the battle was fought, captured before the payout advances the
+    // clock (a late-night battle can roll the day over).
+    const foughtDay = this.state.day;
+    const outcome = this.state.battle?.result ?? null;
     const result = finishBattleSys(this.state, this.rng);
     if (!result) return;
+    if (outcome) recordBattleOutcome(this.state, foughtDay, result.parts[0], outcome);
     this.careerView = "base";
     this.startTimeFx(result.fx);
     this.setEvent(result.parts);
@@ -430,8 +528,35 @@ export class GameController {
           }),
         }
       : null;
+    // Weekly plan (Fase 6): the intent per day, what today holds, what is still
+    // open and the last closed week. Renderer-independent, like everything else
+    // in this dump, so the harness can verify planning without a screenshot.
+    const lastWeek = lastWeekSummary(state);
+    const week = {
+      number: state.week,
+      day: state.day,
+      plan: state.plan,
+      today: todaysPlan(state),
+      openDays: openDays(state),
+      battleDay: battleDay(),
+      record: state.weekRecord,
+      lastClosed: lastWeek
+        ? {
+            week: lastWeek.week,
+            cash: lastWeek.cash,
+            fans: lastWeek.fans,
+            respect: lastWeek.respect,
+            xp: lastWeek.xp,
+            battlesWon: lastWeek.battlesWon,
+            battlesLost: lastWeek.battlesLost,
+            days: lastWeek.days,
+          }
+        : null,
+      closedWeeks: state.weekLog.length,
+    };
     return JSON.stringify({
       coordinate_system: "canvas 960x540, origin top-left, x right, y down",
+      week,
       mode: state.mode,
       careerView: state.mode === "career" ? this.careerView : null,
       player: {

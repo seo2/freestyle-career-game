@@ -4,6 +4,25 @@
     "input": "initial",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "start",
       "careerView": null,
       "player": {
@@ -75,6 +94,25 @@
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -227,6 +265,25 @@
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -385,6 +442,25 @@
     "input": "key:3",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -549,6 +625,25 @@
     "input": "reload",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "start",
       "careerView": null,
       "player": {
@@ -626,6 +721,25 @@
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {

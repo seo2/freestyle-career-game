@@ -144,6 +144,36 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
   Punchline se ve +20 y la Métrica +8. La pantalla dice en una línea qué quiere
   esa sala, para que jugarle al público sea una decisión y no una adivinanza.
 
+### Decisiones del calendario semanal (Fase 6 · gauntlet 3 v2, 2026-08-12)
+
+- **El plan vive en el save**: `state.plan` es un slot por día (el mockup dibuja
+  exactamente uno por tarjeta) y guarda **intención**, no ejecución. Planificar es
+  gratis y reversible; lo que cuesta es vivir el día.
+- **Un día es un compromiso**: al ejecutarlo queda registrado y no se puede
+  repetir (`dayAlreadyLived`). Los bloques que sobren del día se usan desde la
+  pieza, así el sistema de 3 bloques sigue vivo sin que el plan se pueda farmear.
+- **Un día sin plan se va en nada** (cuesta impulso y lo dice), y un **plan roto**
+  —agendaste algo que al llegar el día no podías pagar— cae a descansar
+  explicándolo. Sobre-planificar tiene precio y nunca desaparece en silencio.
+- **La cita de la semana**: la batalla solo se puede **agendar** el sábado
+  (`PlanConfig.week.battleDay`), lo que le da forma a la semana: los días previos
+  son un trade-off real porque hay que llegar con energía. Se puede **saltar** la
+  cita agendando otra cosa ahí: esa también es una decisión.
+- **Resumen semanal** (paso del loop de la Bible): al girar la semana se cierra
+  con sus deltas de plata/fans/respeto/XP y el conteo de batallas. El conteo sale
+  de un **resultado guardado en el día** (`outcome`), no de leer el texto del
+  evento, porque la batalla se resuelve después en su propia escena y el texto
+  puede cambiar sin aviso.
+- **Las flechas del mockup ya no son decorativas**: navegan el historial de
+  semanas cerradas que guarda el save, acotado a 12 semanas para no inflarlo.
+- **Pregunta abierta para el owner:** ¿las batallas deberían ser **estrictamente**
+  eventos de fin de semana? Se probó cerrar la acción `battle` fuera del sábado y
+  funciona (el nodo PLAZA del mapa se bloquea solo, porque lee el motivo real),
+  pero deja a un jugador nuevo sin batallar hasta el día 6 y en la pieza la
+  "batalla" es literalmente un cypher con amigos. Por eso hoy la cita rige el
+  **plan** y la PLAZA del mapa sigue abierta cualquier día. Es una decisión de
+  diseño, no un bug.
+
 ### Decisiones de game feel (Fase 5 · cierre, 2026-08-12)
 
 - **Nada se anima con tweens de Phaser**: el arnés congela `Date.now` y el

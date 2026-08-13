@@ -44,12 +44,16 @@ sus títulos numerados. Resultado — archivos exactos por pantalla:
   TRABAJAR, DESCANSAR, ESCRIBIR, BATALLA LOCAL, LIBRE), selección con
   **esquinas amarillas** en la tarjeta activa.
 - Bajo cada label hay una **ranura punteada**: es el hueco donde se *programa* la
-  acción. Confirma el loop "planificar la semana" de la Bible → el sistema de
-  planificación semanal es trabajo de la Fase 6; en Fase 4 la ranura se dibuja
-  como el marco punteado del mockup.
+  acción. Confirma el loop "planificar la semana" de la Bible. **Desde la Fase 6
+  funciona**: la ranura queda punteada mientras el día está libre y se llena con
+  el color de la acción al agendarla (clic o tecla numérica); el sábado lleva la
+  marca de la cita de batalla.
 - Panel **INFORMACIÓN** abajo-izquierda y botón **CONTINUAR** abajo-derecha.
-- Arriba a la derecha hay dos botones de icono (calendario y engranaje/ajustes)
-  que hoy no existen en el juego — anotados como pendientes.
+- Las flechas de semana **navegan el historial** de semanas cerradas desde la
+  Fase 6 (antes estaban dibujadas e inertes).
+- Arriba a la derecha hay dos botones de icono (calendario y engranaje/ajustes);
+  el del calendario existe en el HUD desde la Fase 4, el de ajustes sigue
+  pendiente.
 
 ## Otros recursos de referencia
 

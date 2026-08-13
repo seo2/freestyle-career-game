@@ -28,7 +28,11 @@ const SCENARIOS = {
     { press: "5" }, // write
     { press: "u" }, // buy recommended upgrade
     { press: "c" }, // calendar view
-    { press: "4" }, // rest (calendar slot 4)
+    // Fase 6: the calendar plans instead of acting. Digit n cycles day n's
+    // slot and Enter lives today's plan, so this now exercises planning.
+    { press: "4" }, // plan day 4
+    { press: "1" }, // plan today
+    { press: "Enter" }, // live today's plan
     { press: "Escape" }, // back to base
   ],
   "views-tour": [
@@ -44,6 +48,7 @@ const SCENARIOS = {
     { press: "s" }, // stats view
     { press: "m" }, // map view
     { press: "c" }, // calendar view
+    { press: "7" }, // plan the last day of the week
     { press: "Escape" },
   ],
   // Fase 5 battle engine v2: each round deals a hand of 5 of the 10 resources
@@ -56,7 +61,16 @@ const SCENARIOS = {
   "battle-flow": [
     { press: "Enter" },
     { press: "c" },
-    { press: "6" }, // battle (calendar slot 6)
+    // Day 6 is the week's battle slot: six presses cycle it to BATALLA, and
+    // Enter would live it on Saturday. Reaching a battle from Monday takes a
+    // whole week, so this scenario keeps starting one from the map's PLAZA
+    // node instead (the informal cypher door, open any day).
+    { press: "6" },
+    { press: "Escape" },
+    { press: "m" }, // map hub (cursor starts on TU PIEZA)
+    { press: "ArrowRight" }, // TRABAJO
+    { press: "ArrowRight" }, // PLAZA
+    { press: "Enter" }, // PLAZA -> battle
     { press: "1" }, // round 1: play hand card 1
     { press: "Enter" }, // continue past round 1 verdict
     { press: "2" }, // round 2: play hand card 2

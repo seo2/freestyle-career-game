@@ -43,6 +43,44 @@ export interface StageDef {
   minFame: number;
 }
 
+// Weekly planning (Fase 6, gauntlet 3 v2). The Bible's main loop is "enter the
+// room -> plan the week -> execute -> consequences -> weekly summary", so the
+// plan is the player's stated intent for each day and lives in the save.
+//
+// One entry per weekday: the action id planned for it, or null for a day left
+// open. Index 0 is Monday.
+export type WeekPlan = (string | null)[];
+
+// What actually happened on a day, recorded as the week is played so the weekly
+// summary and the calendar's history are the truth and not a reconstruction.
+export interface PlannedDayRecord {
+  day: number;
+  // What was planned (null = the day was left open).
+  planned: string | null;
+  // What ran: the planned action, "rest" when the plan broke for lack of
+  // energy, or null when the day drifted by with no plan at all.
+  ran: string | null;
+  note: string;
+  // Set only on a battle day, so the weekly summary can count wins and losses
+  // from data instead of matching the wording of an event string.
+  outcome?: "win" | "loss" | "draw";
+}
+
+// The Bible's weekly summary: one per finished week, kept bounded by
+// PlanConfig.history so a long career does not bloat the save.
+export interface WeekSummary {
+  week: number;
+  days: PlannedDayRecord[];
+  // Resource deltas across the week, for the summary panel.
+  cash: number;
+  fans: number;
+  respect: number;
+  fame: number;
+  xp: number;
+  battlesWon: number;
+  battlesLost: number;
+}
+
 // The 7 rival archetypes of the Bible.
 export type RivalArchetype =
   | "agresivo"
@@ -183,6 +221,17 @@ export interface GameState {
   week: number;
   day: number;
   block: number;
+  // This week's intent, one slot per weekday (Fase 6). Planning costs no time:
+  // what costs is executing, and what hurts is arriving at a day you cannot
+  // afford.
+  plan: WeekPlan;
+  // What has happened so far this week; rolls into weekLog when the week turns.
+  weekRecord: PlannedDayRecord[];
+  // Finished weeks, newest last, bounded by PlanConfig.history.maxWeeks.
+  weekLog: WeekSummary[];
+  // Resource snapshot taken when the week began, so the summary can report
+  // deltas without every system having to report them.
+  weekOpening: { cash: number; fans: number; respect: number; fame: number; xp: number };
   level: number;
   xp: number;
   xpNext: number;
