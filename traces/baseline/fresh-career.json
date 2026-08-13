@@ -88,7 +88,8 @@
       ],
       "recommendedItem": null,
       "actions": [],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -269,7 +270,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -456,7 +458,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -493,6 +496,1281 @@
         "lastClosed": null,
         "closedWeeks": 0
       },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 1,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "defensa",
+            "label": "Defensa",
+            "trains": [
+              "disciplina",
+              "escena"
+            ]
+          },
+          {
+            "id": "ataque",
+            "label": "Ataque",
+            "trains": [
+              "punchline",
+              "escena"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          }
+        ],
+        "pending": null,
+        "turns": [],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 4,
+    "input": "key:1",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 1,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "defensa",
+            "label": "Defensa",
+            "trains": [
+              "disciplina",
+              "escena"
+            ]
+          },
+          {
+            "id": "ataque",
+            "label": "Ataque",
+            "trains": [
+              "punchline",
+              "escena"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          }
+        ],
+        "pending": {
+          "turn": 1,
+          "choice": "defensa",
+          "score": 23,
+          "verdict": "SALIO",
+          "kind": "good",
+          "repeated": false,
+          "learned": [
+            {
+              "stat": "disciplina",
+              "amount": 1,
+              "label": "Disciplina"
+            },
+            {
+              "stat": "escena",
+              "amount": 1,
+              "label": "Escena"
+            }
+          ]
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          }
+        ],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 5,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 2,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "respuesta",
+            "label": "Respuesta",
+            "trains": [
+              "improvisacion"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          },
+          {
+            "id": "ataque",
+            "label": "Ataque",
+            "trains": [
+              "punchline",
+              "escena"
+            ]
+          }
+        ],
+        "pending": null,
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          }
+        ],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 6,
+    "input": "key:2",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 3,
+          "punchline": 2,
+          "metrica": 2,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 2,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "respuesta",
+            "label": "Respuesta",
+            "trains": [
+              "improvisacion"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          },
+          {
+            "id": "ataque",
+            "label": "Ataque",
+            "trains": [
+              "punchline",
+              "escena"
+            ]
+          }
+        ],
+        "pending": {
+          "turn": 2,
+          "choice": "dobletempo",
+          "score": 8,
+          "verdict": "TRABADO",
+          "kind": "weak",
+          "repeated": false,
+          "learned": [
+            {
+              "stat": "flow",
+              "amount": 1,
+              "label": "Flow"
+            },
+            {
+              "stat": "metrica",
+              "amount": 1,
+              "label": "Metrica"
+            }
+          ]
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          },
+          {
+            "turn": 2,
+            "choice": "dobletempo",
+            "score": 8,
+            "verdict": "TRABADO",
+            "kind": "weak",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          }
+        ],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 7,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 3,
+          "punchline": 2,
+          "metrica": 2,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 3,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "punchline",
+            "label": "Punchline",
+            "trains": [
+              "punchline"
+            ]
+          },
+          {
+            "id": "flow",
+            "label": "Flow",
+            "trains": [
+              "flow"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          }
+        ],
+        "pending": null,
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          },
+          {
+            "turn": 2,
+            "choice": "dobletempo",
+            "score": 8,
+            "verdict": "TRABADO",
+            "kind": "weak",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          }
+        ],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 8,
+    "input": "key:3",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 4,
+          "punchline": 2,
+          "metrica": 3,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 3,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "punchline",
+            "label": "Punchline",
+            "trains": [
+              "punchline"
+            ]
+          },
+          {
+            "id": "flow",
+            "label": "Flow",
+            "trains": [
+              "flow"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          }
+        ],
+        "pending": {
+          "turn": 3,
+          "choice": "dobletempo",
+          "score": 30,
+          "verdict": "LIMPIO",
+          "kind": "great",
+          "repeated": true,
+          "learned": [
+            {
+              "stat": "flow",
+              "amount": 1,
+              "label": "Flow"
+            },
+            {
+              "stat": "metrica",
+              "amount": 1,
+              "label": "Metrica"
+            }
+          ]
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          },
+          {
+            "turn": 2,
+            "choice": "dobletempo",
+            "score": 8,
+            "verdict": "TRABADO",
+            "kind": "weak",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          },
+          {
+            "turn": 3,
+            "choice": "dobletempo",
+            "score": 30,
+            "verdict": "LIMPIO",
+            "kind": "great",
+            "repeated": true,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          }
+        ],
+        "finished": false
+      }
+    }
+  },
+  {
+    "step": 9,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "cypher",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 4,
+          "punchline": 2,
+          "metrica": 3,
+          "improvisacion": 3,
+          "escena": 2,
+          "carisma": 1,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": {
+        "turn": 3,
+        "maxTurns": 3,
+        "options": [
+          {
+            "id": "punchline",
+            "label": "Punchline",
+            "trains": [
+              "punchline"
+            ]
+          },
+          {
+            "id": "flow",
+            "label": "Flow",
+            "trains": [
+              "flow"
+            ]
+          },
+          {
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "trains": [
+              "flow",
+              "metrica"
+            ]
+          }
+        ],
+        "pending": null,
+        "turns": [
+          {
+            "turn": 1,
+            "choice": "defensa",
+            "score": 23,
+            "verdict": "SALIO",
+            "kind": "good",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "disciplina",
+                "amount": 1,
+                "label": "Disciplina"
+              },
+              {
+                "stat": "escena",
+                "amount": 1,
+                "label": "Escena"
+              }
+            ]
+          },
+          {
+            "turn": 2,
+            "choice": "dobletempo",
+            "score": 8,
+            "verdict": "TRABADO",
+            "kind": "weak",
+            "repeated": false,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          },
+          {
+            "turn": 3,
+            "choice": "dobletempo",
+            "score": 30,
+            "verdict": "LIMPIO",
+            "kind": "great",
+            "repeated": true,
+            "learned": [
+              {
+                "stat": "flow",
+                "amount": 1,
+                "label": "Flow"
+              },
+              {
+                "stat": "metrica",
+                "amount": 1,
+                "label": "Metrica"
+              }
+            ]
+          }
+        ],
+        "finished": true
+      }
+    }
+  },
+  {
+    "step": 10,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -508,13 +1786,13 @@
         "day": 1,
         "block": 2,
         "timeLabel": "Noche",
-        "xp": 44,
+        "xp": 48,
         "xpNext": 70,
         "energy": 56,
         "health": 88,
         "cash": 25,
-        "fans": 2,
-        "respect": 5,
+        "fans": 0,
+        "respect": 0,
         "fame": 0,
         "songs": 0,
         "discProgress": 0,
@@ -524,18 +1802,18 @@
           "home": 0
         },
         "items": [],
-        "momentum": 62,
+        "momentum": 66,
         "momentumMood": "Activo",
         "lastActionId": "cypher",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
+          "flow": 4,
           "punchline": 2,
-          "metrica": 1,
+          "metrica": 3,
           "improvisacion": 3,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -545,12 +1823,12 @@
         "to": "Noche",
         "daysPassed": 0
       },
-      "lastEvent": "El cypher te dio respeto local. Impulso +12: Activo.",
+      "lastEvent": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica. Impulso +10: Activo.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 5/8",
-          "value": 78,
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
           "max": 100
         },
         {
@@ -643,11 +1921,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 4,
+    "step": 11,
     "input": "key:3",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -666,7 +1945,14 @@
         "today": null,
         "openDays": 6,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -695,13 +1981,13 @@
         "day": 2,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 54,
+        "xp": 58,
         "xpNext": 70,
         "energy": 46,
         "health": 90,
         "cash": 79,
-        "fans": 2,
-        "respect": 5,
+        "fans": 0,
+        "respect": 0,
         "fame": 0,
         "songs": 0,
         "discProgress": 0,
@@ -711,16 +1997,16 @@
           "home": 0
         },
         "items": [],
-        "momentum": 57,
+        "momentum": 61,
         "momentumMood": "Activo",
         "lastActionId": "work",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
+          "flow": 4,
           "punchline": 2,
-          "metrica": 1,
+          "metrica": 3,
           "improvisacion": 3,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -736,8 +2022,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 5/8",
-          "value": 78,
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
           "max": 100
         },
         {
@@ -836,11 +2122,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 5,
+    "step": 12,
     "input": "key:4",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -859,7 +2146,14 @@
         "today": null,
         "openDays": 6,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -888,13 +2182,13 @@
         "day": 2,
         "block": 2,
         "timeLabel": "Noche",
-        "xp": 2,
+        "xp": 6,
         "xpNext": 103,
         "energy": 52,
         "health": 95,
         "cash": 79,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
         "discProgress": 0,
@@ -904,16 +2198,16 @@
           "home": 0
         },
         "items": [],
-        "momentum": 68,
+        "momentum": 72,
         "momentumMood": "Activo",
         "lastActionId": "social",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
+          "flow": 4,
           "punchline": 2,
-          "metrica": 1,
+          "metrica": 3,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -925,12 +2219,12 @@
         "to": "Noche",
         "daysPassed": 0
       },
-      "lastEvent": "Subiste un clip: +10 fans. Impulso +11: Activo. Subiste a nivel 2: +1 Impro.",
+      "lastEvent": "Subiste un clip: +13 fans. Impulso +11: Activo. Subiste a nivel 2: +1 Impro.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
@@ -1029,11 +2323,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 6,
+    "step": 13,
     "input": "key:5",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1052,7 +2347,14 @@
         "today": null,
         "openDays": 5,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -1081,32 +2383,32 @@
         "day": 3,
         "block": 0,
         "timeLabel": "Mañana",
-        "xp": 24,
+        "xp": 28,
         "xpNext": 103,
         "energy": 44,
         "health": 97,
         "cash": 79,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
           "home": 0
         },
         "items": [],
-        "momentum": 71,
+        "momentum": 75,
         "momentumMood": "Activo",
         "lastActionId": "write",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 3,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 2,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -1118,18 +2420,18 @@
         "to": "Mañana",
         "daysPassed": 1
       },
-      "lastEvent": "Escribiste: +20% de cancion. Impulso +6: Activo. Paso un dia.",
+      "lastEvent": "Escribiste: +30% de cancion. Impulso +6: En racha. Paso un dia.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -1222,11 +2524,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 7,
+    "step": 14,
     "input": "key:u",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1245,7 +2548,14 @@
         "today": null,
         "openDays": 5,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -1274,16 +2584,16 @@
         "day": 3,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 44,
         "health": 97,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1292,16 +2602,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 81,
+        "momentum": 85,
         "momentumMood": "En racha",
         "lastActionId": "buy-item",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -1317,14 +2627,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -1411,11 +2721,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 8,
+    "step": 15,
     "input": "key:c",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1434,7 +2745,14 @@
         "today": null,
         "openDays": 5,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -1463,16 +2781,16 @@
         "day": 3,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 44,
         "health": 97,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1481,16 +2799,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 81,
+        "momentum": 85,
         "momentumMood": "En racha",
         "lastActionId": "buy-item",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -1506,14 +2824,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -1600,11 +2918,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 9,
+    "step": 16,
     "input": "key:4",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1623,7 +2942,14 @@
         "today": null,
         "openDays": 4,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -1652,16 +2978,16 @@
         "day": 3,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 44,
         "health": 97,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1670,16 +2996,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 81,
+        "momentum": 85,
         "momentumMood": "En racha",
         "lastActionId": "buy-item",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -1695,14 +3021,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -1789,11 +3115,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 10,
+    "step": 17,
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1812,7 +3139,14 @@
         "today": null,
         "openDays": 4,
         "battleDay": 6,
-        "record": [],
+        "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          }
+        ],
         "opportunities": [
           {
             "id": "cypher-sorpresa",
@@ -1841,16 +3175,16 @@
         "day": 3,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 44,
         "health": 97,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1859,16 +3193,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 81,
+        "momentum": 85,
         "momentumMood": "En racha",
         "lastActionId": "buy-item",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -1884,14 +3218,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -1978,11 +3312,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 11,
+    "step": 18,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2003,6 +3338,12 @@
         "battleDay": 6,
         "record": [
           {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          },
+          {
             "day": 3,
             "planned": null,
             "ran": null,
@@ -2037,16 +3378,16 @@
         "day": 3,
         "block": 2,
         "timeLabel": "Noche",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 84,
         "health": 100,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -2055,16 +3396,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 79,
+        "momentum": 83,
         "momentumMood": "En racha",
         "lastActionId": "rest",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -2080,14 +3421,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -2174,11 +3515,12 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
-    "step": 12,
+    "step": 19,
     "input": "key:Escape",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2198,6 +3540,12 @@
         "openDays": 4,
         "battleDay": 6,
         "record": [
+          {
+            "day": 1,
+            "planned": null,
+            "ran": "cypher",
+            "note": "Cypher: 2/3 te salieron. +1 Disciplina, +1 Escena, +2 Flow, +2 Metrica."
+          },
           {
             "day": 3,
             "planned": null,
@@ -2233,16 +3581,16 @@
         "day": 3,
         "block": 2,
         "timeLabel": "Noche",
-        "xp": 41,
+        "xp": 45,
         "xpNext": 103,
         "energy": 84,
         "health": 100,
         "cash": 19,
-        "fans": 12,
-        "respect": 5,
+        "fans": 13,
+        "respect": 0,
         "fame": 1,
         "songs": 0,
-        "discProgress": 20,
+        "discProgress": 30,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -2251,16 +3599,16 @@
         "items": [
           "cuaderno"
         ],
-        "momentum": 79,
+        "momentum": 83,
         "momentumMood": "En racha",
         "lastActionId": "rest",
         "actionStreak": 1,
         "stats": {
-          "flow": 2,
-          "punchline": 5,
-          "metrica": 1,
+          "flow": 4,
+          "punchline": 4,
+          "metrica": 4,
           "improvisacion": 4,
-          "escena": 1,
+          "escena": 2,
           "carisma": 1,
           "disciplina": 2
         }
@@ -2276,14 +3624,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 5/8",
-          "value": 91,
+          "detail": "Nv 2/2 · Resp 0/8",
+          "value": 75,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "20% escrito",
-          "value": 20,
+          "detail": "30% escrito",
+          "value": 30,
           "max": 80
         }
       ],
@@ -2370,7 +3718,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   }
 ]

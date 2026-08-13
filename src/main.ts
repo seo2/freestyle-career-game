@@ -13,6 +13,7 @@ import { MenuScene } from "./scenes/MenuScene";
 import { CreateMcScene } from "./scenes/CreateMcScene";
 import { CareerScene } from "./scenes/CareerScene";
 import { BattleScene } from "./scenes/BattleScene";
+import { CypherScene } from "./scenes/CypherScene";
 import { hex, palette } from "./ui/palette";
 
 const controller = new GameController(localStorage);
@@ -39,7 +40,7 @@ fontsReady.then(() => {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene],
+    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene, CypherScene],
   });
   new SceneDirector(game, controller);
 });

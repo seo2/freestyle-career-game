@@ -88,7 +88,8 @@
       ],
       "recommendedItem": null,
       "actions": [],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -269,7 +270,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -456,7 +458,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -649,7 +652,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -755,7 +759,8 @@
         "affordable": true
       },
       "actions": [],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   },
   {
@@ -942,7 +947,8 @@
           "reason": null
         }
       ],
-      "battle": null
+      "battle": null,
+      "cypher": null
     }
   }
 ]

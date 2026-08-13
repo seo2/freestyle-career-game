@@ -6,12 +6,13 @@ import type Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import type { GameController } from "../managers/GameController";
 
-const GAME_SCENES = ["Menu", "CreateMc", "Career", "Battle"] as const;
+const GAME_SCENES = ["Menu", "CreateMc", "Career", "Battle", "Cypher"] as const;
 export type GameSceneKey = (typeof GAME_SCENES)[number];
 
 export function targetSceneKey(controller: GameController): GameSceneKey {
   const { state, creatingNew } = controller;
   if (state.mode === "battle") return "Battle";
+  if (state.mode === "cypher") return "Cypher";
   if (state.mode === "career") return "Career";
   return controller.hasSave() && !creatingNew ? "Menu" : "CreateMc";
 }

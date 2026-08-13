@@ -139,6 +139,8 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         inputName: saved.playerName || "MC Barrio",
         animationTime: 0,
         battle: null,
+        // A cypher is never persisted, exactly like a battle.
+        cypher: null,
         block: clamp(saved.block ?? 0, 0, CalendarConfig.clock.blocksPerDay - 1),
         nickname: backfillNickname(saved.nickname),
         look: backfillOption(saved.look, NewGameConfig.identityOptions.looks, NewGameConfig.identity.look),
@@ -186,6 +188,8 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         mode: "career",
         inputName: state.playerName,
         battle: null,
+        // A cypher is never persisted, exactly like a battle.
+        cypher: null,
         animationTime: 0,
       };
       storage.setItem(SAVE_KEY, JSON.stringify(toSave));

@@ -13,6 +13,8 @@ import { advanceClock, formatDuration, spendActionTime } from "./CalendarSystem"
 import { addStat, addXp, applyRhythm, rhythmPreview } from "./ProgressionSystem";
 import { battleDurationBlocks, battleEnergyCost, battleLabel, startBattle } from "./BattleSystem";
 import { burnoutReason, isBurntOut } from "./OpportunitySystem";
+import { startCypher } from "./CypherSystem";
+import { CypherConfig } from "../data/config/CypherConfig";
 
 export function getCareerActions(state: GameState): CareerActionInfo[] {
   const actions: CareerActionInfo[] = [];
@@ -32,11 +34,11 @@ export function getCareerActions(state: GameState): CareerActionInfo[] {
   actions.push({
     id: "cypher",
     label: "Cypher",
-    detail: "Juntarte con amigos a soltar rimas.",
-    cost: `${formatDuration(ActionsConfig.cypher.blocks)} / -${ActionsConfig.cypher.energyCost} energia`,
+    detail: "Rondas con amigos: practicas el recurso que elijas.",
+    cost: `${formatDuration(CypherConfig.entry.blocks)} / -${CypherConfig.entry.energyCost} energia`,
     rhythm: rhythmPreview(state, "cypher", ActionsConfig.cypher.rhythmDelta),
-    durationBlocks: ActionsConfig.cypher.blocks,
-    disabledReason: state.energy < ActionsConfig.cypher.energyCost ? tired : undefined,
+    durationBlocks: CypherConfig.entry.blocks,
+    disabledReason: state.energy < CypherConfig.entry.energyCost ? tired : undefined,
   });
 
   actions.push({
@@ -144,7 +146,10 @@ export function executeAction(state: GameState, rng: RandomSource, actionId: str
     case "practice":
       return runPractice(state, rng);
     case "cypher":
-      return runCypher(state, rng);
+      // Owner decision (2026-08-13): the cypher is training with its own
+      // screen, so the action opens it instead of resolving in one line. Its
+      // rewards are paid turn by turn there (CypherSystem).
+      return startCypher(state, rng) ? { type: "cypher-started" } : { type: "none" };
     case "work":
       return runWork(state, rng);
     case "social":
@@ -183,25 +188,6 @@ function runPractice(state: GameState, rng: RandomSource): ActionResult {
   };
 }
 
-function runCypher(state: GameState, rng: RandomSource): ActionResult {
-  const cfg = ActionsConfig.cypher;
-  addStat(state, "improvisacion", rng.next() > cfg.improGainThreshold ? cfg.improGain : 0);
-  state.respect += cfg.respectBase + rng.int(0, cfg.respectRandomMax);
-  state.fans += cfg.fansBase + rng.int(0, cfg.fansRandomMax);
-  const levelMessages = addXp(state, cfg.xp);
-  const rhythmMessages = applyRhythm(state, "cypher", cfg.rhythmDelta);
-  const clock = spendActionTime(state, cfg.energyCost, cfg.blocks, "Cypher");
-  return {
-    type: "event",
-    parts: [
-      "El cypher te dio respeto local.",
-      ...rhythmMessages,
-      ...levelMessages,
-      ...clock.messages,
-    ],
-    fx: clock.fx,
-  };
-}
 
 function runWork(state: GameState, rng: RandomSource): ActionResult {
   const cfg = ActionsConfig.work;

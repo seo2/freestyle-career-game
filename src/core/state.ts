@@ -55,5 +55,6 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     seed,
     animationTime: 0,
     battle: null,
+    cypher: null,
   };
 }

@@ -1,6 +1,8 @@
 // Shared game types. Pure data — no DOM, no Phaser, no side effects.
 
-export type GameMode = "start" | "career" | "battle";
+// "cypher" is training with its own screen (owner decision, 2026-08-13): the
+// any-day outlet that lets the stage battle keep its weekend appointment.
+export type GameMode = "start" | "career" | "battle" | "cypher";
 // Career difficulty picked once on the Crear MC screen. Mechanical effects live
 // in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
 export type Difficulty = "facil" | "normal" | "dificil";
@@ -41,6 +43,33 @@ export interface StageDef {
   minFans: number;
   minRespect: number;
   minFame: number;
+}
+
+// One turn thrown into the circle. There is no rival: the score is this MC's own
+// stats plus a roll, so the verdict answers "did it come out?".
+export interface CypherTurn {
+  turn: number;
+  choice: BattleResourceId;
+  score: number;
+  verdict: string;
+  kind: "great" | "good" | "weak";
+  // Throwing the same resource twice in one circle teaches less.
+  repeated: boolean;
+  // The stat points this turn actually paid, for the screen and the summary.
+  learned: { stat: StatKey; amount: number; label: string }[];
+}
+
+// A cypher in progress. Never persisted: saves always write cypher: null, the
+// same contract the battle has.
+export interface CypherState {
+  turn: number;
+  maxTurns: number;
+  // The resources on offer this turn (a circle always offers a choice).
+  options: BattleResourceId[];
+  turns: CypherTurn[];
+  // The turn whose verdict is on screen; null while choosing.
+  pending: CypherTurn | null;
+  finished: boolean;
 }
 
 // An offer scheduled for a weekday (Fase 6). It is the same shape whether it is
@@ -275,6 +304,8 @@ export interface GameState {
   seed: number;
   animationTime: number;
   battle: BattleState | null;
+  // A cypher in progress (training with its own screen). Never persisted.
+  cypher: CypherState | null;
 }
 
 export interface UpgradeDef {
@@ -345,4 +376,5 @@ export interface CareerActionInfo {
 export type ActionResult =
   | { type: "event"; parts: string[]; fx: TimeAdvance | null }
   | { type: "battle-started" }
+  | { type: "cypher-started" }
   | { type: "none" };

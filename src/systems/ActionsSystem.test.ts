@@ -28,7 +28,7 @@ describe("getCareerActions", () => {
       {
         id: "cypher",
         label: "Cypher",
-        detail: "Juntarte con amigos a soltar rimas.",
+        detail: "Rondas con amigos: practicas el recurso que elijas.",
         cost: "1 bloque / -14 energia",
         rhythm: "Impulso +12",
         durationBlocks: 1,
@@ -241,19 +241,30 @@ describe("practice", () => {
 });
 
 describe("cypher", () => {
-  it("applies respect, fans and xp with the exact legacy roll order", () => {
+  // Owner decision (2026-08-13): the cypher is training with its own screen, so
+  // the action no longer resolves in one line — it opens the cypher and the
+  // rewards are paid there, turn by turn (see CypherSystem.test.ts).
+  it("opens the cypher screen instead of resolving, and charges nothing yet", () => {
     const state = freshState();
-    const result = executeAction(state, createSequenceRng([0.6, 0.5, 0.5]), "cypher");
-    expect(result).toEqual({
-      type: "event",
-      parts: ["El cypher te dio respeto local.", "Impulso +12: Frio."],
-      fx: { label: "Cypher", fromBlock: 0, toBlock: 1, blocks: 1, daysPassed: 0 },
-    });
-    expect(state.stats.improvisacion).toBe(3); // 0.6 > 0.58
-    expect(state.respect).toBe(6); // 4 + int(0,3) with 0.5 -> 2
-    expect(state.fans).toBe(2); // 1 + int(0,2) with 0.5 -> 1
-    expect(state.xp).toBe(20);
-    expect(state.energy).toBe(72);
+    const before = { energy: state.energy, block: state.block, respect: state.respect, xp: state.xp };
+    const result = executeAction(state, createSequenceRng([0.5, 0.5, 0.5]), "cypher");
+    expect(result).toEqual({ type: "cypher-started" });
+    expect(state.mode).toBe("cypher");
+    expect(state.cypher).not.toBeNull();
+    expect(state.cypher?.turn).toBe(1);
+    // Energy and the clock are spent when the circle closes, not when it opens.
+    expect(state.energy).toBe(before.energy);
+    expect(state.block).toBe(before.block);
+    expect(state.respect).toBe(before.respect);
+    expect(state.xp).toBe(before.xp);
+  });
+
+  it("refuses to open when too tired, without touching state", () => {
+    const state = freshState();
+    state.energy = 3;
+    const snapshot = JSON.stringify(state);
+    expect(executeAction(state, createSequenceRng([0.5]), "cypher")).toEqual({ type: "none" });
+    expect(JSON.stringify(state)).toBe(snapshot);
   });
 });
 
