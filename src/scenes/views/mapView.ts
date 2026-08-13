@@ -14,15 +14,33 @@
 // The mockup is 1672x941 and the canvas is 960x540 (factor 0.574 in x). The map
 // panel is compressed vertically because CareerScene keeps the HUD on top
 // (y 10..86), which the mockup does not have.
+//
+// The city itself is now the mockup's OWN art (owner request, 2026-08-13: "algo
+// mas similar a la imagen adjunta, simulando un 3d"). It used to be a procedural
+// grid of flat boxes, which project rule 2 only tolerates while the real asset is
+// missing — and it was not missing, it was baked into the mockup. So it was cut
+// out (scripts/build-map-city.mjs), the mockup's own UI patched out of it with
+// neighbouring city texture, palette-reduced to 128 colours (628 KB -> 226 KB)
+// and scaled with NEAREST to keep the hard pixel edges.
+//
+// Every node coordinate below is DERIVED from where that place actually stands in
+// the art: game = ((mockup_x - 31), (mockup_y - 161)) * 0.57747 + (16, 92).
+//
+// The mockup's own dotted paths, platform rings, pills, MC and padlock pins were
+// inpainted OUT of the art, so the game still draws all of those from real state.
+// Painting them into the asset was tried first and was wrong twice over: the pills
+// sit on the paths, so removing a pill cut a hole in the line, and a painted path
+// cannot know that the ESTUDIO is padlocked.
 
 import type Phaser from "phaser";
 import { eventBus } from "../../events/EventBus";
 import { palette } from "../../ui/palette";
-import { addDisplayText, addHitZone, addPanel, addSoftPanel } from "../../ui/kit";
+import { addDisplayText, addHitZone, addPanel, addSoftPanel, addSpriteImage } from "../../ui/kit";
 import { getCareerGoals } from "../../systems/ProgressionSystem";
 import { stageIndex } from "../../core/derived";
 import { stages } from "../../data/stages";
 import { goalRow, line, mcFigure, rect } from "./viewKit";
+import { AssetRegistry } from "../../game/AssetRegistry";
 import type { ViewCtx } from "./viewKit";
 import type { CareerView } from "../../core/types";
 import type { GameController } from "../../managers/GameController";
@@ -34,18 +52,9 @@ const LEVEL_PANEL = { x: 16, y: 451, w: 174, h: 71 } as const;
 const GOAL_PANEL = { x: 200, y: 451, w: 744, h: 71 } as const;
 const PANEL_FILL = "#050e2d";
 
-const CITY = {
-  base: "#070c22",
-  skyline: "#0d1533",
-  road: "#2e3450",
-  roadLine: "#8a8460",
-  blockDark: "#141d3f",
-  blockLite: "#1a2450",
-  blockSide: "#0d1330",
-  roof: "#26325f",
-  window: "#e0b95c",
-  tree: "#16351f",
-} as const;
+// Only the panel fill survives: everything else this used to define (roads,
+// rooftops, windows, trees) is in the city art now.
+const CITY = { base: "#070c22" } as const;
 
 const NODE = {
   labelSize: 16, // display face renders at 0.7x -> ~11px caps (mockup 20)
@@ -83,22 +92,27 @@ interface PlaceNode {
 // Constellation copied from the mockup's relative layout: pieza left, trabajo
 // below it, plaza in the middle with tienda under it, gimnasio bottom right and
 // estudio top right.
-const PLACES: readonly PlaceNode[] = [
-  { id: "pieza", label: "TU PIEZA", kind: "home", x: 168, y: 262, labelDy: 60, view: "base" },
-  { id: "trabajo", label: "TRABAJO", kind: "job", x: 262, y: 388, labelDy: 42, view: "work", hintActionId: "work" },
-  { id: "plaza", label: "PLAZA", kind: "plaza", x: 476, y: 246, labelDy: 52, actionId: "battle" },
-  { id: "tienda", label: "TIENDA", kind: "shop", x: 470, y: 394, labelDy: 46, view: "shop" },
-  { id: "gimnasio", label: "GIMNASIO", kind: "gym", x: 700, y: 390, labelDy: 52, view: "training", hintActionId: "practice" },
-  { id: "estudio", label: "ESTUDIO", kind: "studio", x: 814, y: 258, labelDy: 66, actionId: "record" },
+// Routes the mockup draws between places, with the bow its hand-drawn curve has.
+// `bow` is the perpendicular offset of the curve's midpoint in game px, measured
+// off the mockup: negative bows the path away from the straight line towards the
+// top of the screen. Straight lines were tried first and cut across rooftops,
+// where the mockup's route follows the streets.
+const PATHS: readonly { from: string; to: string; bow: number }[] = [
+  { from: "pieza", to: "plaza", bow: -14 },
+  { from: "pieza", to: "trabajo", bow: -6 },
+  { from: "plaza", to: "tienda", bow: 5 },
+  { from: "plaza", to: "estudio", bow: -20 },
 ];
 
-const PATHS: readonly [string, string][] = [
-  ["pieza", "trabajo"],
-  ["pieza", "plaza"],
-  ["plaza", "tienda"],
-  ["plaza", "estudio"],
-  ["tienda", "gimnasio"],
+const PLACES: readonly PlaceNode[] = [
+  { id: "pieza", label: "TU PIEZA", kind: "home", x: 183, y: 251, labelDy: 78, view: "base" },
+  { id: "trabajo", label: "TRABAJO", kind: "job", x: 261, y: 398, labelDy: 70, view: "work", hintActionId: "work" },
+  { id: "plaza", label: "PLAZA", kind: "plaza", x: 503, y: 240, labelDy: 85, actionId: "battle" },
+  { id: "tienda", label: "TIENDA", kind: "shop", x: 481, y: 421, labelDy: 94, view: "shop" },
+  { id: "gimnasio", label: "GIMNASIO", kind: "gym", x: 725, y: 398, labelDy: 71, view: "training", hintActionId: "practice" },
+  { id: "estudio", label: "ESTUDIO", kind: "studio", x: 790, y: 242, labelDy: 102, actionId: "record" },
 ];
+
 
 // Node cursor (presentation state, same role as InputRouter.actionFocus for the
 // room dock). Module scope so it survives the immediate-mode redraws.
@@ -113,16 +127,16 @@ export function renderMap(ctx: ViewCtx): void {
   cursor = nextOpenIndex(controller, cursor, 1);
 
   addPanel(ctx.scene, ctx.layer, MAP.x, MAP.y, MAP.w, MAP.h, CITY.base);
-  cityBackdrop(ctx, MAP.x, MAP.y, MAP.w, MAP.h);
+  coverImage(ctx, AssetRegistry.scenes.mapCity.key, MAP.x, MAP.y, MAP.w, MAP.h);
   mapHeader(ctx);
 
   const byId = new Map(PLACES.map((place) => [place.id, place]));
-  PATHS.forEach(([fromId, toId]) => {
-    const from = byId.get(fromId);
-    const to = byId.get(toId);
+  PATHS.forEach((route) => {
+    const from = byId.get(route.from);
+    const to = byId.get(route.to);
     if (!from || !to) return;
     const open = !lockReason(controller, from) && !lockReason(controller, to);
-    dottedPath(ctx, from, to, open);
+    dottedPath(ctx, from, to, route.bow, open);
   });
 
   PLACES.forEach((place, index) => {
@@ -181,73 +195,42 @@ function drawPlace(ctx: ViewCtx, place: PlaceNode, locked: string | undefined, f
   }
 }
 
-// Glowing pixel platform (the mockup's white ellipse) plus its ground shadow.
+// The mockup's glowing platform ellipse. Two earlier tries got this wrong in the
+// same way: a stack of full-width rects. That passed on flat procedural boxes but
+// on the real city art it reads as a concrete slab, and "hollowing" it by drawing
+// black at alpha 0 does nothing at all — rect() paints, it cannot erase.
+//
+// So the ring is drawn as an OUTLINE: the flat top and bottom rows are full bars,
+// and every row between them is two short end segments with nothing in the middle.
 function platform(ctx: ViewCtx, x: number, y: number, open: boolean): void {
-  const alpha = open ? 1 : 0.45;
-  rect(ctx, x - 24, y + 2, 48, 5, "#03060f", 0.55 * alpha);
-  rect(ctx, x - 30, y - 3, 60, 6, NODE.platform, 0.5 * alpha);
-  rect(ctx, x - 22, y - 7, 44, 4, NODE.platform, 0.3 * alpha);
-  rect(ctx, x - 22, y + 3, 44, 4, NODE.platform, 0.3 * alpha);
-  rect(ctx, x - 14, y - 10, 28, 3, NODE.platform, 0.16 * alpha);
+  const alpha = (open ? 0.85 : 0.32);
+  const rx = 20;
+  const ry = 6;
+  rect(ctx, x - 14, y + ry - 1, 28, 2, "#03060f", 0.35 * alpha);
+  for (let dy = -ry; dy <= ry; dy += 2) {
+    const t = 1 - (dy / (ry + 1)) ** 2;
+    if (t <= 0) continue;
+    const half = Math.round(rx * Math.sqrt(t));
+    const edge = Math.abs(dy) >= ry - 1;
+    const fade = edge ? 0.5 : 1;
+    if (edge || half <= 7) {
+      rect(ctx, x - half, y + dy, half * 2, 2, NODE.platform, alpha * fade);
+      continue;
+    }
+    // Middle rows: only the two ends, so the ground shows through the ring.
+    const seg = Math.max(3, Math.round(half * 0.28));
+    rect(ctx, x - half, y + dy, seg, 2, NODE.platform, alpha);
+    rect(ctx, x + half - seg, y + dy, seg, 2, NODE.platform, alpha);
+  }
 }
 
-// Place marker: the MC himself at home, a small procedural building elsewhere.
-// The isometric city art is a pending asset (docs/ASSETS.md), so these read like
-// the mockup's silhouettes without pretending to be the final sprites.
+// The only marker still drawn: the MC standing at his pieza. Every other place
+// is a real building in the city art, so the procedural silhouettes that stood in
+// for them (a grey box for the job, a red awning for the shop...) are gone — they
+// would now be a second, worse shop sitting on top of the real one.
 function marker(ctx: ViewCtx, place: PlaceNode): void {
-  const { x, y } = place;
-  if (place.kind === "home") {
-    mcFigure(ctx, x, y - 16, 0.62);
-    return;
-  }
-  if (place.kind === "job") {
-    rect(ctx, x - 28, y - 36, 56, 36, "#3b3f52");
-    rect(ctx, x + 20, y - 32, 8, 32, "#262a38");
-    rect(ctx, x - 28, y - 40, 56, 4, "#5a6076");
-    rect(ctx, x - 7, y - 17, 14, 17, "#1b1f2e");
-    rect(ctx, x - 5, y - 14, 10, 12, CITY.window, 0.55);
-    [0, 1, 2].forEach((i) => rect(ctx, x - 24 + i * 15, y - 31, 10, 8, CITY.window, 0.9));
-    return;
-  }
-  if (place.kind === "shop") {
-    rect(ctx, x - 26, y - 34, 52, 34, "#4a3341");
-    rect(ctx, x + 18, y - 30, 8, 30, "#33222c");
-    for (let i = 0; i < 9; i += 1) {
-      rect(ctx, x - 28 + i * 6, y - 40, 6, 6, i % 2 === 0 ? palette.red : palette.ink);
-    }
-    rect(ctx, x - 22, y - 27, 18, 12, CITY.window, 0.9);
-    rect(ctx, x + 1, y - 25, 14, 25, "#241a24");
-    rect(ctx, x + 4, y - 21, 8, 10, CITY.window, 0.45);
-    return;
-  }
-  if (place.kind === "gym") {
-    rect(ctx, x - 23, y - 44, 46, 44, "#4b4a44");
-    rect(ctx, x + 15, y - 40, 8, 40, "#33322e");
-    rect(ctx, x - 23, y - 48, 46, 4, "#6b6a60");
-    rect(ctx, x - 14, y - 33, 6, 15, palette.ink);
-    rect(ctx, x + 6, y - 33, 6, 15, palette.ink);
-    rect(ctx, x - 9, y - 28, 16, 5, palette.ink);
-    rect(ctx, x - 8, y - 14, 16, 14, "#232228");
-    rect(ctx, x - 5, y - 11, 10, 9, CITY.window, 0.4);
-    return;
-  }
-  if (place.kind === "studio") {
-    rect(ctx, x - 24, y - 52, 48, 52, "#2b3c74");
-    rect(ctx, x + 16, y - 48, 8, 48, "#1d2a55");
-    rect(ctx, x - 24, y - 56, 48, 4, "#4a5da0");
-    [0, 1, 2].forEach((row) =>
-      [0, 1].forEach((col) => rect(ctx, x - 18 + col * 19, y - 48 + row * 15, 13, 9, "#8ea7ff", 0.85)),
-    );
-    rect(ctx, x + 3, y - 66, 3, 10, "#6b6a60");
-    rect(ctx, x - 2, y - 71, 13, 6, "#8f8e84");
-    return;
-  }
-  // plaza: lit monument on a stepped base, the mockup's centre square.
-  rect(ctx, x - 30, y - 10, 60, 10, "#3a3c56");
-  rect(ctx, x - 21, y - 19, 42, 9, "#4a4d6b");
-  rect(ctx, x - 6, y - 42, 12, 23, "#c9c6b4");
-  rect(ctx, x - 11, y - 50, 22, 8, palette.yellow);
-  rect(ctx, x - 18, y - 5, 36, 5, CITY.window, 0.35);
+  if (place.kind !== "home") return;
+  mcFigure(ctx, place.x, place.y - 3, 0.6);
 }
 
 function labelBox(ctx: ViewCtx, cx: number, bottomY: number, label: string, dim: boolean): void {
@@ -295,98 +278,6 @@ function padlock(ctx: ViewCtx, x: number, y: number): void {
   rect(ctx, x + 11, y + 5, 2, 3, "#12060a");
   rect(ctx, x + 4, y + 8, 10, 7, palette.ink);
   rect(ctx, x + 8, y + 10, 2, 3, "#12060a");
-}
-
-function dottedPath(ctx: ViewCtx, from: PlaceNode, to: PlaceNode, open: boolean): void {
-  const steps = 24;
-  const color = open ? NODE.platform : "#5b628c";
-  const alpha = open ? 0.85 : 0.4;
-  for (let i = 1; i < steps; i += 2) {
-    const t = i / steps;
-    const x = from.x + (to.x - from.x) * t;
-    const y = from.y + (to.y - from.y) * t;
-    rect(ctx, Math.round(x) - 3, Math.round(y) - 3, 5, 5, color, alpha);
-  }
-}
-
-// --- City backdrop -------------------------------------------------------------
-
-// Procedural night city: the isometric city art is pending (docs/ASSETS.md), so
-// this only has to read like the mockup - lit blocks, a street grid, a far
-// skyline. Rooftops are not all one navy: blues, indigos and warm brick mix.
-const BLOCK_FILLS = [CITY.blockLite, CITY.blockDark, "#26214c", "#33253c", "#1e2c56", "#2c2a3f"] as const;
-const CELL = { row: 76, col: 116, road: 10, top: 34 } as const;
-
-// Deterministic 0..1 hash: the city must look scattered but redraw identically
-// (the trace harness compares byte-identical frames, and Math.random is banned).
-function noise(a: number, b: number): number {
-  const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
-  return v - Math.floor(v);
-}
-
-function cityBackdrop(ctx: ViewCtx, x: number, y: number, w: number, h: number): void {
-  rect(ctx, x, y, w, h, CITY.base);
-  // Distant skyline along the top edge (the mockup's far bank).
-  for (let i = 0; i < 26; i += 1) {
-    const bh = 10 + Math.floor(noise(i, 9) * 22);
-    rect(ctx, x + 4 + i * 36, y + CELL.top - bh, 16 + Math.floor(noise(i, 11) * 20), bh, CITY.skyline);
-  }
-  const top = y + CELL.top;
-  for (let r = 0; top + (r + 1) * CELL.row < y + h; r += 1) {
-    const ry = top + r * CELL.row + CELL.row - CELL.road;
-    rect(ctx, x, ry, w, CELL.road, CITY.road);
-    rect(ctx, x, ry + 4, w, 1, CITY.roadLine, 0.55);
-  }
-  for (let c = 0; x + 30 + (c + 1) * CELL.col < x + w; c += 1) {
-    const cx = x + 30 + c * CELL.col;
-    rect(ctx, cx, top, 9, h - CELL.top, CITY.road);
-    rect(ctx, cx + 4, top, 1, h - CELL.top, CITY.roadLine, 0.45);
-  }
-  for (let r = 0; top + r * CELL.row + 40 < y + h; r += 1) {
-    for (let c = 0; x + 39 + c * CELL.col < x + w - 40; c += 1) {
-      const cellX = x + 39 + c * CELL.col;
-      const cellY = top + r * CELL.row + 2;
-      const cellW = CELL.col - 15;
-      const cellH = Math.min(CELL.row - CELL.road - 4, y + h - 6 - cellY);
-      const count = noise(r * 17 + c, 1) > 0.45 ? 2 : 1;
-      for (let k = 0; k < count; k += 1) {
-        const seed = r * 31 + c * 7 + k * 3;
-        const bw = 24 + Math.floor(noise(seed, 2) * (cellW / count - 20));
-        const bh = 18 + Math.floor(noise(seed, 3) * (cellH - 22));
-        if (bw < 14 || bh < 12) continue;
-        const bx = cellX + k * Math.floor(cellW / count) + Math.floor(noise(seed, 4) * Math.max(1, cellW / count - bw));
-        const by = cellY + Math.floor(noise(seed, 5) * Math.max(1, cellH - bh));
-        cityBlock(ctx, bx, by, bw, bh, seed);
-      }
-    }
-  }
-  // Keeps the city behind the nodes instead of competing with them.
-  rect(ctx, x, y, w, h, NODE.scrim, 0.24);
-}
-
-// One city block, or a patch of park when it would land on a place node (the
-// nodes need clean ground under their platform and label).
-function cityBlock(ctx: ViewCtx, x: number, y: number, w: number, h: number, seed: number): void {
-  const onNode = PLACES.some(
-    (place) => Math.abs(place.x - (x + w / 2)) < 56 && place.y > y - 30 && place.y < y + h + 46,
-  );
-  if (onNode) {
-    rect(ctx, x, y + h - 8, w, 8, CITY.tree, 0.7);
-    rect(ctx, x + 4, y + h - 13, 6, 6, CITY.tree);
-    return;
-  }
-  rect(ctx, x, y, w, h, BLOCK_FILLS[Math.floor(noise(seed, 6) * BLOCK_FILLS.length) % BLOCK_FILLS.length]);
-  rect(ctx, x + w - 6, y + 2, 6, h - 2, CITY.blockSide);
-  rect(ctx, x, y, w, 3, CITY.roof);
-  const cols = Math.max(1, Math.floor((w - 6) / 10));
-  const rows = Math.max(1, Math.floor((h - 8) / 9));
-  for (let wy = 0; wy < rows; wy += 1) {
-    for (let wx = 0; wx < cols; wx += 1) {
-      if (noise(seed * 5 + wy * 3 + wx, 7) < 0.45) continue;
-      rect(ctx, x + 4 + wx * 10, y + 6 + wy * 9, 4, 5, CITY.window, 0.8);
-    }
-  }
-  if (noise(seed, 8) > 0.6) rect(ctx, x - 7, y + h - 9, 6, 9, CITY.tree);
 }
 
 // The mockup titles the screen above the frame; the HUD occupies that band here,
@@ -496,4 +387,42 @@ function nextOpenIndex(controller: GameController, from: number, dir: 1 | -1): n
     if (!lockReason(controller, PLACES[index])) return index;
   }
   return 0;
+}
+
+// Draws an image filling a box, cropping the overflow instead of stretching it —
+// the same helper statsView and trainingView use for their backdrops.
+function coverImage(ctx: ViewCtx, key: string, x: number, y: number, w: number, h: number): void {
+  const image = addSpriteImage(ctx.scene, ctx.layer, key, x + w / 2, y + h / 2, h, 0.5, 0.5);
+  if (!image || image.width <= 0 || image.height <= 0) return;
+  const scale = Math.max(w / image.width, h / image.height);
+  image.setScale(scale);
+  image.setCrop((image.width - w / scale) / 2, (image.height - h / scale) / 2, w / scale, h / scale);
+}
+
+// Dotted route between two places, in the game's own hands again now that the art
+// no longer paints one. Dimmed when either end is closed — the whole reason this
+// is not baked into the asset.
+//
+// A quadratic curve, not a segment: `bow` pushes the midpoint perpendicular to the
+// line by the amount measured off the mockup, so the route follows the streets the
+// way the drawn one does instead of cutting over rooftops.
+function dottedPath(ctx: ViewCtx, from: PlaceNode, to: PlaceNode, bow: number, open: boolean): void {
+  const steps = 26;
+  const color = open ? NODE.platform : "#5b628c";
+  const alpha = open ? 0.9 : 0.35;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.max(1, Math.hypot(dx, dy));
+  // Control point: the straight midpoint pushed along the line's normal.
+  const cx = (from.x + to.x) / 2 + (-dy / len) * bow;
+  const cy = (from.y + to.y) / 2 + (dx / len) * bow;
+  for (let i = 1; i < steps; i += 2) {
+    const t = i / steps;
+    const u = 1 - t;
+    const x = Math.round(u * u * from.x + 2 * u * t * cx + t * t * to.x);
+    const y = Math.round(u * u * from.y + 2 * u * t * cy + t * t * to.y);
+    // A round-ish dot: the mockup's are circles, not squares.
+    rect(ctx, x - 2, y - 3, 4, 6, color, alpha);
+    rect(ctx, x - 3, y - 2, 6, 4, color, alpha);
+  }
 }

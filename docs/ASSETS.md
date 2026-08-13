@@ -142,12 +142,20 @@ salieron reformulando el prompt.
 
 ### Sigue pendiente (ilustraciones, no iconos)
 
+**Resuelto (2026-08-13): la ciudad isométrica del mapa.** No hacía falta
+ilustrarla: ya existía dentro del mockup del mapa. `map-city-v1.png` (928×348,
+225 KB, 128 colores) se construye con `node scripts/build-map-city.mjs`, que
+recorta la ciudad de `reference/screens/...06_23_15 a.m. (5).png` y le **quita la
+UI horneada** (seis píldoras, el MC, dos candados, el pin de ubicación, los
+caminos punteados y los anillos de plataforma) para que el juego siga dibujando
+todo eso desde el estado real. Detalles del método y de los tres errores que
+costó afinarlo, en la cabecera del script.
+
 Esto es lo que queda, y es de otra escala: son **ilustraciones**, con más riesgo
 de no calzar con el estilo del mockup.
 
 - **Multitud de batalla**: el mockup tiene público rodeando el cypher; hoy
   reacciona la **luz** de la escena al hype, no una multitud.
-- **Ciudad isométrica del mapa**: el mapa dibuja una grilla nocturna procedural.
 - **Ilustraciones de trabajo (4)** y sus iconos de fila, con el hueco de 406×168
   ya reservado.
 - **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario);
