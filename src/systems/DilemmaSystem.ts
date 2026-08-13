@@ -26,6 +26,7 @@ import type { RandomSource } from "../services/RandomService";
 import { stageIndex } from "../core/derived";
 import { maxEnergy } from "../core/derived";
 import { addXp } from "./ProgressionSystem";
+import { applyAxisPull } from "./RelationshipSystem";
 import { clamp } from "../utils/math";
 
 export function findDilemma(id: string): DilemmaDef | null {
@@ -108,6 +109,9 @@ export function resolveDilemma(state: GameState, optionId: string): DilemmaResol
   for (const [axis, delta] of Object.entries(option.axes) as [IdentityAxis, number][]) {
     moveAxis(state.axes, axis, delta);
   }
+  // A decision lands on people, not only on sliders (Fase 7): choosing the crew
+  // warms the crew, choosing yourself cools it.
+  applyAxisPull(state, option.axes);
 
   const record: DecisionRecord = {
     dilemmaId: dilemma.id,

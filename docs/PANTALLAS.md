@@ -38,6 +38,7 @@ sus títulos numerados. Resultado — archivos exactos por pantalla:
 | 13 | **Estadísticas** | `06_25_08 a.m. (3).png` |
 | — | **Epílogo de arco** | sin mockup: pantalla nueva de 2026-08-13. Cierre de capítulo compuesto desde la carrera (ejes movidos, decisiones de ese capítulo, batallas, semanas) + el destino emergente |
 | — | **Dilema (decisión de carrera)** | sin mockup: pantalla nueva de 2026-08-13. La pregunta arriba y dos respuestas lado a lado como bifurcación; cada una muestra costo y premio con el mismo peso, y hacia qué eje de identidad te mueve |
+| — | **Quién vas siendo (identidad, lazos y rivales)** | sin mockup: pantalla nueva de 2026-08-13. Cuatro columnas: los ejes como sliders a tamaño real con el destino emergente, los lazos (familia/crew) con barra y su temperatura **en palabras**, lo que decidiste, y los rivales que te recuerdan con récord y barra de rencor. Existe porque el panel que hacía esto dentro de Estadísticas **tapaba** el nombre, el nivel y la XP |
 | — | **Cypher (entrenamiento)** | sin mockup: pantalla nueva de 2026-08-13, construida con el lenguaje visual de la batalla (paneles pixel, cartas, cursor amarillo) pero deliberadamente **sin** HUD de rival ni medidor de hype |
 
 ### Lo que revela el mockup 4 (calendario) — importante para el diseño

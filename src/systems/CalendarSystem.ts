@@ -8,6 +8,7 @@ import { maxEnergy } from "../core/derived";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { clamp } from "../utils/math";
 import { closeWeek } from "./PlanSystem";
+import { decayRelationships } from "./RelationshipSystem";
 
 export interface ClockResult {
   messages: string[];
@@ -33,6 +34,7 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
   const fromBlock = state.block;
   let daysPassed = 0;
   let weekChanged = false;
+  const relationshipMessages: string[] = [];
   let closedWeek: WeekSummary | null = null;
 
   state.block += Math.max(0, Math.round(blocks));
@@ -53,6 +55,9 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
       // number of the week that actually ended (Bible: resumen semanal), and
       // the fresh plan and opening snapshot belong to the new one.
       closedWeek = closeWeek(state);
+      // The people you did not see this week (Fase 7). Charged BEFORE the
+      // counter moves, so the bond that cooled belongs to the week that ended.
+      relationshipMessages.push(...decayRelationships(state));
       state.week += 1;
       state.day = 1;
       weekChanged = true;
@@ -76,6 +81,7 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
       `Semana ${closedWeek.week} cerrada: +$${closedWeek.cash}, +${closedWeek.fans} fans, +${closedWeek.respect} respeto.`,
     );
     messages.push(`Semana ${state.week}: recuperaste energia y la agenda esta vacia.`);
+    messages.push(...relationshipMessages);
   }
   const fx: TimeAdvance = {
     label,

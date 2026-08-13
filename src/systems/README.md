@@ -46,6 +46,22 @@ a small collaborator instead of a copy-paste move. `src/scenes/BattleScene.ts`
 had the same problem after gauntlet 9 (578 lines) and was split into
 `battleDraw.ts` in Fase 5, proven pixel-identical.
 
+## Fase 7 notes
+
+- `RelationshipSystem` owns both halves of "the people": bonds (familia, crew)
+  and rivalries. Its effects are read by other systems rather than pushed:
+  `ActionsSystem` asks for `restHealthBonus`, `battleTier` asks for
+  `rivalryEdge`, `BattleSystem` asks for `crewHypeBoost`. That keeps the
+  dependency one-way and lets the bond rules change without touching them.
+- `battleTier.ts` was split out of `BattleSystem` when the latter hit the size
+  limit: it owns how an opponent is BUILT for the current stage (roster pick,
+  power, rewards, crowd, and the grudge that sharpens them), while
+  `BattleSystem` owns the FLOW (rounds, resolution, payout).
+- `acrossAffinity` anchors every bond effect at the bond's STARTING affinity, not
+  at zero. Anchoring at zero would have handed a fresh career the bonus and
+  silently re-tuned the battle/rest balance that `scripts/playthrough.mjs` had
+  just measured.
+
 ## Fase 4 notes
 
 - **Store = items, upgrades = backbone.** `StoreSystem` sells the catalogue in

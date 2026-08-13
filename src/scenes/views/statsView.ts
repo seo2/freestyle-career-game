@@ -19,13 +19,14 @@
 //  * The map screen became a places hub, so the seven-stage ladder
 //    (pieza -> leyenda) lives in this screen's footer bar, next to the mockup's
 //    own [ESC] VOLVER chip.
+//  * Identity, bonds and rivalries (Fase 7) used to be a panel bolted onto the
+//    lower half of the left column. They were not: that band holds the name
+//    plate, the career level and the XP bar, and the panel drew over all three.
+//    They now have their own screen (identityView) and this one links to it.
 //
-// Read-only screen: nothing here mutates state, and the only command it sends
-// is setCareerView("base") from the back chip.
+// Read-only screen: nothing here mutates state, and the only commands it sends
+// are view changes (the back chip and the identity chip).
 
-import { DilemmaConfig } from "../../data/config/DilemmaConfig";
-import { axisLean, identitySummary, recentDecisions } from "../../systems/DilemmaSystem";
-import type { IdentityAxis } from "../../core/types";
 import { AssetRegistry, stageBackdropKey } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
 import { addDisplayText, addHitZone, addMeter, addPanel, addSpriteImage, addText } from "../../ui/kit";
@@ -49,9 +50,6 @@ const MID = { x: 272, y: 124, w: 390, h: 354 } as const; // mockup 477..1157
 const RIGHT = { x: 670, y: 124, w: 264, h: 274 } as const; // mockup 1174..1652 x 69..644
 const GOALS = { x: 670, y: 404, w: 264, h: 74 } as const; // mockup 1174..1652 x 648..837
 const FOOTER = { x: 26, y: 486, w: 908, h: 40 } as const; // mockup 26..1646 x 850..920
-// Identity panel (Fase 7): no mockup carries it, so it takes the free band under
-// the profile column, where the eye already goes for "who is this MC".
-const IDENTITY = { x: 26, y: 300, w: 248, h: 178, pitch: 30, firstDy: 32 } as const;
 
 // Attribute rows: mockup pitch 89 / height ~86, scaled for seven rows.
 const ROW = {
@@ -107,7 +105,7 @@ export function renderStats(ctx: ViewCtx): void {
   addPanel(ctx.scene, ctx.layer, GOALS.x, GOALS.y, GOALS.w, GOALS.h, "#0a1030");
   goalsColumn(ctx);
 
-  identityColumn(ctx);
+  identityChip(ctx, 706, 90, 228, 28);
 
   footerBar(ctx);
 }
@@ -322,58 +320,17 @@ function compactGoal(ctx: ViewCtx, x: number, y: number, w: number, goal: Career
 // Identity (Fase 7): the four axes of the GDD and the last decisions that moved
 // them. An MC who has decided nothing shows nothing — "mismo origen" means the
 // label is earned, not assigned.
-function identityColumn(ctx: ViewCtx): void {
-  const state = ctx.controller.state;
-  const x = IDENTITY.x;
-  rect(ctx, x, IDENTITY.y, IDENTITY.w, IDENTITY.h, "#0a1030");
-  columnHeader(ctx, x, IDENTITY.y, IDENTITY.w, "QUIEN VAS SIENDO");
-
-  const axes: IdentityAxis[] = ["undergroundComercial", "batalleroMusico", "soloCrew", "autenticoPolemico"];
-  axes.forEach((axis, index) => {
-    const y = IDENTITY.y + IDENTITY.firstDy + index * IDENTITY.pitch;
-    const labels = DilemmaConfig.axes.labels[axis];
-    const value = state.axes[axis];
-    line(ctx, x + 10, y, labels.low.toUpperCase(), 9, palette.muted, IDENTITY.w / 2 - 12);
-    const highText = addText(ctx.scene, ctx.layer, 0, y - 9, labels.high.toUpperCase(), 9, palette.muted);
-    highText.setX(Math.round(x + IDENTITY.w - 14 - highText.width));
-
-    // A slider: the needle sits where the decisions put it, centre = undecided.
-    const trackY = y + 6;
-    rect(ctx, x + 10, trackY, IDENTITY.w - 20, 6, "#050a20");
-    rect(ctx, x + 10 + (IDENTITY.w - 20) / 2, trackY, 1, 6, CARD.border);
-    const span = (IDENTITY.w - 24) / 2;
-    const needleX = Math.round(x + 12 + span + (value / DilemmaConfig.axes.max) * span);
-    const lean = axisLean(state.axes, axis);
-    rect(ctx, needleX - 2, trackY - 2, 5, 10, lean.label === "Sin definir" ? CARD.border : palette.yellow);
-  });
-
-  // The sliders already show all four axes, so the line names only the two
-  // strongest leans — four of them just truncated.
-  // Names only, no numbers: the sliders already show how far each lean went, and
-  // four labelled values simply truncated.
-  const summary = identitySummary(state)
-    .map((entry) => ({ label: entry.replace(/\s*\([^)]*\)/, ""), value: Math.abs(Number(entry.replace(/[^-\d]/g, ""))) }))
-    .sort((a, b) => b.value - a.value);
-  const strongest = summary.slice(0, 2).map((entry) => entry.label);
-  line(
-    ctx,
-    x + 10,
-    IDENTITY.y + IDENTITY.h - 26,
-    strongest.length > 0 ? strongest.join(" · ") : "Sin definir: todavia no decidiste nada grande.",
-    10,
-    strongest.length > 0 ? palette.teal : palette.muted,
-    IDENTITY.w - 20,
-  );
-  const last = recentDecisions(state, 1)[0];
-  line(
-    ctx,
-    x + 10,
-    IDENTITY.y + IDENTITY.h - 10,
-    last ? `Ultima: ${last.choice} (sem ${last.week})` : "Sin decisiones registradas.",
-    10,
-    palette.muted,
-    IDENTITY.w - 20,
-  );
+// Pointer route to the identity screen. Keyboard has I; a mouse-only player
+// needs the door drawn (project rule 5: nothing may be keyboard-only either way).
+function identityChip(ctx: ViewCtx, x: number, y: number, w: number, h: number): void {
+  rect(ctx, x, y, w, h, CARD.border);
+  rect(ctx, x + 2, y + 2, w - 4, h - 4, "#101740");
+  rect(ctx, x + 8, y + 6, 26, h - 12, "#0a0f26");
+  const key = addText(ctx.scene, ctx.layer, 0, 0, "I", 10, palette.muted);
+  key.setOrigin(0.5, 0.5).setPosition(x + 21, y + h / 2);
+  const label = addText(ctx.scene, ctx.layer, 0, 0, "QUIEN VAS SIENDO", 11, palette.ink);
+  label.setOrigin(0, 0.5).setPosition(x + 44, y + h / 2);
+  addHitZone(ctx.scene, ctx.layer, x, y, w, h, () => ctx.controller.setCareerView("identity"));
 }
 
 function footerBar(ctx: ViewCtx): void {

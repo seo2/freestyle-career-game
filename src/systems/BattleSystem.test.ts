@@ -898,6 +898,9 @@ describe("finishBattle", () => {
     // Pieza tier: cash 35, fans 18, respect 10, fame 3, xp 48; duration 1 block.
     expect(outcome.parts).toEqual([
       "Ganaste en Cypher de pieza (1 bloque): +$35, +18 fans, +10 respeto.",
+      // Beating someone gets you noticed (Fase 7): the rivalry starts here, and
+      // the next time this name comes up he is stronger and the screen says so.
+      "Nico Cuaderno te tomo la matricula.",
       "[rhythm battle 18]",
       "[xp 48]",
       "[clock Cypher de pieza 1]",

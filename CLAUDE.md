@@ -38,8 +38,9 @@ node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo 
 - **Tiempo**: día en 3 bloques (Mañana/Tarde/Noche). **Etapas**: 7 (pieza→leyenda).
 - Guardado en `localStorage` clave `freestyle-career-save-v2` (migración automática desde v1 en `SaveManager`); PWA: `public/manifest.webmanifest` + `public/sw.js`.
 - Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas. La referencia vive **versionada** en `traces/baseline/` (solo los JSON: los PNG son evidencia y quedan en `output/`, que está en gitignore). Se verifica con `npm run traces` y, cuando un cambio de conducta es intencional, se acepta con `node scripts/compare-traces.mjs --update` **explicándolo en el commit**.
-- **Navegación (modelo del mockup, decisión del owner en Fase 4):** la pieza es HUD + escena + dock de 5 tiles; **no hay barra de pestañas**. El **mapa es el hub** (sus nodos llevan a Trabajo/Tienda/Gimnasio/Plaza/Estudio) y las metas de carrera viven ahí. Calendario y Stats se abren con los dos botones del HUD arriba a la derecha. Los atajos de letra (B/C/M/E/R/J/T/S) siguen activos.
+- **Navegación (modelo del mockup, decisión del owner en Fase 4):** la pieza es HUD + escena + dock de 5 tiles; **no hay barra de pestañas**. El **mapa es el hub** (sus nodos llevan a Trabajo/Tienda/Gimnasio/Plaza/Estudio) y las metas de carrera viven ahí. Calendario y Stats se abren con los dos botones del HUD arriba a la derecha. Los atajos de letra (B/C/M/E/R/J/T/S/**I**) siguen activos; **I** abre "Quién vas siendo" (identidad, lazos y rivales), que también tiene chip clickeable desde Estadísticas y de vuelta.
 - **Identidad del MC** (nombre, apodo, aspecto, piel, voz) e **inventario de ítems** (`src/data/items.ts`) existen desde la Fase 4; la dificultad es la única elección con efecto mecánico (`DifficultyConfig`).
+- **Relaciones (Fase 7):** los lazos (familia/crew) **decaen** si no apareces y cobran en salud del descanso y hype de batalla; las rivalidades guardan récord y rencor, que le compra poder y agresividad al rival. Reglas en `src/systems/RelationshipSystem.ts`, números en `RelationshipConfig`.
 - Personajes con sprites reales desde la Fase 3; el arte pendiente está listado en `docs/ASSETS.md`.
 
 ## Reglas del proyecto
@@ -74,6 +75,12 @@ node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo 
   matemática (`src/ui/fx.test.ts`) y por su **estado persistente** (p. ej. el
   brillo de la sala según el hype, que sí se puede medir en un PNG). No dar por
   buena una animación porque "el código está bien".
+- **La escala FIT no entera del arnés se come filas de glifos.** Con un viewport
+  de 960×540 el canvas queda en 917×516 (×0,955) y el resampler del navegador
+  borra filas: "CREW" sale "CRFW" y "definir" sale "dsfinir" en las capturas.
+  **No es un defecto del juego** — a escala ≈2× el texto sale perfecto. Antes de
+  perseguir un problema de tipografía, re-capturar con un viewport grande
+  (ej. 1960×1120) y comparar.
 - **Las coordenadas de página NO son las del juego.** `#app` tiene padding y el
   canvas escala con FIT, así que con un viewport de 960×540 el canvas real queda
   en ~(21, 12) y 917×516. Un `mouse.click(x, y)` con coordenadas del juego cae

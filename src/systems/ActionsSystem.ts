@@ -10,6 +10,7 @@ import { statLabels } from "../data/stats";
 import type { RandomSource } from "../services/RandomService";
 import { clamp } from "../utils/math";
 import { advanceClock, formatDuration, spendActionTime } from "./CalendarSystem";
+import { feedBonds, restHealthBonus } from "./RelationshipSystem";
 import { addStat, addXp, applyRhythm, rhythmPreview } from "./ProgressionSystem";
 import { battleDurationBlocks, battleEnergyCost, battleLabel, startBattle } from "./BattleSystem";
 import { burnoutReason, isBurntOut } from "./OpportunitySystem";
@@ -142,6 +143,17 @@ export function executeAction(state: GameState, rng: RandomSource, actionId: str
   const action = getCareerActions(state).find((item) => item.id === actionId);
   if (!action || action.disabledReason) return { type: "none" };
 
+  const outcome = dispatchAction(state, rng, actionId);
+  // Showing up is what a bond counts (Fase 7). Done here, once, so no action can
+  // forget to do it — and only for actions that actually ran.
+  if (outcome.type !== "none") {
+    const bondMessages = feedBonds(state, actionId);
+    if (bondMessages.length > 0 && outcome.type === "event") outcome.parts.push(...bondMessages);
+  }
+  return outcome;
+}
+
+function dispatchAction(state: GameState, rng: RandomSource, actionId: string): ActionResult {
   switch (actionId) {
     case "practice":
       return runPractice(state, rng);
@@ -329,7 +341,13 @@ function runRest(state: GameState): ActionResult {
     0,
     maxEnergy(state),
   );
-  state.health = clamp(state.health + cfg.healthBase + state.homeLevel * cfg.healthPerHomeLevel, 0, 100);
+  // The house you actually come home to heals more (Fase 7). Neglect it and the
+  // same night of rest gives back less.
+  state.health = clamp(
+    state.health + cfg.healthBase + state.homeLevel * cfg.healthPerHomeLevel + restHealthBonus(state),
+    0,
+    100,
+  );
   const rhythmMessages = applyRhythm(state, "rest", rhythmBase);
   const clock = advanceClock(state, cfg.blocks, "Descansar");
   return {

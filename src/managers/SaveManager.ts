@@ -4,11 +4,14 @@
 // clock) are migrated on load and re-persisted under the v2 key.
 
 import type {
+  BondId,
+  BondState,
   DecisionRecord,
   Difficulty,
   GameState,
   IdentityAxes,
   PlannedDayRecord,
+  RivalryState,
   ScheduledOpportunity,
   StageId,
   WeekPlan,
@@ -18,6 +21,8 @@ import { createNewState } from "../core/state";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { PlanConfig } from "../data/config/PlanConfig";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
+import { RelationshipConfig } from "../data/config/RelationshipConfig";
+import { bondDefs } from "../data/bonds";
 import { emptyPlan } from "../systems/PlanSystem";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
@@ -120,6 +125,41 @@ function backfillDecisions(value: unknown): DecisionRecord[] {
   return records.slice(-DilemmaConfig.log.maxDecisions);
 }
 
+function backfillBonds(value: unknown): Record<BondId, BondState> {
+  const cfg = RelationshipConfig.bonds;
+  // A save from before relationships existed starts where a new career does:
+  // the family is there, the crew is something you build. Not at zero — nobody
+  // wakes up estranged because the game grew a feature.
+  const fresh = {} as Record<BondId, BondState>;
+  for (const def of bondDefs) fresh[def.id] = { affinity: def.start, fedWeek: 1 };
+  if (typeof value !== "object" || value === null) return fresh;
+  const saved = value as Partial<Record<BondId, unknown>>;
+  for (const def of bondDefs) {
+    const raw = saved[def.id];
+    if (typeof raw !== "object" || raw === null) continue;
+    const bond = raw as Partial<BondState>;
+    fresh[def.id] = {
+      affinity: typeof bond.affinity === "number" && Number.isFinite(bond.affinity)
+        ? clamp(bond.affinity, cfg.min, cfg.max)
+        : def.start,
+      fedWeek: typeof bond.fedWeek === "number" && Number.isFinite(bond.fedWeek) ? bond.fedWeek : 1,
+    };
+  }
+  return fresh;
+}
+
+function backfillRivalries(value: unknown): RivalryState[] {
+  if (!Array.isArray(value)) return [];
+  const records = value.filter(
+    (entry): entry is RivalryState =>
+      typeof entry === "object" && entry !== null && typeof (entry as RivalryState).name === "string",
+  );
+  return records.slice(-RelationshipConfig.log.maxRivalries).map((entry) => ({
+    ...entry,
+    heat: clamp(Number(entry.heat) || 0, 0, RelationshipConfig.rivalry.max),
+  }));
+}
+
 function backfillItems(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.filter((id): id is string => typeof id === "string"))];
@@ -202,6 +242,10 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         // commercial or underground.
         axes: backfillAxes(saved.axes),
         decisions: backfillDecisions(saved.decisions),
+        // The people (Fase 7). Rivalries backfill empty: an old save has no
+        // record of who it humiliated, and inventing grudges would be a lie.
+        bonds: backfillBonds(saved.bonds),
+        rivalries: backfillRivalries(saved.rivalries),
         // A dilemma waiting for an answer is not persisted: reloading mid-choice
         // should not trap the player on a screen with no context.
         pendingDilemma: null,

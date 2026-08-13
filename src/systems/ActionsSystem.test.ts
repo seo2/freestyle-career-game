@@ -380,10 +380,14 @@ describe("rest", () => {
     const result = executeAction(state, createStateRng(state), "rest");
     expect(result).toEqual({
       type: "event",
-      parts: ["Descansaste y ordenaste la cabeza.", "Impulso +2: Frio."],
+      // The third line is the family bond crossing into warm (Fase 7): a fresh
+      // career starts just under the mark, so the first night home says so once.
+      parts: ["Descansaste y ordenaste la cabeza.", "Impulso +2: Frio.", "En la casa te esperan despierta."],
       fx: { label: "Descansar", fromBlock: 0, toBlock: 1, blocks: 1, daysPassed: 0 },
     });
     expect(state.energy).toBe(93); // clamp(86 + 36 + 2, 0, maxEnergy 93)
+    // Unchanged by relationships on purpose: the family bonus is measured from
+    // where the bond STARTS, so a new career collects nothing.
     expect(state.health).toBe(100);
     expect(state.momentum).toBe(44);
     expect(state.seed).toBe(12345); // rest consumes no RNG
@@ -405,7 +409,12 @@ describe("rest", () => {
     const result = executeAction(state, createStateRng(state), "rest");
     expect(result).toEqual({
       type: "event",
-      parts: ["Descansaste y ordenaste la cabeza.", "Impulso +2: Frio.", "Paso un dia."],
+      parts: [
+        "Descansaste y ordenaste la cabeza.",
+        "Impulso +2: Frio.",
+        "Paso un dia.",
+        "En la casa te esperan despierta.",
+      ],
       fx: { label: "Descansar", fromBlock: 2, toBlock: 0, blocks: 1, daysPassed: 1 },
     });
     expect(state.day).toBe(2);
