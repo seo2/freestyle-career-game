@@ -3,6 +3,8 @@ import { createNewState } from "../core/state";
 import { createSequenceRng, createStateRng } from "../services/RandomService";
 import { battleResources, battleStimuli, battleRivals, resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
+import { crowdByStage, rivalArchetypes, rivalRoster } from "../data/rivals";
+import { stages } from "../data/stages";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import type { Difficulty, GameState, StageId } from "../core/types";
 import {
@@ -11,10 +13,12 @@ import {
   battleEnergyCost,
   battleLabel,
   battleRoundSeconds,
+  chooseRivalMove,
   expireBattleRound,
   finishBattle,
   projectedHypeGain,
   resolveBattle,
+  rivalMoveWeights,
   startBattle,
 } from "./BattleSystem";
 
@@ -289,8 +293,17 @@ describe("projectedHypeGain", () => {
       if (!battle) throw new Error("battle missing");
       battle.hand = [resource.id]; // make every resource playable in turn
       const projected = projectedHypeGain(battle, resource);
-      // No previous round: base hype + stimulus bonus (barrio) only.
-      expect(projected).toBe(resource.baseHype + (battle.prompt.best.includes(resource.id) ? 4 : 0));
+      // No previous round: base hype + stimulus bonus (barrio), then this
+      // event's crowd multiplier. Recomputed from the data here so a drift in
+      // the system formula still fails the test.
+      const crowd = crowdByStage.pieza;
+      const factor = crowd.loves.includes(resource.id)
+        ? BattleConfig.crowd.lovesMultiplier
+        : crowd.colds.includes(resource.id)
+          ? BattleConfig.crowd.coldsMultiplier
+          : 1;
+      const raw = resource.baseHype + (battle.prompt.best.includes(resource.id) ? 4 : 0);
+      expect(projected).toBe(Math.floor(raw * factor));
       resolveBattle(state, rng, resource);
       expect(battle.results[0].playerHypeDelta).toBe(projected);
       expect(battle.hype).toBe(50 + projected);
@@ -325,14 +338,14 @@ describe("resolveBattle", () => {
     // Round 1: "ataque" is barrio-best -> +12 roll bonus, forced win.
     // player = stats floor((2+1)*8/2)=12 + lvl 3 + prompt 12 + energy 4
     //          + health 3 + momentum -1 + presence 0 + hype floor(50/8)=6 + roll 26 = 65
-    // rival  = power 3*8 + round 2 + roll 12 = 38
+    // rival  = power 3*8 + round 2 + resource 2 + roll 12 = 40
     resolveBattle(state, rng, resourceById("ataque"));
     expect(battle.results[0]).toEqual({
       round: 1,
       choice: "ataque",
       rivalChoice: "punchline",
       player: 65,
-      rival: 38,
+      rival: 40, // power 24 + round 2 + rival punchline floor(2*1.2)=2 + roll 12
       note: "El publico reacciona a tu ronda.",
       tensionNotes: [],
       playerHypeDelta: 16, // baseHype 12 + stimulus 12/3
@@ -362,14 +375,14 @@ describe("resolveBattle", () => {
     // Round 2: "ataque" repeated, forced loss -> the repetition penalty
     // deepens the drop and surfaces its note.
     // player = 12 + 3 + 0 + 4 + 3 - 1 + 0 + floor(66/8)=8 + roll 7 = 36
-    // rival  = 24 + 4 + roll 34 = 62
+    // rival  = 24 + 4 + resource 2 + roll 34 = 64
     resolveBattle(state, rng, resourceById("ataque"));
     expect(battle.results[1]).toEqual({
       round: 2,
       choice: "ataque",
       rivalChoice: "ataque", // .35 -> index 3, sets up round 3's counter
       player: 36,
-      rival: 62,
+      rival: 64, // power 24 + round 4 + rival ataque 2 + roll 34
       note: "El rival conecto mas fuerte.",
       tensionNotes: ["Repites recurso: aburres al publico."],
       playerHypeDelta: -12, // lossDrop 7 + repetitionPenalty 5
@@ -392,14 +405,14 @@ describe("resolveBattle", () => {
     // Round 3: "respuesta" the round after the rival's Ataque -> response
     // bonus on the win, with its note.
     // player = impro 2*8=16 + 3 + 0 + 4 + 3 - 1 + 0 + floor(54/8)=6 + roll 26 = 57
-    // rival  = 24 + 6 + roll 12 = 42
+    // rival  = 24 + 6 + resource 2 + roll 12 = 44
     resolveBattle(state, rng, resourceById("respuesta"));
     expect(battle.results[2]).toEqual({
       round: 3,
       choice: "respuesta",
       rivalChoice: "punchline",
       player: 57,
-      rival: 42,
+      rival: 44, // power 24 + round 6 + rival punchline 2 + roll 12
       note: "El publico reacciona a tu ronda.",
       tensionNotes: ["Respondiste el ataque del rival."],
       playerHypeDelta: 16, // baseHype 10 + responseBonus 6
@@ -483,7 +496,7 @@ describe("resolveBattle", () => {
     battle.playerScore = 1;
     battle.rivalScore = 0;
     // player = flow 16 + 3 + 0 + energy 4 + health 3 - 1 + 0 + 6 + roll 7 = 38
-    // rival  = 24 + 6 + roll 34 = 64
+    // rival  = 24 + 6 + resource + roll 34
     resolveBattle(state, createSequenceRng([0, 0, 0.99]), resourceById("flow"));
     expect(battle.finished).toBe(false); // verdict beat first
     advanceBattleRound(state, createSequenceRng([0]));
@@ -515,6 +528,155 @@ describe("resolveBattle", () => {
 
 // Decision-timer expiry: the deterministic "Pasada" fallback defined in
 // BattleConfig.timer, driven by GameController.update.
+// Gauntlet 10: the rival stops being a coin flip. Their personality and
+// archetype decide which resource they reach for, the resource they perform
+// feeds their roll, and each event's crowd rewards different resources.
+describe("AI rivals", () => {
+  it("covers the 7 archetypes of the Bible, one rival per stage", () => {
+    expect(Object.keys(rivalArchetypes).sort()).toEqual(
+      ["agresivo", "campeon", "humoristico", "callejero", "tecnico", "veteranisimo", "viral"].sort(),
+    );
+    expect(rivalRoster).toHaveLength(stages.length);
+    expect(rivalRoster.map((rival) => rival.stage)).toEqual(stages.map((stage) => stage.id));
+    // Every archetype is actually reachable in a career, none is dead data.
+    expect(new Set(rivalRoster.map((rival) => rival.archetype)).size).toBe(Object.keys(rivalArchetypes).length);
+  });
+
+  it("weights every resource above zero, so a legible rival can still surprise", () => {
+    for (const stage of stages) {
+      const state = stateAtStage(stage.id, 90);
+      startBattle(state, createSequenceRng([0]));
+      const battle = state.battle;
+      if (!battle) throw new Error("battle missing");
+      const weights = rivalMoveWeights(battle);
+      expect(weights.size).toBe(battleResources.length);
+      for (const weight of weights.values()) {
+        expect(weight).toBeGreaterThanOrEqual(BattleConfig.rivalAi.minWeight);
+      }
+    }
+  });
+
+  it("makes an Agresivo attack far more than a Tecnico, and a Tecnico build structures", () => {
+    const weightsAt = (stage: StageId): Map<string, number> => {
+      const state = stateAtStage(stage, 90);
+      startBattle(state, createSequenceRng([0]));
+      const battle = state.battle;
+      if (!battle) throw new Error("battle missing");
+      return rivalMoveWeights(battle);
+    };
+    const agresivo = weightsAt("plaza"); // La Sombra, archetype agresivo
+    const tecnico = weightsAt("regional"); // Killa Metro, archetype tecnico
+    expect(agresivo.get("ataque")).toBeGreaterThan(tecnico.get("ataque") ?? 0);
+    expect(tecnico.get("metrica")).toBeGreaterThan(agresivo.get("metrica") ?? 0);
+    expect(tecnico.get("dobletempo")).toBeGreaterThan(agresivo.get("dobletempo") ?? 0);
+    // The Agresivo's own top pick is the attack; the Tecnico's is structure.
+    const top = (weights: Map<string, number>): string =>
+      [...weights.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    expect(top(agresivo)).toBe("ataque");
+    expect(top(tecnico)).toBe("metrica");
+  });
+
+  it("picks the move with EXACTLY ONE rng draw (the trace harness depends on it)", () => {
+    const state = stateAtStage("plaza", 90);
+    startBattle(state, createSequenceRng([0]));
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+    let draws = 0;
+    const counting = {
+      next: () => {
+        draws += 1;
+        return 0.5;
+      },
+      int: (min: number, max: number) => {
+        draws += 1;
+        return min + Math.floor(0.5 * (max - min + 1));
+      },
+    };
+    chooseRivalMove(battle, counting);
+    expect(draws).toBe(1);
+  });
+
+  it("walks the whole weight range: a low cursor and a high cursor pick different moves", () => {
+    const state = stateAtStage("plaza", 90);
+    startBattle(state, createSequenceRng([0]));
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+    const low = chooseRivalMove(battle, createSequenceRng([0]));
+    const high = chooseRivalMove(battle, createSequenceRng([0.999]));
+    expect(low).not.toBe(high);
+    expect(battleResources.map((resource) => resource.id)).toContain(low);
+    expect(battleResources.map((resource) => resource.id)).toContain(high);
+  });
+
+  it("lets the resource the rival performs change their roll on the same seed", () => {
+    // Same battle, same rival-roll draw, different performed resource: the
+    // rival's own flow/punchline must move the number.
+    const rollWith = (rivalMoveDraw: number): number => {
+      const state = stateAtStage("plaza", 90);
+      const rng = createSequenceRng([0, 0, 0, 0, 0, 0, rivalMoveDraw, 0, 0]);
+      startBattle(state, rng);
+      const battle = state.battle;
+      if (!battle) throw new Error("battle missing");
+      resolveBattle(state, rng, resourceById(battle.hand[0]));
+      return battle.results[0].rival;
+    };
+    // Plaza rival: flow 4, punchline 6 — a punchline-leaning move outrolls a
+    // resource that leans on neither stat.
+    const draws = [0, 0.2, 0.4, 0.6, 0.8, 0.999];
+    const rolls = new Set(draws.map(rollWith));
+    expect(rolls.size).toBeGreaterThan(1);
+  });
+
+  it("applies each event's crowd taste to the hype a won round pays", () => {
+    // Pieza loves improvisacion and leaves metrica cold; plaza loves ataque.
+    const pieza = stateAtStage("pieza", 90);
+    startBattle(pieza, createSequenceRng([0]));
+    const piezaBattle = pieza.battle;
+    if (!piezaBattle) throw new Error("battle missing");
+    const loved = projectedHypeGain(piezaBattle, resourceById("improvisacion"));
+    const cold = projectedHypeGain(piezaBattle, resourceById("metrica"));
+    expect(loved).toBe(
+      Math.floor(resourceById("improvisacion").baseHype * BattleConfig.crowd.lovesMultiplier),
+    );
+    expect(cold).toBe(Math.floor(resourceById("metrica").baseHype * BattleConfig.crowd.coldsMultiplier));
+
+    // The same resource is worth more in the room that wants it.
+    const plaza = stateAtStage("plaza", 90);
+    startBattle(plaza, createSequenceRng([0]));
+    const plazaBattle = plaza.battle;
+    if (!plazaBattle) throw new Error("battle missing");
+    expect(projectedHypeGain(plazaBattle, resourceById("ataque"))).toBeGreaterThan(
+      projectedHypeGain(piezaBattle, resourceById("ataque")),
+    );
+  });
+
+  it("keeps the crowd-adjusted projection equal to what a won round actually pays", () => {
+    const state = stateAtStage("pieza", 90);
+    const rng = createSequenceRng([0, 0, 0, 0, 0, 0, 0, 0.99, 0]);
+    startBattle(state, rng);
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+    battle.hand = ["improvisacion"]; // a resource this crowd loves
+    const projected = projectedHypeGain(battle, resourceById("improvisacion"));
+    resolveBattle(state, rng, resourceById("improvisacion"));
+    expect(battle.results[0].playerHypeDelta).toBe(projected);
+  });
+
+  it("carries an honest crowd line and taste into the battle state", () => {
+    for (const stage of stages) {
+      const state = stateAtStage(stage.id, 90);
+      startBattle(state, createSequenceRng([0]));
+      const battle = state.battle;
+      if (!battle) throw new Error("battle missing");
+      const crowd = crowdByStage[stage.id];
+      expect(battle.crowdLine).toBe(crowd.line);
+      expect(battle.crowdLoves).toEqual(crowd.loves);
+      expect(battle.crowdColds).toEqual(crowd.colds);
+      expect(battle.crowdLine.length).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("expireBattleRound", () => {
   it("resolves the round as a Pasada: rival takes it, hype penalty, DEBIL verdict", () => {
     const state = stateAtStage("pieza", 86);
@@ -528,7 +690,7 @@ describe("expireBattleRound", () => {
       choice: null, // no card played
       rivalChoice: "ataque",
       player: 0,
-      rival: 38, // 24 + 2 + 12
+      rival: 40, // 24 + 2 + rival ataque 2 + 12
       note: "El rival aprovecho tu silencio.",
       tensionNotes: ["Se acabo el tiempo: pasaste la ronda."],
       playerHypeDelta: -10, // timer.passHypePenalty

@@ -9,7 +9,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "traces": "node scripts/compare-traces.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

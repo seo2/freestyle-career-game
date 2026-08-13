@@ -116,6 +116,33 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
   público se enfría. Vive en `GameController.update(dt)` para que
   `window.advanceTime(ms)` lo pueda testear, y `render_game_to_text` solo expone
   segundos enteros para que las trazas deterministas no dependan de milisegundos.
+
+### Decisiones de AI Rivals (Fase 5 · gauntlet 10, 2026-08-12)
+
+- **Un rival por etapa con perfil completo** (`src/data/rivals.ts`): nombre, estilo,
+  arquetipo, su propio flow y punchline, y las cuatro pesas de personalidad de la
+  Bible (agresividad, humor, métrica, frecuencia de riesgo). Los **7 arquetipos**
+  existen y todos son alcanzables en una carrera: Callejero (pieza), Agresivo
+  (plaza), Técnico (regional), Viral (nacional), Humorístico (internacional),
+  Veteranísimo (estrellato), Campeón Mundial (leyenda).
+- **Cómo la personalidad elige la jugada**: se arma un peso por recurso partiendo
+  de una base plana (nada es imposible), y se le suman las pesas de personalidad
+  (agresividad levanta Ataque/Punchline y baja Defensa; humor levanta Humor y
+  Storytelling; métrica levanta Métrica/Doble Tempo; la frecuencia de riesgo
+  levanta las cartas de alto hype y baja Defensa) más el sesgo propio del
+  arquetipo. Todo con piso mínimo: **un rival legible igual puede sorprender**.
+  La elección se resuelve con **exactamente un draw de RNG** sobre el peso
+  acumulado — el arnés de trazas deterministas depende de esa cuenta.
+- **El recurso que juega el rival importa mecánicamente**: sus stats alimentan la
+  tirada del recurso que interpreta (un Punchline de un rival punchlinero pega más
+  que el mismo Punchline de un técnico métrico). Qué recurso se apoya en cuál stat
+  es data (`BattleConfig.rivalResource`).
+- **Público/jueces por evento**: cada etapa declara qué recursos premia y cuáles
+  la dejan fría (`crowdByStage`), y eso multiplica el hype que paga una ronda
+  ganada. Vive **dentro de `projectedHypeGain`**, así que el `+N` que muestra la
+  carta sigue siendo exactamente lo que paga ganar — en la Final Nacional el
+  Punchline se ve +20 y la Métrica +8. La pantalla dice en una línea qué quiere
+  esa sala, para que jugarle al público sea una decisión y no una adivinanza.
 - **Hype** modifica votos, presión y público.
 
 ### IA del rival

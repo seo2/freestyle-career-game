@@ -21,7 +21,9 @@ npm run build      # tsc (estricto) + vite build
 npm run test       # Vitest (suite de systems/managers/data)
 npm run lint       # ESLint (Math.random prohibido; unused = error)
 npm run preview    # servir dist/
-node scripts/capture-traces.mjs <outDir>   # trazas deterministas de juego (arnés de paridad)
+node scripts/capture-traces.mjs <outDir>   # capturar trazas deterministas (evidencia en output/)
+npm run traces     # comparar el juego actual contra traces/baseline/ (falla si cambió la conducta)
+node scripts/compare-traces.mjs --update    # aceptar la conducta actual como nuevo baseline
 node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
 ```
 
@@ -34,7 +36,7 @@ node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev se
 - **Presentación**: escenas en `src/scenes/` (Boot/Menu/CreateMc/Career/Battle) y una vista por pantalla en `src/scenes/views/` (calendar/map/training/social/work/shop/stats + `viewKit` compartido) — solo muestran y envían comandos al controller; assets siempre vía `src/game/AssetRegistry.ts`.
 - **Tiempo**: día en 3 bloques (Mañana/Tarde/Noche). **Etapas**: 7 (pieza→leyenda).
 - Guardado en `localStorage` clave `freestyle-career-save-v2` (migración automática desde v1 en `SaveManager`); PWA: `public/manifest.webmanifest` + `public/sw.js`.
-- Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas (`output/traces/baseline-v3/` es la referencia vigente (regenerarla con `node scripts/capture-traces.mjs output/traces/baseline-v3` cuando un cambio de conducta sea intencional)).
+- Hooks de test deterministas en `window`: `render_game_to_text()` (independiente del renderer) y `advanceTime(ms)`. **Mantenerlos en cualquier refactor** — son la base del arnés de trazas byte-idénticas. La referencia vive **versionada** en `traces/baseline/` (solo los JSON: los PNG son evidencia y quedan en `output/`, que está en gitignore). Se verifica con `npm run traces` y, cuando un cambio de conducta es intencional, se acepta con `node scripts/compare-traces.mjs --update` **explicándolo en el commit**.
 - **Navegación (modelo del mockup, decisión del owner en Fase 4):** la pieza es HUD + escena + dock de 5 tiles; **no hay barra de pestañas**. El **mapa es el hub** (sus nodos llevan a Trabajo/Tienda/Gimnasio/Plaza/Estudio) y las metas de carrera viven ahí. Calendario y Stats se abren con los dos botones del HUD arriba a la derecha. Los atajos de letra (B/C/M/E/R/J/T/S) siguen activos.
 - **Identidad del MC** (nombre, apodo, aspecto, piel, voz) e **inventario de ítems** (`src/data/items.ts`) existen desde la Fase 4; la dificultad es la única elección con efecto mecánico (`DifficultyConfig`).
 - Personajes con sprites reales desde la Fase 3; el arte pendiente está listado en `docs/ASSETS.md`.

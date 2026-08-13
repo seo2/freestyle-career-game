@@ -367,6 +367,17 @@ export class GameController {
       ? {
           event: liveBattle.eventName,
           rival: liveBattle.rivalName,
+          // Who the rival is (gauntlet 10): the archetype and the personality
+          // weights that decide which resource they reach for.
+          rivalStyle: liveBattle.rivalStyle,
+          rivalArchetype: liveBattle.rivalArchetype,
+          rivalFlow: liveBattle.rivalFlow,
+          rivalPunchline: liveBattle.rivalPunchline,
+          rivalPersonality: liveBattle.rivalPersonality,
+          // What this event's crowd rewards and what leaves it cold.
+          crowdLoves: liveBattle.crowdLoves,
+          crowdColds: liveBattle.crowdColds,
+          crowdLine: liveBattle.crowdLine,
           round: liveBattle.round,
           score: `${liveBattle.playerScore}-${liveBattle.rivalScore}`,
           hype: liveBattle.hype,
