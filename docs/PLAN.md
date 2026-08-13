@@ -107,12 +107,12 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - **Hecho (2026-08-13): el criterio de cierre re-medido con las relaciones dentro.** `node scripts/playthrough.mjs`: **Plaza en semana 5, 524 inputs (~26-52 min), 3 dilemas**, 0 días a la deriva, 0 planes rotos, 0 errores de consola. La medición además destapó que los lazos eran un trinquete (100/100 en cinco semanas) y se corrigió la economía; ahora la misma partida termina en familia 93 / crew 36.
 - **Fase 7 cerrada.** Falta de la fase: nada. Pendiente de balance global (no de esta fase): las batallas son demasiado fáciles — el recorrido gana 5 de 5 y el rival llega a rencor máximo sin que eso alcance para complicarlo.
 
-### Fase 8 — Audio y juice final ⏳ en curso
+### Fase 8 — Audio y juice final ✅ (2026-08-13)
 
 - `AudioManager`: música por zona (boom bap / jazz / soul / lo-fi / trap según Bible), SFX (UI, cartas, público), toggle de música como en el mockup del menú.
 - **Criterio de cierre:** el juego suena; volumen persistido en save.
 - **Hecho (2026-08-13): SFX sintetizados, el toggle del mockup hecho real y el ajuste persistido.** `AudioService` sintetiza 13 sonidos con WebAudio (`src/data/sounds.ts`) — **sin assets**, porque generarlos gastaría créditos del owner y unos osciladores bastan para blips de pixel-art. El "♪ MUSICA: SI" del menú **era un texto fijo en un juego sin audio**; ahora lee el save y lo cambia por clic o con `M`. El ajuste sobrevive la recarga (verificado leyendo `localStorage`). Evidencia: `output/web-game/fase8-audio/`.
-- **Falta de esta fase:** la **música por zona**, que sí necesita archivos (ver `docs/ASSETS.md`). El servicio está construido para recibirlos sin plomería nueva.
+
 
 ### Fase 9 — Balance y contenido
 

@@ -14,6 +14,7 @@ import type { EventBus } from "../events/EventBus";
 import type { GameState } from "../core/types";
 import type { AudioService } from "../services/AudioService";
 import type { SoundId } from "../data/sounds";
+import type { MusicTrackId } from "../data/music";
 
 interface Snapshot {
   mode: string;
@@ -52,8 +53,21 @@ const MODE_SOUND: Record<string, SoundId | undefined> = {
   career: "uiConfirm",
 };
 
+// Which loop each screen gets. Silence is a choice here, not a gap: a dilemma and
+// an arc epilogue are the two moments the game asks the player to sit with
+// something, and a beat under them would push instead of wait.
+const MODE_MUSIC: Record<string, MusicTrackId | null> = {
+  start: "menu",
+  career: "career",
+  battle: "battle",
+  cypher: "cypher",
+  dilemma: null,
+  epilogue: null,
+};
+
 export function wireAudio(bus: EventBus, audio: AudioService, readState: () => GameState): () => void {
   let last = snapshot(readState());
+  audio.setMusic(MODE_MUSIC[last.mode] ?? "career");
 
   const offState = bus.on("STATE_CHANGED", () => {
     const now = snapshot(readState());
@@ -76,6 +90,7 @@ export function wireAudio(bus: EventBus, audio: AudioService, readState: () => G
   const offMode = bus.on("MODE_CHANGED", (mode) => {
     const sound = MODE_SOUND[mode];
     if (sound) audio.play(sound);
+    audio.setMusic(MODE_MUSIC[mode] ?? "career");
     last = snapshot(readState());
   });
 
