@@ -18,23 +18,19 @@ import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
 import { AssetRegistry, battleBackdropKey, battleChoiceIconKey } from "../game/AssetRegistry";
 import { hex, palette } from "../ui/palette";
-import { addButton, addDisplayText, addHitZone, addRect, addSpriteImage, addText, TEXT_PAD } from "../ui/kit";
+import { addHitZone, addRect, addSpriteImage, addText } from "../ui/kit";
 import { resourceById } from "../data/battle";
 import { rivalArchetypes } from "../data/rivals";
-import { BattleConfig } from "../data/config/BattleConfig";
 import { battleEnergyCost, battleRoundSeconds, projectedHypeGain } from "../systems/BattleSystem";
 import { maxEnergy } from "../core/derived";
-import type { BattleResource, BattleState, GameState, RoundResult } from "../core/types";
+import type { BattleResource, BattleState, GameState } from "../core/types";
+import { BattleDraw, FRAME, FRAME_DIM, HYPE_ORANGE, LABEL_CYAN } from "./battleDraw";
 
 const W = 960;
 const H = 540;
 
 // Tones the battle mockups use that src/ui/palette.ts does not carry yet.
 // (handoff: fold these into the palette as frame / frameDim / label / hype.)
-const FRAME = "#878da3";
-const FRAME_DIM = "#4e5470";
-const LABEL_CYAN = "#6ec6ec";
-const HYPE_ORANGE = "#ff9d2f";
 
 // Choice dock: the hand of 5 vertical cards, mockup card proportions
 // (126x169, gap 24) centered on the canvas — exactly the mockup's five.
@@ -78,6 +74,9 @@ export class BattleScene extends Phaser.Scene {
   // Live handle to the timer bar's fill so update() can animate it with the
   // frame delta between redraws (null whenever no card choice is on screen).
   private timerFill: Phaser.GameObjects.Rectangle | null = null;
+  // Pixel primitives and the two result screens live in BattleDraw so this
+  // scene stays under the 500-line rule.
+  private draw!: BattleDraw;
 
   constructor() {
     super("Battle");
@@ -92,6 +91,7 @@ export class BattleScene extends Phaser.Scene {
     this.addPerformer(RIVAL_X, PERFORMER_FEET_Y, "rival");
 
     this.layer = this.add.container(0, 0);
+    this.draw = new BattleDraw(this, this.layer);
     const subs = [
       eventBus.on("STATE_CHANGED", () => this.redraw()),
       eventBus.on("FOCUS_CHANGED", () => this.redraw()),
@@ -120,9 +120,9 @@ export class BattleScene extends Phaser.Scene {
 
     this.drawStageHud(battle);
     if (battle.finished) {
-      this.drawResultPanel(battle);
+      this.draw.finalResultPanel(battle);
     } else if (battle.pendingResult) {
-      this.drawRoundResultPanel(battle, battle.pendingResult);
+      this.draw.roundResultPanel(battle, battle.pendingResult);
     } else {
       this.drawChoiceDock(battle, input.battleFocus, controller.state);
     }
@@ -201,23 +201,23 @@ export class BattleScene extends Phaser.Scene {
   private drawStageHud(battle: BattleState): void {
     const state = gameContext().controller.state;
     this.drawScreenPixelBorder();
-    this.addCenteredText(134, 33, "TU", 18, palette.ink);
-    this.addCenteredText(824, 33, "RIVAL", 18, palette.ink);
+    this.draw.centeredText(134, 33, "TU", 18, palette.ink);
+    this.draw.centeredText(824, 33, "RIVAL", 18, palette.ink);
     // Who you are facing and what this room rewards (gauntlet 10): both come
     // from state, so the player can read the rival and play to the crowd
     // instead of guessing.
-    this.addCenteredText(824, 52, rivalArchetypes[battle.rivalArchetype].label.toUpperCase(), 11, palette.muted);
+    this.draw.centeredText(824, 52, rivalArchetypes[battle.rivalArchetype].label.toUpperCase(), 11, palette.muted);
     this.drawHudSide(202, 42, state.energy, maxEnergy(state), battle.hype);
     this.drawHudSide(600, 42, battle.rivalEnergy, battle.rivalEnergyMax, battle.rivalHype);
-    this.addCenteredDisplayText(483, 29, `RONDA ${battle.round}`, 26, palette.ink);
-    this.addCenteredText(483, 68, "HYPE", 17, HYPE_ORANGE);
-    this.drawHudBar(390, 88, 188, 14, battle.hype, 100, palette.yellow, true);
+    this.draw.centeredDisplayText(483, 29, `RONDA ${battle.round}`, 26, palette.ink);
+    this.draw.centeredText(483, 68, "HYPE", 17, HYPE_ORANGE);
+    this.draw.hudBar(390, 88, 188, 14, battle.hype, 100, palette.yellow, true);
     const onResultScreen = battle.finished || battle.pendingResult !== null;
     if (!onResultScreen) this.drawDecisionTimer(battle);
     this.drawStimulus(battle, onResultScreen ? STIMULUS_TOP_RESULT : STIMULUS_TOP_ROUND);
     // The crowd's taste rides just under the card dock, where the round screen
     // has room; the verdict beat needs that band for its panels.
-    if (!onResultScreen) this.addCenteredText(W / 2, CARD_TOP + CARD_H + 60, battle.crowdLine, 11, LABEL_CYAN);
+    if (!onResultScreen) this.draw.centeredText(W / 2, CARD_TOP + CARD_H + 60, battle.crowdLine, 11, LABEL_CYAN);
   }
 
   // Discreet countdown bar under RONDA n. Only exists while choosing a card
@@ -241,47 +241,21 @@ export class BattleScene extends Phaser.Scene {
 
   // ESTIMULO label + framed keyword box (mockup: no prompt sentence here).
   private drawStimulus(battle: BattleState, top: number): void {
-    this.addCenteredText(483, top - 23, "ESTIMULO", 16, palette.ink);
+    this.draw.centeredText(483, top - 23, "ESTIMULO", 16, palette.ink);
     addRect(this, this.layer, 338, top, 290, 71, palette.deep, 0.9);
-    this.drawFrame(338, top, 290, 71, FRAME);
-    this.addCenteredDisplayText(483, top + 18, battle.prompt.label.toUpperCase(), 37, palette.yellow);
+    this.draw.frame(338, top, 290, 71, FRAME);
+    this.draw.centeredDisplayText(483, top + 18, battle.prompt.label.toUpperCase(), 37, palette.yellow);
   }
 
   // ENERGIA value + bar and the HYPE bar for one performer.
   private drawHudSide(x: number, y: number, energy: number, maxEnergyValue: number, hype: number): void {
     addText(this, this.layer, x, y - 12, "ENERGIA", 12, palette.ink);
-    this.addValueLine(x + 164, y - 5, `${Math.floor(energy)}`, `/${maxEnergyValue}`, 12, palette.green, palette.ink, "right");
-    this.drawHudBar(x, y + 14, 166, 13, energy, maxEnergyValue, palette.green);
+    this.draw.valueLine(x + 164, y - 5, `${Math.floor(energy)}`, `/${maxEnergyValue}`, 12, palette.green, palette.ink, "right");
+    this.draw.hudBar(x, y + 14, 166, 13, energy, maxEnergyValue, palette.green);
     addText(this, this.layer, x, y + 27, "HYPE", 14, HYPE_ORANGE);
-    this.drawHudBar(x, y + 46, 166, 13, hype, 100, palette.yellow, true);
+    this.draw.hudBar(x, y + 46, 166, 13, hype, 100, palette.yellow, true);
   }
 
-  // Shadowed pixel bar; segmented mode splits orange/yellow like the mockup.
-  private drawHudBar(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    value: number,
-    max: number,
-    color: string,
-    segmented = false,
-  ): void {
-    addRect(this, this.layer, x + 3, y + 3, w, h, "#000000", 0.28);
-    addRect(this, this.layer, x, y, w, h, "#060814");
-    addRect(this, this.layer, x, y, w, 2, "#ffffff", 0.2);
-    addRect(this, this.layer, x, y + h - 2, w, 2, "#03040a");
-    const fill = Math.floor((clamp(value, 0, max) / max) * w);
-    if (segmented) {
-      const orange = Math.min(fill, Math.floor(w * 0.42));
-      const yellow = Math.max(0, fill - orange);
-      if (orange > 0) addRect(this, this.layer, x, y, orange, h, "#ff771f");
-      if (yellow > 0) addRect(this, this.layer, x + orange, y, yellow, h, color);
-    } else if (fill > 0) {
-      addRect(this, this.layer, x, y, fill, h, color);
-      addRect(this, this.layer, x, y, fill, Math.max(2, Math.floor(h * 0.35)), "#ffffff", 0.14);
-    }
-  }
 
   // Thin frame around the battle screen.
   private drawScreenPixelBorder(): void {
@@ -309,7 +283,7 @@ export class BattleScene extends Phaser.Scene {
         index === battleFocus,
       );
     });
-    this.addValueLine(
+    this.draw.valueLine(
       W / 2,
       CARD_TOP + CARD_H + 42,
       "COSTO ENERGIA: ",
@@ -330,21 +304,21 @@ export class BattleScene extends Phaser.Scene {
     if (focused) {
       const pad = CARD_SELECT_PAD;
       addRect(this, this.layer, x - pad, y - pad, CARD_W + pad * 2, CARD_H + pad * 2, palette.deep, 0.94);
-      this.drawFrame(x - pad, y - pad, CARD_W + pad * 2, CARD_H + pad * 2, palette.yellow);
+      this.draw.frame(x - pad, y - pad, CARD_W + pad * 2, CARD_H + pad * 2, palette.yellow);
       this.drawCursor(cx, y - 3);
     }
     addRect(this, this.layer, x, y, CARD_W, CARD_H, palette.deep, 0.94);
-    this.drawFrame(x, y, CARD_W, CARD_H, focused ? palette.yellow : FRAME);
+    this.draw.frame(x, y, CARD_W, CARD_H, focused ? palette.yellow : FRAME);
     // Long resource names (IMPROVISACION, STORYTELLING) shrink to the card.
-    this.addFittedCenteredText(cx, y + 17, choice.label.toUpperCase(), 15, palette.ink, CARD_W - 10);
+    this.draw.fittedCenteredText(cx, y + 17, choice.label.toUpperCase(), 15, palette.ink, CARD_W - 10);
     const iconKey = battleChoiceIconKey(choice.id);
     const icon = iconKey ? addSpriteImage(this, this.layer, iconKey, cx, y + 72, 50, 0.5, 0.5, 52) : null;
     // Four of the ten resources have no cut icon yet (docs/ASSETS.md): a dashed
     // frame reads as "pending art", the way the shop's preview slot does, so a
     // missing sprite can never be mistaken for a broken card.
     if (!icon) this.drawPendingIconSlot(cx, y + 72);
-    this.addCenteredDisplayText(cx, y + 110, `+${hype}`, 30, palette.ink);
-    this.addCenteredText(cx, y + 142, "HYPE", 13, HYPE_ORANGE);
+    this.draw.centeredDisplayText(cx, y + 110, `+${hype}`, 30, palette.ink);
+    this.draw.centeredText(cx, y + 142, "HYPE", 13, HYPE_ORANGE);
     addHitZone(this, this.layer, x, y, CARD_W, CARD_H, () => gameContext().controller.resolveBattle(choice));
   }
 
@@ -376,203 +350,4 @@ export class BattleScene extends Phaser.Scene {
   }
 
   // --- Round result beat (mockup 06_25_07: verdict after EVERY round) ---------
-
-  // Round verdict per the mockup: TU JUGADA (resource + icon, or PASADA when
-  // the timer expired), the big one-word grade with the hype the answer
-  // earned, RESPUESTA RIVAL naming the rival's resource with its grade and
-  // hype, the tension note when a rule fired, HYPE TOTAL, and CONTINUAR.
-  private drawRoundResultPanel(battle: BattleState, result: RoundResult): void {
-    const played = result.choice ? resourceById(result.choice) : null;
-    const playerColor = result.playerHypeDelta > 0 ? palette.green : palette.red;
-
-    this.drawResultSeparator();
-    this.drawPlayedPanel(played);
-
-    // Centre box: player verdict + hype delta (mockup rows 275/322/372).
-    addRect(this, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
-    this.drawFrame(340, 262, 266, 141, FRAME);
-    this.addCenteredDisplayText(473, 274, result.playerVerdict, 32, playerColor);
-    this.addCenteredDisplayText(473, 318, this.signed(result.playerHypeDelta), 44, playerColor);
-    this.addCenteredText(473, 372, "HYPE", 20, HYPE_ORANGE);
-
-    this.drawRivalAnswerPanel(result);
-    this.drawTensionNotes(result);
-    this.drawHypeTotal(battle.hype);
-    addButton(this, this.layer, 390, 492, 180, 26, "Continuar", () => gameContext().controller.advanceBattleRound(), {
-      fill: "#11183a",
-      size: 13,
-    });
-  }
-
-  // Rival box: which resource they answered with, their grade and the hype
-  // their answer earned.
-  private drawRivalAnswerPanel(result: RoundResult): void {
-    const rivalPlayed = resourceById(result.rivalChoice);
-    addRect(this, this.layer, 642, 262, 184, 141, palette.deep, 0.94);
-    this.drawFrame(642, 262, 184, 141, FRAME);
-    this.addCenteredText(734, 271, "RESPUESTA RIVAL", 11, palette.muted);
-    // Icon + name read as one centred group: the label shifts right by half
-    // the icon block so the pair sits on the panel's centre line, not the text.
-    const iconKey = battleChoiceIconKey(rivalPlayed.id);
-    const iconBlock = iconKey ? 22 : 0;
-    const label = this.addFittedCenteredText(
-      734 + iconBlock / 2,
-      288,
-      rivalPlayed.label.toUpperCase(),
-      12,
-      palette.ink,
-      140 - iconBlock,
-    );
-    if (iconKey) {
-      addSpriteImage(this, this.layer, iconKey, label.x - label.width / 2 - 11, 295, 16, 0.5, 0.5, 18);
-    }
-    this.addCenteredDisplayText(734, 307, result.rivalVerdict, 20, palette.red);
-    this.addCenteredDisplayText(734, 334, this.signed(result.rivalHypeDelta), 34, palette.red);
-    this.addCenteredText(734, 376, "HYPE", 14, HYPE_ORANGE);
-  }
-
-  // Tension-rule notes ("aburres al publico", response bonus, timer expiry):
-  // one discreet line between the verdict boxes and the HYPE TOTAL bar.
-  private drawTensionNotes(result: RoundResult): void {
-    if (result.tensionNotes.length === 0) return;
-    this.addCenteredText(W / 2, 412, result.tensionNotes.join("  "), 11, palette.yellow);
-  }
-
-  // "+18" / "-7": hype deltas always carry their sign, like the mockup.
-  private signed(value: number): string {
-    return `${value >= 0 ? "+" : ""}${value}`;
-  }
-
-  // --- Final result (battle over) ----------------------------------------------
-
-  private drawResultPanel(battle: BattleState): void {
-    const last = battle.results[battle.results.length - 1];
-    const played = last?.choice ? resourceById(last.choice) : null;
-    const verdict = battle.result === "win" ? "GANASTE" : battle.result === "draw" ? "REPLICA" : "DERROTA";
-    const color = battle.result === "win" ? palette.green : battle.result === "draw" ? palette.teal : palette.red;
-    const hypeDelta = battle.hype - BattleConfig.rounds.openingHype;
-
-    this.drawResultSeparator();
-    this.drawPlayedPanel(played);
-    this.drawVerdictPanel(verdict, color, hypeDelta);
-    this.drawRivalPanel(battle, last?.rival ?? 0);
-    this.drawHypeTotal(battle.hype);
-    addButton(this, this.layer, 390, 492, 180, 26, "Continuar", () => gameContext().controller.finishBattle(), {
-      fill: "#11183a",
-      size: 13,
-    });
-  }
-
-  // "RESULTADO" between two rules, like the mockup's section divider.
-  private drawResultSeparator(): void {
-    const label = this.addCenteredText(W / 2, 239, "RESULTADO", 15, palette.ink);
-    const left = label.x + TEXT_PAD;
-    const right = left + label.width - TEXT_PAD * 2;
-    addRect(this, this.layer, 185, 248, left - 195, 1, FRAME);
-    addRect(this, this.layer, right + 10, 248, 773 - (right + 10), 1, FRAME);
-    addRect(this, this.layer, 319, 275, 1, 115, FRAME_DIM);
-    addRect(this, this.layer, 624, 275, 1, 115, FRAME_DIM);
-  }
-
-  // TU JUGADA: the resource the player just used, with its icon — or PASADA
-  // when the decision timer expired and no card was played.
-  private drawPlayedPanel(played: BattleResource | null): void {
-    addRect(this, this.layer, 139, 262, 160, 141, palette.panel, 0.94);
-    this.drawFrame(139, 262, 160, 141, FRAME);
-    this.addCenteredText(219, 270, "TU JUGADA:", 12, LABEL_CYAN);
-    this.addCenteredText(219, 294, played ? played.label.toUpperCase() : BattleConfig.timer.passLabel, 16, palette.ink);
-    const iconKey = played ? battleChoiceIconKey(played.id) : null;
-    if (iconKey) addSpriteImage(this, this.layer, iconKey, 219, 356, 66, 0.5, 0.5, 96);
-  }
-
-  // Big verdict word plus the hype the battle swung, in the mockup's centre box.
-  private drawVerdictPanel(verdict: string, color: string, hypeDelta: number): void {
-    addRect(this, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
-    this.drawFrame(340, 262, 266, 141, FRAME);
-    this.addCenteredDisplayText(473, 272, verdict, 38, color);
-    this.addCenteredDisplayText(473, 318, this.signed(hypeDelta), 40, color);
-    this.addCenteredText(473, 372, "HYPE", 20, HYPE_ORANGE);
-  }
-
-  // RESPUESTA RIVAL: who answered and how hard they connected that round.
-  private drawRivalPanel(battle: BattleState, rivalRoll: number): void {
-    addRect(this, this.layer, 642, 262, 184, 141, palette.deep, 0.94);
-    this.drawFrame(642, 262, 184, 141, FRAME);
-    this.addCenteredText(734, 272, "RESPUESTA RIVAL", 11, palette.muted);
-    this.addCenteredText(734, 294, battle.rivalName.toUpperCase(), 13, palette.red);
-    this.addCenteredDisplayText(734, 318, String(rivalRoll), 40, palette.red);
-    this.addCenteredText(734, 372, "PUNTOS", 14, HYPE_ORANGE);
-  }
-
-  // HYPE TOTAL bar with its N/100 readout.
-  private drawHypeTotal(hype: number): void {
-    this.addCenteredText(489, 438, "HYPE TOTAL", 16, palette.ink);
-    this.drawFrame(410, 458, 161, 25, FRAME);
-    this.drawHudBar(412, 460, 157, 21, hype, 100, palette.yellow);
-    this.addValueLine(580, 464, String(Math.floor(hype)), "/100", 13, palette.yellow, palette.ink, "left");
-  }
-
-  // --- Text/frame helpers -----------------------------------------------------
-
-  private addCenteredText(cx: number, y: number, content: string, size: number, color: string): Phaser.GameObjects.Text {
-    const text = addText(this, this.layer, 0, y, content, size, color);
-    text.setX(Math.round(cx - text.width / 2));
-    return text;
-  }
-
-  // Centered text that shrinks (uniformly) when wider than maxWidth, so long
-  // resource names never bleed out of their card or panel.
-  private addFittedCenteredText(
-    cx: number,
-    y: number,
-    content: string,
-    size: number,
-    color: string,
-    maxWidth: number,
-  ): Phaser.GameObjects.Text {
-    const text = addText(this, this.layer, 0, y, content, size, color);
-    if (text.width > maxWidth) text.setScale(maxWidth / text.width);
-    text.setX(Math.round(cx - text.displayWidth / 2));
-    return text;
-  }
-
-  private addCenteredDisplayText(cx: number, y: number, content: string, size: number, color: string): void {
-    const text = addDisplayText(this, this.layer, 0, y, content, size, color);
-    text.setX(Math.round(cx - text.width / 2));
-  }
-
-  // Two-tone value line ("90" + "/100"), anchored left, centred or right.
-  private addValueLine(
-    x: number,
-    y: number,
-    left: string,
-    right: string,
-    size: number,
-    leftColor: string,
-    rightColor: string,
-    anchor: "left" | "center" | "right",
-  ): void {
-    const a = addText(this, this.layer, 0, y, left, size, leftColor);
-    const b = addText(this, this.layer, 0, y, right, size, rightColor);
-    const aWidth = a.width - TEXT_PAD * 2;
-    const bWidth = b.width - TEXT_PAD * 2;
-    const total = aWidth + bWidth;
-    const start = anchor === "center" ? x - total / 2 : anchor === "right" ? x - total : x;
-    a.setX(Math.round(start - TEXT_PAD));
-    b.setX(Math.round(start + aWidth - TEXT_PAD));
-  }
-
-  // Chamfered 2px pixel frame (the mockup's rounded card/panel outline).
-  private drawFrame(x: number, y: number, w: number, h: number, color: string): void {
-    const t = 2;
-    const c = 4;
-    addRect(this, this.layer, x + c, y, w - c * 2, t, color);
-    addRect(this, this.layer, x + c, y + h - t, w - c * 2, t, color);
-    addRect(this, this.layer, x, y + c, t, h - c * 2, color);
-    addRect(this, this.layer, x + w - t, y + c, t, h - c * 2, color);
-    addRect(this, this.layer, x + t, y + t, t, t, color);
-    addRect(this, this.layer, x + w - t * 2, y + t, t, t, color);
-    addRect(this, this.layer, x + t, y + h - t * 2, t, t, color);
-    addRect(this, this.layer, x + w - t * 2, y + h - t * 2, t, t, color);
-  }
 }
