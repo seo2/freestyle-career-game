@@ -64,18 +64,25 @@ describe("addXp", () => {
 });
 
 describe("maybeUnlockStage", () => {
-  it("unlocks plaza at exactly level 2 and respect 8", () => {
+  it("unlocks plaza exactly at the ladder's gate", () => {
     const state = createNewState("Test", SEED);
-    state.level = 2;
-    state.respect = 8;
+    const plaza = stages[1];
+    state.level = plaza.minLevel;
+    state.fans = plaza.minFans;
+    state.respect = plaza.minRespect;
+    state.fame = plaza.minFame;
     expect(maybeUnlockStage(state)).toBe("Nuevo circuito desbloqueado: Plaza.");
     expect(state.stage).toBe("plaza");
+    // Leaving a stage closes its chapter (Fase 7), so the loop stops on it.
+    expect(state.mode).toBe("epilogue");
   });
 
   it("stays locked one point below either requirement", () => {
+    const plaza = stages[1];
     const low = createNewState("Test", SEED);
-    low.level = 2;
-    low.respect = 7;
+    low.level = plaza.minLevel;
+    low.fans = plaza.minFans;
+    low.respect = plaza.minRespect - 1;
     expect(maybeUnlockStage(low)).toBeNull();
     expect(low.stage).toBe("pieza");
 
@@ -96,8 +103,10 @@ describe("maybeUnlockStage", () => {
 describe("finalizeEvent", () => {
   it("appends the unlock message before joining parts", () => {
     const state = createNewState("Test", SEED);
-    state.level = 2;
-    state.respect = 8;
+    const plaza = stages[1];
+    state.level = plaza.minLevel;
+    state.fans = plaza.minFans;
+    state.respect = plaza.minRespect;
     const parts = ["Ganaste la batalla."];
     finalizeEvent(state, parts);
     expect(state.lastEvent).toBe("Ganaste la batalla. Nuevo circuito desbloqueado: Plaza.");
@@ -117,8 +126,10 @@ describe("stageGoalProgress", () => {
   it("averages the four requirement ratios", () => {
     const state = createNewState("Test", SEED);
     const plaza = stages[1];
-    // level 1/2 = 0.5, fans req 0 = 1, respect 0/8 = 0, fame req 0 = 1.
-    expect(stageGoalProgress(state, plaza)).toBeCloseTo(0.625, 10);
+    // A fresh MC is level 1 with nothing else, so the progress is the level ratio
+    // averaged with three zeros (fame has no requirement, which counts as met).
+    const expected = (1 / plaza.minLevel + 0 + 0 + 1) / 4;
+    expect(stageGoalProgress(state, plaza)).toBeCloseTo(expected, 10);
   });
 });
 
@@ -129,8 +140,8 @@ describe("getCareerGoals", () => {
     expect(goals).toEqual([
       {
         label: "Abrir Plaza",
-        detail: "Nv 1/2 · Resp 0/8",
-        value: 63,
+        detail: "Nv 1/5 · Resp 0/45",
+        value: 30,
         max: 100,
         color: "#2fa58d",
       },

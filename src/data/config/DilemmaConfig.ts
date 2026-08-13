@@ -3,9 +3,12 @@
 
 export const DilemmaConfig = {
   roll: {
-    // Chance (0..1) that a lived day brings a dilemma. Low on purpose: a week
-    // where nothing forces a choice is what makes the choices land.
-    chancePerDay: 0.28,
+    // Chance (0..1) that a lived day brings a dilemma. Capped at one per week, so
+    // this is really "how likely is it that an eligible week delivers its one":
+    // at 0.40 a seven-day week lands one about 96% of the time. It was 0.28, and
+    // a measured run to Plaza (scripts/playthrough.mjs) found only 2 dilemmas
+    // where docs/PLAN.md asks for at least 3.
+    chancePerDay: 0.4,
     // Never two in the same week: the point is that a decision is an event.
     maxPerWeek: 1,
     // How many opening weeks stay clear: the first week is for learning the

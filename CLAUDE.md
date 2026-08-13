@@ -25,6 +25,7 @@ node scripts/capture-traces.mjs <outDir>   # capturar trazas deterministas (evid
 npm run traces     # comparar el juego actual contra traces/baseline/ (falla si cambió la conducta)
 node scripts/compare-traces.mjs --update    # aceptar la conducta actual como nuevo baseline
 node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
+node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo del primer arco (dev server corriendo)
 ```
 
 ## Arquitectura (Fases 1–4)
