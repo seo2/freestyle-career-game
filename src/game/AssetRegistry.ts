@@ -36,6 +36,23 @@ export const AssetRegistry = {
     resCash: { key: "res-cash", path: "/assets/icons/res-cash.png" },
     resFans: { key: "res-fans", path: "/assets/icons/res-fans.png" },
     resRespect: { key: "res-respect", path: "/assets/icons/res-respect.png" },
+    resFame: { key: "res-fame", path: "/assets/icons/res-fame.png" },
+    uiCart: { key: "ui-cart", path: "/assets/icons/ui-cart.png" },
+    actionOffer: { key: "action-offer", path: "/assets/icons/action-offer.png" },
+    battleDefensa: { key: "battle-defensa", path: "/assets/icons/battle-defensa.png" },
+    battleDobletempo: { key: "battle-dobletempo", path: "/assets/icons/battle-dobletempo.png" },
+    battleStorytelling: { key: "battle-storytelling", path: "/assets/icons/battle-storytelling.png" },
+    battleImprovisacion: { key: "battle-improvisacion", path: "/assets/icons/battle-improvisacion.png" },
+    itemInterfaz: { key: "item-interfaz", path: "/assets/icons/item-interfaz.png" },
+    itemMonitores: { key: "item-monitores", path: "/assets/icons/item-monitores.png" },
+    itemGorra: { key: "item-gorra", path: "/assets/icons/item-gorra.png" },
+    itemZapatillas: { key: "item-zapatillas", path: "/assets/icons/item-zapatillas.png" },
+    itemChaqueta: { key: "item-chaqueta", path: "/assets/icons/item-chaqueta.png" },
+    itemMesa: { key: "item-mesa", path: "/assets/icons/item-mesa.png" },
+    itemCuaderno: { key: "item-cuaderno", path: "/assets/icons/item-cuaderno.png" },
+    itemBeatBoombap: { key: "item-beat-boombap", path: "/assets/icons/item-beat-boombap.png" },
+    itemBeatTrap: { key: "item-beat-trap", path: "/assets/icons/item-beat-trap.png" },
+    itemPackAcapella: { key: "item-pack-acapella", path: "/assets/icons/item-pack-acapella.png" },
     battlePunchline: { key: "battle-punchline", path: "/assets/icons/battle-punchline.png" },
     battleRespuesta: { key: "battle-respuesta", path: "/assets/icons/battle-respuesta.png" },
     battleHumor: { key: "battle-humor", path: "/assets/icons/battle-humor.png" },
@@ -71,15 +88,18 @@ const actionIconKeys: Record<string, string> = {
   battle: AssetRegistry.icons.battlePunchline.key,
   work: AssetRegistry.icons.resCash.key,
   cypher: AssetRegistry.icons.battleRespuesta.key,
+  // The weekly plan's offer slot (Fase 6): the thing with a deadline.
+  offer: AssetRegistry.icons.actionOffer.key,
 };
 
 export function actionIconKey(id: string): string | null {
   return actionIconKeys[id] ?? null;
 }
 
-// Battle resource id -> card icon texture key (null when no icon cut yet).
-// Pending art: battle-defensa, battle-dobletempo, battle-storytelling and
-// battle-improvisacion — those cards draw the neutral framed placeholder.
+// Battle resource id -> card icon texture key. All ten resources of the Bible
+// have art now (the four missing ones were generated and processed through
+// scripts/process-icon.mjs in 2026-08-13), so no card falls back to the dashed
+// pending frame.
 const battleChoiceIconKeys: Record<string, string> = {
   respuesta: AssetRegistry.icons.battleRespuesta.key,
   punchline: AssetRegistry.icons.battlePunchline.key,
@@ -87,6 +107,10 @@ const battleChoiceIconKeys: Record<string, string> = {
   humor: AssetRegistry.icons.battleHumor.key,
   metrica: AssetRegistry.icons.battleMetrica.key,
   ataque: AssetRegistry.icons.battleAtaque.key,
+  defensa: AssetRegistry.icons.battleDefensa.key,
+  dobletempo: AssetRegistry.icons.battleDobletempo.key,
+  storytelling: AssetRegistry.icons.battleStorytelling.key,
+  improvisacion: AssetRegistry.icons.battleImprovisacion.key,
 };
 
 export function battleChoiceIconKey(id: string): string | null {
