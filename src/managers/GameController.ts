@@ -26,6 +26,8 @@ import { eventBus } from "../events/EventBus";
 import { addXp, finalizeEvent } from "../systems/ProgressionSystem";
 import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
+import type { AudioService } from "../services/AudioService";
+import type { SoundId } from "../data/sounds";
 import { resolveDilemma as resolveDilemmaSys, rollDilemma } from "../systems/DilemmaSystem";
 import { closeEpilogue as closeEpilogueSys } from "../systems/EpilogueSystem";
 import {
@@ -92,6 +94,7 @@ function wrapOption(current: number, delta: number, count: number): number {
 export class GameController {
   state: GameState;
   careerView: CareerView = "base";
+  private audio: AudioService | null = null;
   timeFx: TimeAdvanceFx | null = null;
   creatingNew: boolean;
   savedSnapshot: GameState | null;
@@ -240,6 +243,9 @@ export class GameController {
     ];
     const current = plannedActionFor(this.state, day);
     const index = options.indexOf(current);
+    // Sounded here rather than only in the router: the calendar cards are
+    // clickable too, and a mouse player deserves the same feedback.
+    this.playSound("uiMove");
     this.planDay(day, options[(index + 1) % options.length]);
   }
 
@@ -358,6 +364,35 @@ export class GameController {
     this.applyResult(buyUpgradeByKeySys(this.state, this.rng, key));
   }
 
+  // --- Audio (Fase 8) ------------------------------------------------------------
+
+  // The service is created by the bootstrap (it needs a browser), so the
+  // controller only holds it to keep it in step with the save.
+  attachAudio(audio: AudioService): void {
+    this.audio = audio;
+    audio.applySettings(this.state.audio);
+  }
+
+  // UI sounds come from the INPUT layer, not from a state diff: only the router
+  // knows that a key was accepted, refused, or merely moved a cursor. Verifying
+  // the audio log showed the cost of not having this — planning a day and playing
+  // a card were both silent, and `cardPlayed` was a sound nothing could trigger.
+  playSound(id: SoundId): void {
+    this.audio?.play(id);
+  }
+
+  // The mockup's menu carries a single "MUSICA: SI/NO", so one switch moves both:
+  // a player turning the sound off means all of it.
+  toggleSound(): void {
+    const on = !(this.state.audio.sfxOn || this.state.audio.musicOn);
+    this.state.audio = { ...this.state.audio, sfxOn: on, musicOn: on };
+    this.audio?.applySettings(this.state.audio);
+    // Persisted immediately: the closing criterion of Fase 8 is that this
+    // survives a reload, and a setting is not a move you should have to confirm.
+    this.saveState();
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
   setCareerView(view: CareerView): void {
     if (this.careerView === view) return;
     this.careerView = view;
@@ -368,6 +403,9 @@ export class GameController {
   // --- Battle commands -----------------------------------------------------------
 
   resolveBattle(choice: BattleResource): void {
+    // Every route into a played card passes through here — digit, Enter on the
+    // focused card, or a click on it — so this is the one place it can sound once.
+    this.playSound("cardPlayed");
     resolveBattleSys(this.state, this.rng, choice);
     eventBus.emit("STATE_CHANGED", undefined);
   }

@@ -1,6 +1,7 @@
 import type { BondId, GameState } from "./types";
 import { NewGameConfig } from "../data/config/NewGameConfig";
 import { bondDefs } from "../data/bonds";
+import { AudioConfig } from "../data/config/AudioConfig";
 import { emptyPlan } from "../systems/PlanSystem";
 
 // Where each bond opens, from its definition — the number belongs to the data,
@@ -77,5 +78,7 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
       crew: { affinity: bondStart("crew"), fedWeek: 0 },
     },
     rivalries: [],
+    // Sound on, at a volume that is not the loudest thing the game can do.
+    audio: { volume: AudioConfig.volume.start, sfxOn: true, musicOn: true },
   };
 }

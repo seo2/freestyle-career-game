@@ -165,6 +165,11 @@ de no calzar con el estilo del mockup.
 - **Fondo en formato retrato** para el marco de Crear MC.
 - **Arte por stat** (libros, foco, manos-corazón, cerebro) para Entrenamiento.
 - **"Cypher en la pieza"** como fondo de batalla temprana.
+- **Música por zona** (boom bap / jazz / soul / lo-fi / trap, según la Bible). Los
+  **SFX no son un pendiente**: se sintetizan con WebAudio (`src/data/sounds.ts`),
+  así que no hay archivos que cargar ni que falten. Una pista de boom bap sí es
+  otra cosa — no la fingen unos osciladores — y `AudioService` está hecho para que
+  meter los archivos después no necesite plomería nueva.
 
 ### Placeholders resueltos en Fase 4
 

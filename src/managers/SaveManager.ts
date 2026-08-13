@@ -4,6 +4,7 @@
 // clock) are migrated on load and re-persisted under the v2 key.
 
 import type {
+  AudioSettings,
   BondId,
   BondState,
   DecisionRecord,
@@ -22,6 +23,7 @@ import { CalendarConfig } from "../data/config/CalendarConfig";
 import { PlanConfig } from "../data/config/PlanConfig";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import { RelationshipConfig } from "../data/config/RelationshipConfig";
+import { AudioConfig } from "../data/config/AudioConfig";
 import { bondDefs } from "../data/bonds";
 import { emptyPlan } from "../systems/PlanSystem";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
@@ -160,6 +162,21 @@ function backfillRivalries(value: unknown): RivalryState[] {
   }));
 }
 
+function backfillAudio(value: unknown): AudioSettings {
+  const { min, max, start } = AudioConfig.volume;
+  // A save from before Fase 8 gets sound ON: it is what a new career gets, and
+  // silently muting someone's game would be a worse guess than the default.
+  const fresh: AudioSettings = { volume: start, sfxOn: true, musicOn: true };
+  if (typeof value !== "object" || value === null) return fresh;
+  const saved = value as Partial<AudioSettings>;
+  return {
+    volume:
+      typeof saved.volume === "number" && Number.isFinite(saved.volume) ? clamp(saved.volume, min, max) : start,
+    sfxOn: typeof saved.sfxOn === "boolean" ? saved.sfxOn : true,
+    musicOn: typeof saved.musicOn === "boolean" ? saved.musicOn : true,
+  };
+}
+
 function backfillItems(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.filter((id): id is string => typeof id === "string"))];
@@ -246,6 +263,7 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         // record of who it humiliated, and inventing grudges would be a lie.
         bonds: backfillBonds(saved.bonds),
         rivalries: backfillRivalries(saved.rivalries),
+        audio: backfillAudio(saved.audio),
         // A dilemma waiting for an answer is not persisted: reloading mid-choice
         // should not trap the player on a screen with no context.
         pendingDilemma: null,
