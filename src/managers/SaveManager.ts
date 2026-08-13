@@ -3,7 +3,14 @@
 // globals are touched. v2 saves carry the day-block clock; v1 saves (24h
 // clock) are migrated on load and re-persisted under the v2 key.
 
-import type { Difficulty, GameState, PlannedDayRecord, WeekPlan, WeekSummary } from "../core/types";
+import type {
+  Difficulty,
+  GameState,
+  PlannedDayRecord,
+  ScheduledOpportunity,
+  WeekPlan,
+  WeekSummary,
+} from "../core/types";
 import { createNewState } from "../core/state";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { PlanConfig } from "../data/config/PlanConfig";
@@ -145,6 +152,15 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         plan: backfillPlan(saved.plan),
         weekRecord: backfillDayRecords(saved.weekRecord),
         weekLog: backfillWeekLog(saved.weekLog),
+        // Offers are a per-week roll, so an older save simply starts with none
+        // and gets its own at the next week rollover.
+        opportunities: Array.isArray(saved.opportunities)
+          ? saved.opportunities.filter(
+              (entry): entry is ScheduledOpportunity =>
+                typeof entry === "object" && entry !== null && typeof (entry as ScheduledOpportunity).id === "string",
+            )
+          : [],
+        opportunitiesWeek: typeof saved.opportunitiesWeek === "number" ? saved.opportunitiesWeek : 0,
         weekOpening: saved.weekOpening ?? {
           cash: saved.cash ?? 0,
           fans: saved.fans ?? 0,

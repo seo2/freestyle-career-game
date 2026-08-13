@@ -20,6 +20,8 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -110,6 +112,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -281,6 +293,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -458,6 +480,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -478,7 +510,7 @@
         "timeLabel": "Mañana",
         "xp": 34,
         "xpNext": 70,
-        "energy": 60,
+        "energy": 59,
         "health": 90,
         "cash": 77,
         "fans": 0,
@@ -503,7 +535,7 @@
           "improvisacion": 3,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 2
+          "disciplina": 1
         }
       },
       "timeFx": {
@@ -641,6 +673,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -661,7 +703,7 @@
         "timeLabel": "Mañana",
         "xp": 34,
         "xpNext": 70,
-        "energy": 60,
+        "energy": 59,
         "health": 90,
         "cash": 77,
         "fans": 0,
@@ -686,7 +728,7 @@
           "improvisacion": 3,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 2
+          "disciplina": 1
         }
       },
       "timeFx": null,
@@ -737,6 +779,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -757,7 +809,7 @@
         "timeLabel": "Mañana",
         "xp": 34,
         "xpNext": 70,
-        "energy": 60,
+        "energy": 59,
         "health": 90,
         "cash": 77,
         "fans": 0,
@@ -782,7 +834,7 @@
           "improvisacion": 3,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 2
+          "disciplina": 1
         }
       },
       "timeFx": null,

@@ -43,6 +43,15 @@ export interface StageDef {
   minFame: number;
 }
 
+// An offer scheduled for a weekday (Fase 6). It is the same shape whether it is
+// still live, taken or missed, so the week's history keeps what you turned down.
+export interface ScheduledOpportunity {
+  id: string;
+  day: number;
+  taken: boolean;
+  missed: boolean;
+}
+
 // Weekly planning (Fase 6, gauntlet 3 v2). The Bible's main loop is "enter the
 // room -> plan the week -> execute -> consequences -> weekly summary", so the
 // plan is the player's stated intent for each day and lives in the save.
@@ -229,6 +238,13 @@ export interface GameState {
   weekRecord: PlannedDayRecord[];
   // Finished weeks, newest last, bounded by PlanConfig.history.maxWeeks.
   weekLog: WeekSummary[];
+  // This week's scheduled offers: what knocked, on which day, and whether you
+  // took it. Rolled fresh every week (Fase 6).
+  opportunities: ScheduledOpportunity[];
+  // The week `opportunities` was rolled for. The roll needs RNG, which lives in
+  // the controller, so this marker is what makes "roll once per week"
+  // state-driven and therefore deterministic.
+  opportunitiesWeek: number;
   // Resource snapshot taken when the week began, so the summary can report
   // deltas without every system having to report them.
   weekOpening: { cash: number; fans: number; respect: number; fame: number; xp: number };

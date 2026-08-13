@@ -12,6 +12,7 @@ import { clamp } from "../utils/math";
 import { advanceClock, formatDuration, spendActionTime } from "./CalendarSystem";
 import { addStat, addXp, applyRhythm, rhythmPreview } from "./ProgressionSystem";
 import { battleDurationBlocks, battleEnergyCost, battleLabel, startBattle } from "./BattleSystem";
+import { burnoutReason, isBurntOut } from "./OpportunitySystem";
 
 export function getCareerActions(state: GameState): CareerActionInfo[] {
   const actions: CareerActionInfo[] = [];
@@ -122,6 +123,15 @@ export function getCareerActions(state: GameState): CareerActionInfo[] {
     ),
     durationBlocks: ActionsConfig.rest.blocks,
   });
+
+  // Mandatory rest (Bible: fatigue and mental health force a break). Below the
+  // health floor every action except resting closes — the game stops letting you
+  // dig a deeper hole. Applied last so it overrides every other reason.
+  if (isBurntOut(state)) {
+    for (const action of actions) {
+      if (action.id !== "rest") action.disabledReason = burnoutReason();
+    }
+  }
 
   return actions;
 }
