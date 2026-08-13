@@ -145,6 +145,22 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
       : null,
     closedWeeks: state.weekLog.length,
   };
+  // The cypher (training with its own screen): its turns and what they taught,
+  // so the harness can verify practice without a screenshot.
+  const liveCypher = state.cypher;
+  const cypher = liveCypher
+    ? {
+        turn: liveCypher.turn,
+        maxTurns: liveCypher.maxTurns,
+        options: liveCypher.options.map((id) => {
+          const resource = resourceById(id);
+          return { id, label: resource.label, trains: resource.stats };
+        }),
+        pending: liveCypher.pending,
+        turns: liveCypher.turns,
+        finished: liveCypher.finished,
+      }
+    : null;
   return JSON.stringify({
     coordinate_system: "canvas 960x540, origin top-left, x right, y down",
     week,
@@ -212,5 +228,6 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
       : null,
     actions,
     battle,
+    cypher,
   });
 }

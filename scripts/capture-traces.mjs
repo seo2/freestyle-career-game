@@ -22,7 +22,16 @@ const SCENARIOS = {
   "fresh-career": [
     { press: "Enter" }, // start new career with default name
     { press: "1" }, // practice
-    { press: "2" }, // cypher
+    // The cypher is training with its own screen now (2026-08-13): it opens,
+    // three turns are thrown, and closing the circle is what pays the clock.
+    { press: "2" }, // cypher -> opens the circle
+    { press: "1" }, // throw the first option
+    { press: "Enter" }, // past the turn verdict
+    { press: "2" }, // throw the second option
+    { press: "Enter" },
+    { press: "3" }, // throw the third option
+    { press: "Enter" },
+    { press: "Enter" }, // close the circle, back to the room
     { press: "3" }, // work
     { press: "4" }, // social clip
     { press: "5" }, // write

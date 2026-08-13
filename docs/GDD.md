@@ -181,13 +181,38 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
 - **Impulso visible**: es un modificador real de las tiradas de batalla, así que
   el panel de planificación lo muestra con su ánimo en vez de dejarlo escondido
   dentro del texto de los eventos.
-- **Pregunta abierta para el owner:** ¿las batallas deberían ser **estrictamente**
-  eventos de fin de semana? Se probó cerrar la acción `battle` fuera del sábado y
-  funciona (el nodo PLAZA del mapa se bloquea solo, porque lee el motivo real),
-  pero deja a un jugador nuevo sin batallar hasta el día 6 y en la pieza la
-  "batalla" es literalmente un cypher con amigos. Por eso hoy la cita rige el
-  **plan** y la PLAZA del mapa sigue abierta cualquier día. Es una decisión de
-  diseño, no un bug.
+- **Resuelto (decisión del owner, 2026-08-13): dos niveles, no una regla rígida.**
+  El problema no era "estricto o no": era que `battle` y `cypher` eran casi lo
+  mismo (en la pieza la "batalla" se llamaba literalmente *cypher con amigos*).
+  Ahora:
+  - **Cypher = entrenamiento, con su propia pantalla.** Cualquier día. Tiras un
+    recurso, ruedas contra **tus propias stats** (no hay rival ni medidor de
+    hype) y lo que te llevas son **puntos en las stats que ese recurso ejercita**.
+    Es la válvula de siempre-puedes-rapear.
+  - **Evento de etapa = la batalla.** Tiene **fecha** (se agenda el sábado), paga
+    los premios de etapa y cuenta para las metas. Es la cita que le da forma a la
+    semana.
+  - Con eso la semana tiene stakes **sin** encerrar a nadie. La acción `battle`
+    **no** quedó cerrada fuera del sábado: la cita sigue rigiendo el **plan**, y
+    la PLAZA del mapa sigue abierta. Cerrarla es ahora seguro (el cypher cubre el
+    hueco) si el owner lo quiere; es una línea.
+
+### El cypher como entrenamiento (decisión del owner, 2026-08-13)
+
+- **Su propia pantalla** (`src/scenes/CypherScene.ts`), no la de batalla: sin HUD
+  de rival, sin medidor de hype, sin premios de etapa. El círculo de amigos
+  alrededor, puntos de turno arriba, y tres cartas anchas que **dicen qué entrena
+  cada recurso** — que es la razón para elegir una sobre otra.
+- **Ruedas contra ti mismo** (`CypherSystem`): la tirada es tus stats + un dado,
+  así el veredicto responde "¿te salió?" (LIMPIO / SALIO / TRABADO) en vez de
+  compararte con un rival. Mejorar se vuelve visible.
+- **Paga en stats, turno por turno.** Un turno limpio enseña más que uno trabado,
+  pero **un turno trabado también enseña** — eso es practicar. Repetir el mismo
+  recurso en el mismo círculo enseña menos: la variedad es el punto.
+- **El costo se cobra al cerrar el círculo**, no al abrirlo (energía + 1 bloque),
+  así irse a la mitad no es gratis. El respeto solo llega si **todos** los turnos
+  salieron limpios: un cypher no es un escenario. Nunca paga plata ni fans.
+- Números en `src/data/config/CypherConfig.ts`.
 
 ### Decisiones de game feel (Fase 5 · cierre, 2026-08-12)
 

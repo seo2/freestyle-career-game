@@ -87,6 +87,10 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - **Cerrado también:** **oportunidades programadas que expiran** (`src/data/opportunities.ts` + `OpportunitySystem`): cada semana golpean hasta dos ofertas con fecha, se agendan solo el día que llegaron, pagan lo que prometen y **se pierden** con aviso si el día pasa. **Descanso obligatorio** por salud mental: bajo el piso de `OpportunityConfig.burnout` todo se cierra menos descansar. **Impulso visible** en el panel de planificación (es un modificador real de las tiradas de batalla, así que dejó de vivir solo dentro del texto de los eventos).
 - **Queda una pregunta de diseño para el owner** (registrada en `docs/GDD.md`): si las batallas deben ser estrictamente de fin de semana. Hoy la cita rige el plan y el nodo PLAZA del mapa sigue abierto cualquier día.
 
+### Cypher como entrenamiento ✅ (2026-08-13) — decisión del owner
+
+- El cypher dejó de ser una acción que se resolvía en una línea: es **entrenamiento con su propia pantalla** (tiras un recurso, ruedas contra tus stats, te llevas puntos en las stats que ese recurso ejercita). Eso resuelve la pregunta de si las batallas debían ser estrictamente de fin de semana: hay **dos niveles** — cypher cualquier día, evento de etapa con fecha. Decisiones en `docs/GDD.md`. Evidencia: `output/web-game/cypher/`.
+
 ### Fase 7 — Progresión, eventos y primer arco completo — gauntlets 11–14
 
 - `EventSystem`: eventos semanales probabilísticos con decisiones sin respuesta correcta (entrevista, hate, polémica, sponsor, lesión…).

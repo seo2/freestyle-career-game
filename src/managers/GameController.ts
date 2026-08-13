@@ -27,6 +27,11 @@ import { addXp, finalizeEvent } from "../systems/ProgressionSystem";
 import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
 import {
+  advanceCypher as advanceCypherSys,
+  finishCypher as finishCypherSys,
+  throwResource as throwResourceSys,
+} from "../systems/CypherSystem";
+import {
   advanceBattleRound as advanceBattleRoundSys,
   expireBattleRound as expireBattleRoundSys,
   finishBattle as finishBattleSys,
@@ -171,6 +176,8 @@ export class GameController {
       this.setEvent([...result.parts, ...missed]);
     } else if (result.type === "battle-started") {
       eventBus.emit("BATTLE_STARTED", undefined);
+      eventBus.emit("MODE_CHANGED", this.state.mode);
+    } else if (result.type === "cypher-started") {
       eventBus.emit("MODE_CHANGED", this.state.mode);
     }
     eventBus.emit("STATE_CHANGED", undefined);
@@ -378,6 +385,31 @@ export class GameController {
     this.startTimeFx(result.fx);
     this.setEvent(result.parts);
     eventBus.emit("BATTLE_FINISHED", undefined);
+    eventBus.emit("MODE_CHANGED", this.state.mode);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // --- Cypher (training with its own screen) -----------------------------------
+
+  throwCypher(choice: BattleResource): void {
+    throwResourceSys(this.state, this.rng, choice);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  advanceCypherTurn(): void {
+    advanceCypherSys(this.state, this.rng);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // Closing the circle: pays momentum, career xp and the clock, and records the
+  // day so a planned cypher shows up in the weekly summary like any other day.
+  finishCypher(): void {
+    const outcome = finishCypherSys(this.state, this.rng);
+    if (!outcome) return;
+    recordDay(this.state, todaysPlan(this.state), "cypher", outcome.parts[0]);
+    this.careerView = "base";
+    this.startTimeFx(outcome.fx);
+    this.setEvent(outcome.parts);
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
   }

@@ -36,6 +36,7 @@ sus títulos numerados. Resultado — archivos exactos por pantalla:
 | 10 | Batalla (ronda) | `06_52_01 a.m. (1).png` (plaza) · `06_52_02 a.m. (4).png` (evento grande) |
 | — | Batalla (resultado de ronda) | `06_25_07 a.m. (1).png` |
 | 13 | **Estadísticas** | `06_25_08 a.m. (3).png` |
+| — | **Cypher (entrenamiento)** | sin mockup: pantalla nueva de 2026-08-13, construida con el lenguaje visual de la batalla (paneles pixel, cartas, cursor amarillo) pero deliberadamente **sin** HUD de rival ni medidor de hype |
 
 ### Lo que revela el mockup 4 (calendario) — importante para el diseño
 
