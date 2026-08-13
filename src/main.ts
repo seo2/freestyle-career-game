@@ -19,6 +19,9 @@ import { EpilogueScene } from "./scenes/EpilogueScene";
 import { hex, palette } from "./ui/palette";
 import { AudioService } from "./services/AudioService";
 import { wireAudio } from "./game/audioWiring";
+import { MusicPlayer } from "./services/MusicPlayer";
+import type { MusicTrackId } from "./data/music";
+import { AudioConfig as AudioConfigProbe } from "./data/config/AudioConfig";
 import { eventBus } from "./events/EventBus";
 
 const controller = new GameController(localStorage);
@@ -71,12 +74,43 @@ window.advanceTime = (ms: number) => {
 // call are readable instead. Draining keeps each assertion about the action that
 // was just performed.
 window.audio_log = () => audio.drainLog();
+// Sound cannot be screenshotted and a node graph existing proves nothing, so this
+// renders a loop OFFLINE and reports how loud it actually came out. It is the only
+// way to show "the game sounds" as a number instead of an assertion.
+window.audio_probe = async (track, seconds = 2) => {
+  const Offline = window.OfflineAudioContext;
+  if (!Offline) return { rms: 0, peak: 0, supported: false };
+  const ctx = new Offline(1, Math.ceil(44100 * seconds), 44100);
+  // The same gain chain the game runs: music bus under a master trimmed by the
+  // player's volume. Measuring the raw synth instead reported a healthy peak for
+  // a loop that was actually at about -30 dBFS by the time it left the speakers.
+  const master = ctx.createGain();
+  master.gain.value = (controller.state.audio.volume / 10) * AudioConfigProbe.volume.master;
+  master.connect(ctx.destination);
+  const player = new MusicPlayer();
+  player.attach(ctx as unknown as AudioContext, master);
+  player.setVolume(AudioConfigProbe.music.busGain);
+  player.play(track);
+  // The real player schedules from a timer against a live clock; offline has no
+  // wall clock, so the whole window is scheduled up front.
+  player.renderWindow(seconds);
+  const buffer = await ctx.startRendering();
+  const data = buffer.getChannelData(0);
+  let sum = 0;
+  let peak = 0;
+  for (let i = 0; i < data.length; i += 1) {
+    sum += data[i] * data[i];
+    peak = Math.max(peak, Math.abs(data[i]));
+  }
+  return { rms: Math.sqrt(sum / data.length), peak, supported: true };
+};
 
 declare global {
   interface Window {
     render_game_to_text: () => string;
     advanceTime: (ms: number) => void;
     audio_log: () => string[];
+    audio_probe: (track: MusicTrackId, seconds?: number) => Promise<{ rms: number; peak: number; supported: boolean }>;
   }
 }
 

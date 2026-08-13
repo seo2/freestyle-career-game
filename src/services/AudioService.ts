@@ -20,6 +20,8 @@
 import type { AudioSettings } from "../core/types";
 import { AudioConfig } from "../data/config/AudioConfig";
 import { soundDuration, sounds, type SoundId } from "../data/sounds";
+import { MusicPlayer } from "./MusicPlayer";
+import type { MusicTrackId } from "../data/music";
 
 type ContextFactory = () => AudioContext | null;
 
@@ -43,8 +45,14 @@ export class AudioService {
   private bus: GainNode | null = null;
   private settings: AudioSettings;
   // What was played, newest last. Bounded: this is a test hook, not a history.
-  private log: SoundId[] = [];
+  // Sound ids, plus "music:<track>" / "music:off" entries so a headless run can
+  // check what the music did too.
+  private log: string[] = [];
   private static readonly LOG_MAX = 64;
+  private readonly music = new MusicPlayer();
+  // What the game last asked for, kept so the switch can restore it instead of
+  // leaving the player on a silent screen after turning sound back on.
+  private wantedTrack: MusicTrackId | null = null;
 
   constructor(
     settings: AudioSettings,
@@ -60,6 +68,10 @@ export class AudioService {
   applySettings(settings: AudioSettings): void {
     this.settings = { ...settings };
     if (this.bus) this.bus.gain.value = this.busGain();
+    this.music.setVolume(AudioConfig.music.busGain);
+    // Turning sound off stops the loop outright rather than muting it: a silent
+    // oscillator still costs a browser something, for hours.
+    this.syncMusic();
   }
 
   // Effective gain of the whole bus: the player's 0..10 scaled by the master trim.
@@ -73,10 +85,33 @@ export class AudioService {
 
   // The log a Playwright run reads. Draining it makes each assertion about the
   // action it just performed instead of everything since boot.
-  drainLog(): SoundId[] {
+  drainLog(): string[] {
     const out = this.log;
     this.log = [];
     return out;
+  }
+
+  // Which loop belongs to the screen the player is on. Null means silence on
+  // purpose — a dilemma reads louder without a beat under it.
+  setMusic(id: MusicTrackId | null): void {
+    if (this.wantedTrack === id) return;
+    this.wantedTrack = id;
+    this.syncMusic();
+  }
+
+  private syncMusic(): void {
+    const wanted = this.settings.musicOn && this.settings.volume > AudioConfig.volume.min ? this.wantedTrack : null;
+    if (this.music.playing() === wanted) return;
+    // Logged before the context is touched, exactly like play(): headless runs
+    // have no audible output but the intent is still the interesting fact.
+    this.record(wanted ? `music:${wanted}` : "music:off");
+    const ctx = this.context();
+    if (!ctx) return;
+    this.music.play(wanted);
+  }
+
+  musicPlaying(): MusicTrackId | null {
+    return this.music.playing();
   }
 
   // A browser will not start an AudioContext without a gesture. Called from the
@@ -84,7 +119,24 @@ export class AudioService {
   unlock(): void {
     const ctx = this.context();
     if (!ctx) return;
-    if (ctx.state === "suspended") void ctx.resume().catch(() => undefined);
+    if (ctx.state === "suspended") {
+      // The loop asked for before the gesture never actually started, so it is
+      // restarted once the context is running.
+      void ctx
+        .resume()
+        .then(() => this.restartMusic())
+        .catch(() => undefined);
+      return;
+    }
+    this.restartMusic();
+  }
+
+  // Re-applies the wanted track after an unlock: play() short-circuits when the
+  // id has not changed, so the player has to be told to start from scratch.
+  private restartMusic(): void {
+    const wanted = this.settings.musicOn && this.settings.volume > AudioConfig.volume.min ? this.wantedTrack : null;
+    if (!wanted || this.music.playing() === wanted) return;
+    this.music.play(wanted);
   }
 
   private context(): AudioContext | null {
@@ -109,6 +161,10 @@ export class AudioService {
       this.bus = ctx.createGain();
       this.bus.gain.value = this.busGain();
       this.bus.connect(ctx.destination);
+      // The music has its own sub-bus under the master, so the loop can sit below
+      // the effects without touching their gain.
+      this.music.attach(ctx, this.bus);
+      this.music.setVolume(AudioConfig.music.busGain);
     } catch {
       this.ctxFailed = true;
       this.ctx = null;
@@ -137,7 +193,7 @@ export class AudioService {
     }
   }
 
-  private record(id: SoundId): void {
+  private record(id: string): void {
     this.log.push(id);
     if (this.log.length > AudioService.LOG_MAX) this.log.shift();
   }
