@@ -61,5 +61,8 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     decisions: [],
     pendingDilemma: null,
     seenDilemmas: [],
+    pendingEpilogue: null,
+    stageStartedWeek: 1,
+    epilogueFromWeek: 1,
   };
 }

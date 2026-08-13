@@ -228,6 +228,27 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Epílogo de arco: los destinos se leen, no se eligen (Fase 7, 2026-08-13)
+
+- **Al cambiar de etapa el loop se detiene** y muestra el **cierre del capítulo**
+  (`EpilogueScene`). Nada del texto está enlatado: se **compone** desde lo que el
+  jugador hizo — los ejes que movió, las decisiones de **ese** capítulo, las
+  batallas y las semanas que tardó. Dos jugadores que llegan a Plaza la misma
+  semana leen capítulos distintos.
+- **Los destinos de la Bible son atractores** (`destinyAttractors`): perfiles con
+  umbrales de eje. Cuando varios calzan, gana **el que el jugador marcó más
+  fuerte** (se puntea qué tan lejos pasó cada umbral), no el primero de la lista —
+  con +52 comercial y +30 músico, "Estrella" es la lectura honesta, no "Productor".
+  Un test verifica además que **todos** los atractores son alcanzables: un perfil
+  que nunca se puede leer es contenido muerto.
+- **Sin decisiones no hay destino**: un MC que no se definió lee eso mismo. No se
+  le inventa un final.
+- **El epílogo es un espejo, no una cinemática**: no consume RNG, y se puede
+  reconstruir desde el estado en cualquier momento (por eso el capítulo no se
+  guarda: se guarda **qué** capítulo está pendiente, para que un milestone
+  sobreviva a un reload en vez de perderse).
+- Contenido en `src/data/epilogues.ts`, reglas en `src/systems/EpilogueSystem.ts`.
+
 ### El cypher como entrenamiento (decisión del owner, 2026-08-13)
 
 - **Su propia pantalla** (`src/scenes/CypherScene.ts`), no la de batalla: sin HUD

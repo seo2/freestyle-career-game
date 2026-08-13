@@ -4,7 +4,7 @@
 // any-day outlet that lets the stage battle keep its weekend appointment.
 // "dilemma" is a decision with its own screen: the loop stops, because a choice
 // that shapes who you become should not be a line in a log.
-export type GameMode = "start" | "career" | "battle" | "cypher" | "dilemma";
+export type GameMode = "start" | "career" | "battle" | "cypher" | "dilemma" | "epilogue";
 // Career difficulty picked once on the Crear MC screen. Mechanical effects live
 // in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
 export type Difficulty = "facil" | "normal" | "dificil";
@@ -373,6 +373,15 @@ export interface GameState {
   pendingDilemma: string | null;
   // Dilemma ids already seen, so a once-only dilemma never repeats.
   seenDilemmas: string[];
+  // The stage whose chapter is waiting to be read (Fase 7). Persisted: a
+  // milestone should survive a reload instead of vanishing.
+  pendingEpilogue: StageId | null;
+  // The week the current stage began, so a chapter can measure itself.
+  stageStartedWeek: number;
+  // The week the CLOSING chapter began. Kept apart from stageStartedWeek, which
+  // already points at the new stage: reading one for the other made the epilogue
+  // report zero weeks and zero decisions.
+  epilogueFromWeek: number;
 }
 
 export interface UpgradeDef {
