@@ -3,9 +3,11 @@
 // globals are touched. v2 saves carry the day-block clock; v1 saves (24h
 // clock) are migrated on load and re-persisted under the v2 key.
 
-import type { Difficulty, GameState } from "../core/types";
+import type { Difficulty, GameState, PlannedDayRecord, WeekPlan, WeekSummary } from "../core/types";
 import { createNewState } from "../core/state";
 import { CalendarConfig } from "../data/config/CalendarConfig";
+import { PlanConfig } from "../data/config/PlanConfig";
+import { emptyPlan } from "../systems/PlanSystem";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
 import { clamp } from "../utils/math";
@@ -45,6 +47,38 @@ function backfillDifficulty(value: Difficulty | undefined): Difficulty {
 
 // Owned item ids only: strings, no duplicates. Unknown ids are kept so a save
 // from a newer catalogue survives a downgrade.
+// Fase 6 (weekly plan): a save written before it has no plan at all, so the
+// week is backfilled empty and the player simply starts planning from today.
+// The history and the running record backfill empty for the same reason — a
+// reconstructed past would be a lie.
+function backfillPlan(value: unknown): WeekPlan {
+  const plan = emptyPlan();
+  if (!Array.isArray(value)) return plan;
+  for (let i = 0; i < plan.length; i += 1) {
+    const entry = value[i];
+    plan[i] = typeof entry === "string" ? entry : null;
+  }
+  return plan;
+}
+
+function backfillDayRecords(value: unknown): PlannedDayRecord[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (entry): entry is PlannedDayRecord =>
+      typeof entry === "object" && entry !== null && typeof (entry as PlannedDayRecord).day === "number",
+  );
+}
+
+function backfillWeekLog(value: unknown): WeekSummary[] {
+  if (!Array.isArray(value)) return [];
+  const log = value.filter(
+    (entry): entry is WeekSummary =>
+      typeof entry === "object" && entry !== null && typeof (entry as WeekSummary).week === "number",
+  );
+  // Trim to the bound even if an older save (or a hand-edited one) carries more.
+  return log.slice(-PlanConfig.history.maxWeeks);
+}
+
 function backfillItems(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.filter((id): id is string => typeof id === "string"))];
@@ -105,6 +139,19 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         voice: backfillOption(saved.voice, NewGameConfig.identityOptions.voices, NewGameConfig.identity.voice),
         difficulty: backfillDifficulty(saved.difficulty),
         items: backfillItems(saved.items),
+        // Fase 6: an older save has no week plan. It backfills empty (and the
+        // opening snapshot is taken from the loaded resources) so the player
+        // just starts planning from today instead of inheriting a fake week.
+        plan: backfillPlan(saved.plan),
+        weekRecord: backfillDayRecords(saved.weekRecord),
+        weekLog: backfillWeekLog(saved.weekLog),
+        weekOpening: saved.weekOpening ?? {
+          cash: saved.cash ?? 0,
+          fans: saved.fans ?? 0,
+          respect: saved.respect ?? 0,
+          fame: saved.fame ?? 0,
+          xp: saved.xp ?? 0,
+        },
         outfitLevel: clamp(saved.outfitLevel ?? 0, 0, 3),
         studioLevel: clamp(saved.studioLevel ?? 0, 0, 3),
         homeLevel: clamp(saved.homeLevel ?? 0, 0, 3),

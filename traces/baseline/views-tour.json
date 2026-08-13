@@ -4,6 +4,25 @@
     "input": "initial",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "start",
       "careerView": null,
       "player": {
@@ -75,6 +94,25 @@
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -227,6 +265,25 @@
     "input": "key:e",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "training",
       "player": {
@@ -379,6 +436,25 @@
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "training",
       "player": {
@@ -537,6 +613,25 @@
     "input": "key:r",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "social",
       "player": {
@@ -695,6 +790,25 @@
     "input": "key:2",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "social",
       "player": {
@@ -853,6 +967,25 @@
     "input": "key:j",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "work",
       "player": {
@@ -1011,6 +1144,25 @@
     "input": "key:2",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "work",
       "player": {
@@ -1175,6 +1327,25 @@
     "input": "key:t",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "shop",
       "player": {
@@ -1339,6 +1510,25 @@
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "shop",
       "player": {
@@ -1503,6 +1693,25 @@
     "input": "key:s",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "stats",
       "player": {
@@ -1667,6 +1876,25 @@
     "input": "key:m",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "map",
       "player": {
@@ -1831,6 +2059,25 @@
     "input": "key:c",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 6,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "calendar",
       "player": {
@@ -1992,9 +2239,211 @@
   },
   {
     "step": 13,
+    "input": "key:7",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "practice"
+        ],
+        "today": null,
+        "openDays": 5,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
+      "mode": "career",
+      "careerView": "calendar",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 2,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 48,
+        "xpNext": 70,
+        "energy": 54,
+        "health": 89,
+        "cash": 87,
+        "fans": 26,
+        "respect": 0,
+        "fame": 6,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 56,
+        "momentumMood": "Activo",
+        "lastActionId": "work-dishes",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 3,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 2,
+          "disciplina": 2
+        }
+      },
+      "timeFx": {
+        "label": "Lavaplatos",
+        "blocks": 2,
+        "from": "Noche",
+        "to": "Tarde",
+        "daysPassed": 1
+      },
+      "lastEvent": "Dia 7: Practicar.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": {
+        "id": "cuaderno",
+        "label": "Cuaderno de rimas",
+        "category": "otros",
+        "price": 60,
+        "affordable": true
+      },
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 14,
     "input": "key:Escape",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 2,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "practice"
+        ],
+        "today": null,
+        "openDays": 5,
+        "battleDay": 6,
+        "record": [],
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -2047,7 +2496,7 @@
         "to": "Tarde",
         "daysPassed": 1
       },
-      "lastEvent": "Faltan $63 para Microfono.",
+      "lastEvent": "Dia 7: Practicar.",
       "goals": [
         {
           "label": "Abrir Plaza",

@@ -68,7 +68,13 @@ describe("advanceClock", () => {
     // Health: 88 + 2 (day) + 6 (week) = 96.
     expect(state.health).toBe(96);
     expect(state.momentum).toBe(39);
-    expect(result.messages).toEqual(["Paso un dia.", "Semana 2: recuperaste energia."]);
+    // Fase 6: the week closes with its summary before the counter moves, so the
+    // summary line carries the week that ended, not the one starting.
+    expect(result.messages).toEqual([
+      "Paso un dia.",
+      "Semana 1 cerrada: +$0, +0 fans, +0 respeto.",
+      "Semana 2: recuperaste energia y la agenda esta vacia.",
+    ]);
   });
 
   it("reports multi-day advances with plural message", () => {

@@ -7,7 +7,7 @@ import type { CareerView } from "../core/types";
 import { resourceById } from "../data/battle";
 import { socialPostOptions } from "../data/social";
 import { jobOptions } from "../data/jobs";
-import { calendarActionIds } from "../data/actions";
+import { PlanConfig } from "../data/config/PlanConfig";
 import { visibleShopItems } from "../scenes/views/shopView";
 import { trainingStats } from "../data/stats";
 import { clamp } from "../utils/math";
@@ -164,11 +164,18 @@ export class InputRouter {
         event.preventDefault();
         return;
       }
+      if (isConfirm && c.careerView === "calendar") {
+        // The calendar's primary button: live the day the week planned.
+        c.runPlannedDay();
+        event.preventDefault();
+        return;
+      }
       const number = Number(event.key);
       if (Number.isInteger(number) && number > 0 && c.careerView !== "base") {
         if (c.careerView === "calendar") {
-          const actionId = calendarActionIds[number - 1];
-          if (actionId) c.runCareerAction(actionId);
+          // Fase 6: the calendar plans, it does not act. Digit n cycles what
+          // day n holds, exactly like clicking that card; Enter lives the day.
+          if (number <= PlanConfig.week.days) c.cyclePlanForDay(number);
         } else if (c.careerView === "training") {
           const stat = trainingStats[number - 1];
           if (stat) c.trainSpecificStat(stat);
