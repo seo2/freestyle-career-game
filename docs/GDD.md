@@ -228,6 +228,45 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Relaciones y rivalidades (Fase 7, 2026-08-13)
+
+Las relaciones existen para que **la semana sea más difícil de planificar**, no
+para agregar una pantalla de números. De las ocho de la Bible se implementan las
+dos que ya están antes de que nadie sepa tu nombre, más los rivales:
+
+- **Los lazos decaen.** La afinidad sube solo si **apareces**, y cada semana que
+  pasa sin aparecer se lleva un pedazo. Eso es lo que convierte "descansar" de un
+  bloque perdido en una decisión con motivo, y lo que hace que el cypher sea más
+  que entrenamiento. Un lazo que solo subiera sería contabilidad.
+  - **Familia** se alimenta con descansar; **Crew**, con el cypher (y poco con
+    redes: postear es hablarle a todos, no a ellos).
+  - **Cobran en la moneda del juego, no en puntos**: con la familia firme una
+    noche de descanso **sana más**, y con la casa abandonada sana **menos**; con
+    la crew firme entras a la batalla con **hype de ventaja**.
+  - **Los bonos se miden desde donde el lazo empieza**, no desde cero: así una
+    carrera nueva no cobra nada y agregar relaciones **no re-tunea en silencio**
+    el balance de batalla y descanso que se acababa de medir.
+  - Un dilema que elige la crew **calienta a la crew** — la decisión aterriza en
+    una persona, no solo en un slider. Pero **no** repone la visita: contestar
+    dilemmas no reemplaza aparecer.
+- **Las rivalidades recuerdan.** Cada cruce queda con nombre, récord y *heat* (el
+  rencor). Ganarle a alguien le sube más el rencor que perder contra él —
+  el que tiene algo que probar es el que perdió el último round— y **ganar por
+  paliza es humillación**, que se recuerda más. El rencor le compra al rival
+  **poder y agresividad** la próxima vez (acotados), decae si no se cruzan, y la
+  pantalla de batalla **lo dice en voz alta** bajo su arquetipo: "Te tiene ganas."
+  / "Viene por la revancha." / "Te odia. Vino a cobrar." En un primer cruce
+  **calla**: una advertencia sobre cada rival escondería las de verdad.
+- **Pantalla propia** ("14. QUIEN VAS SIENDO"): los cuatro ejes a tamaño real, el
+  destino emergente, los lazos con su temperatura en palabras, lo que decidiste y
+  los rivales que te recuerdan. Nació de un defecto: el panel de identidad vivía
+  encima de la mitad baja de la columna izquierda de Estadísticas, en una banda
+  que **no** estaba libre — tapaba el nombre del MC, el nivel de carrera y la
+  barra de XP. Se aplicó la regla del owner para el cypher: si merece pantalla,
+  que tenga la propia.
+- Números en `src/data/config/RelationshipConfig.ts`, contenido en
+  `src/data/bonds.ts`, reglas en `src/systems/RelationshipSystem.ts`.
+
 ### Epílogo de arco: los destinos se leen, no se eligen (Fase 7, 2026-08-13)
 
 - **Al cambiar de etapa el loop se detiene** y muestra el **cierre del capítulo**
@@ -329,7 +368,7 @@ Precios de referencia (mockup tienda): Micrófono $150 (+15 Punchline, mejora gr
 ## Eventos, relaciones y desgaste
 
 - **Eventos semanales** (probabilísticos): entrevista, hate, polémica, sponsor, videoclip, lesión, enfermedad, pelea, viaje, colaboración. **Todos ofrecen decisiones; nunca hay respuesta correcta.** Ejemplos de dilema: ¿firmar con la marca que paga bien pero baja respeto? ¿ir a la batalla cansado? ¿responder la polémica o ignorarla? ¿ayudar a la crew perdiendo una oportunidad propia? ¿disco experimental o comercial?
-- **Relaciones con afinidad:** familia, crew, productores, managers, sellos, marcas, fans, rivales.
+- **Relaciones con afinidad:** familia, crew, productores, managers, sellos, marcas, fans, rivales. **Implementadas (Fase 7):** familia, crew y rivales (ver "Relaciones y rivalidades"). Los fans ya son un recurso; productores, managers, sellos y marcas esperan contratos que les den sentido.
 - **Fatiga:** con energía en cero baja el rendimiento y la improvisación, y aumentan los errores.
 - **Salud mental:** afecta disciplina, creatividad, improvisación y estrés; se recupera con descanso, vacaciones, familia, terapia, meditación.
 

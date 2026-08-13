@@ -1,6 +1,11 @@
-import type { GameState } from "./types";
+import type { BondId, GameState } from "./types";
 import { NewGameConfig } from "../data/config/NewGameConfig";
+import { bondDefs } from "../data/bonds";
 import { emptyPlan } from "../systems/PlanSystem";
+
+// Where each bond opens, from its definition — the number belongs to the data,
+// not to this literal.
+const bondStart = (id: BondId): number => bondDefs.find((def) => def.id === id)?.start ?? 0;
 
 // Seed defaults to wall clock (like the legacy engine) but is injectable so
 // tests and trace captures can pin the whole run.
@@ -64,5 +69,12 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     pendingEpilogue: null,
     stageStartedWeek: 1,
     epilogueFromWeek: 1,
+    // The family is already there when the career starts; the crew is something
+    // you build. Both start "fed" so week 1 does not open with a bill.
+    bonds: {
+      familia: { affinity: bondStart("familia"), fedWeek: 1 },
+      crew: { affinity: bondStart("crew"), fedWeek: 1 },
+    },
+    rivalries: [],
   };
 }

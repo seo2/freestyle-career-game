@@ -15,11 +15,13 @@ import { maxEnergy, stageIndex } from "../core/derived";
 import { clamp } from "../utils/math";
 import type { RandomSource } from "../services/RandomService";
 import { battleResources, battleStimuli } from "../data/battle";
-import { crowdByStage, rivalArchetypes, rivalRoster } from "../data/rivals";
+import { rivalArchetypes } from "../data/rivals";
 import { BattleConfig } from "../data/config/BattleConfig";
-import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
+import { difficultyRules } from "../data/config/DifficultyConfig";
 import { advanceClock, formatDuration } from "./CalendarSystem";
 import { addXp, applyRhythm } from "./ProgressionSystem";
+import { getBattleTier } from "./battleTier";
+import { crewHypeBoost, recordRivalry } from "./RelationshipSystem";
 
 export function battleLabel(state: GameState): string {
   switch (state.stage) {
@@ -168,6 +170,9 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
   const rival = BattleConfig.rival;
   const prompt = pickStimulus(rng);
   const hand = dealHand(rng, null);
+  // Your crew in the crowd (Fase 7): a head start, not a win. A crew you stopped
+  // showing up for brings nothing.
+  const opening = BattleConfig.rounds.openingHype + crewHypeBoost(state);
   state.mode = "battle";
   state.battle = {
     ...tier,
@@ -176,7 +181,7 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
     rivalHype: BattleConfig.rounds.openingHype,
     round: 1,
     maxRounds: BattleConfig.rounds.maxRounds,
-    hype: BattleConfig.rounds.openingHype,
+    hype: opening,
     playerScore: 0,
     rivalScore: 0,
     prompt,
@@ -188,59 +193,6 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
     result: null,
   };
   return true;
-}
-
-type BattleTier = Omit<
-  BattleState,
-  | "rivalEnergy"
-  | "rivalEnergyMax"
-  | "rivalHype"
-  | "round"
-  | "maxRounds"
-  | "hype"
-  | "playerScore"
-  | "rivalScore"
-  | "prompt"
-  | "hand"
-  | "timeLeft"
-  | "results"
-  | "pendingResult"
-  | "finished"
-  | "result"
->;
-
-function getBattleTier(state: GameState): BattleTier {
-  const idx = stageIndex(state);
-  const profile = rivalRoster[idx] ?? rivalRoster[0];
-  const crowd = crowdByStage[profile.stage];
-  const tier = BattleConfig.tier;
-  // Difficulty is the one mechanical choice of the Crear MC screen: it shifts
-  // how strong every rival is (and, at payout time, how much a battle pays).
-  const difficulty = difficultyRules(state.difficulty);
-  return {
-    eventName: profile.eventName,
-    rivalName: profile.name,
-    rivalStyle: profile.style,
-    rivalArchetype: profile.archetype,
-    rivalFlow: profile.flow,
-    rivalPunchline: profile.punchline,
-    rivalPersonality: profile.personality,
-    crowdLoves: crowd.loves,
-    crowdColds: crowd.colds,
-    crowdLine: crowd.line,
-    rivalPower: Math.max(
-      DifficultyConfig.rivalPowerFloor,
-      tier.rivalPowerBase +
-        idx * tier.rivalPowerPerStage +
-        Math.floor(state.level / tier.rivalPowerLevelDivisor) +
-        difficulty.rivalPowerBonus,
-    ),
-    rewardCash: tier.rewardCashBase + idx * tier.rewardCashPerStage,
-    rewardFans: tier.rewardFansBase + idx * tier.rewardFansPerStage,
-    rewardRespect: tier.rewardRespectBase + idx * tier.rewardRespectPerStage,
-    rewardFame: tier.rewardFameBase + idx * tier.rewardFamePerStage,
-    rewardXp: tier.rewardXpBase + idx * tier.rewardXpPerStage,
-  };
 }
 
 function pickStimulus(rng: RandomSource): BattleStimulus {
@@ -476,9 +428,19 @@ export function finishBattle(state: GameState, rng: RandomSource): { parts: stri
   );
   const clock = advanceClock(state, battleDurationBlocks(state), battle.eventName);
 
+  // The rival remembers (Fase 7): heat is scored from the round margin, so a
+  // landslide reads as humiliation and comes back sharper next time.
+  const rivalryMessages = recordRivalry(
+    state,
+    battle.rivalName,
+    won ? "win" : draw ? "draw" : "loss",
+    battle.playerScore - battle.rivalScore,
+  );
+
   const resultText = won ? "Ganaste" : draw ? "Empataste" : "Perdiste";
   const parts = [
     `${resultText} en ${battle.eventName} (${formatDuration(battleDurationBlocks(state))}): +$${cash}, +${fans} fans, +${respect} respeto.`,
+    ...rivalryMessages,
     ...rhythmMessages,
     ...levelMessages,
     ...clock.messages,

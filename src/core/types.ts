@@ -8,7 +8,18 @@ export type GameMode = "start" | "career" | "battle" | "cypher" | "dilemma" | "e
 // Career difficulty picked once on the Crear MC screen. Mechanical effects live
 // in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
 export type Difficulty = "facil" | "normal" | "dificil";
-export type CareerView = "base" | "calendar" | "map" | "training" | "social" | "work" | "shop" | "stats";
+export type CareerView =
+  | "base"
+  | "calendar"
+  | "map"
+  | "training"
+  | "social"
+  | "work"
+  | "shop"
+  | "stats"
+  // Fase 7: identity axes, bonds and rivalries. Its own screen because it did
+  // not fit inside Estadisticas without covering the profile (see identityView).
+  | "identity";
 export type StageId = "pieza" | "plaza" | "regional" | "nacional" | "internacional" | "estrella" | "leyenda";
 export type StatKey =
   | "flow"
@@ -128,6 +139,28 @@ export interface DecisionRecord {
   choice: string;
   outcome: string;
   axes: Partial<Record<IdentityAxis, number>>;
+}
+
+// The people who are there before anyone knows your name (Fase 7). Definitions
+// in src/data/bonds.ts; the rules in src/systems/RelationshipSystem.ts.
+export type BondId = "familia" | "crew";
+
+export interface BondState {
+  affinity: number;
+  // The last week this bond got attention. Decay reads it, so showing up once
+  // pays for the whole week and forgetting for a month costs a month.
+  fedWeek: number;
+}
+
+// A rival who remembers. `won`/`lost` are from the PLAYER's side, and `heat` is
+// the grudge: it buys the rival power and aggression next time you meet.
+export interface RivalryState {
+  name: string;
+  faced: number;
+  won: number;
+  lost: number;
+  heat: number;
+  lastWeek: number;
 }
 
 // An offer scheduled for a weekday (Fase 6). It is the same shape whether it is
@@ -382,6 +415,10 @@ export interface GameState {
   // already points at the new stage: reading one for the other made the epilogue
   // report zero weeks and zero decisions.
   epilogueFromWeek: number;
+  // The people (Fase 7). Bonds decay when you stop showing up; rivalries keep
+  // the grudge, which is what makes a rival the same person twice.
+  bonds: Record<BondId, BondState>;
+  rivalries: RivalryState[];
 }
 
 export interface UpgradeDef {

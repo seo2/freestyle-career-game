@@ -20,6 +20,8 @@ import {
 import { findOpportunity, isBurntOut } from "../systems/OpportunitySystem";
 import { identitySummary } from "../systems/DilemmaSystem";
 import { destinyFor } from "../systems/EpilogueSystem";
+import { affinityOf, bondTemperature, relationshipSummary, rivalryLine } from "../systems/RelationshipSystem";
+import { bondDefs } from "../data/bonds";
 import { resourceById } from "../data/battle";
 import { momentumMood } from "../core/derived";
 import type { CareerView, GameState, TimeAdvance } from "../core/types";
@@ -182,6 +184,28 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
       label: entry.choice,
     })),
   };
+  // The people (Fase 7). Bonds and grudges are state the harness must be able to
+  // assert without a screenshot: "did the week I never rested cool the family?"
+  // is a question about numbers, not pixels.
+  const relationships = {
+    bonds: bondDefs.map((def) => ({
+      id: def.id,
+      affinity: Math.round(affinityOf(state, def.id)),
+      fedWeek: state.bonds[def.id]?.fedWeek ?? 0,
+      temperature: bondTemperature(state, def.id),
+    })),
+    summary: relationshipSummary(state),
+    rivalries: [...state.rivalries]
+      .sort((a, b) => b.heat - a.heat)
+      .map((entry) => ({
+        name: entry.name,
+        faced: entry.faced,
+        won: entry.won,
+        lost: entry.lost,
+        heat: Math.round(entry.heat),
+        line: rivalryLine(state, entry.name),
+      })),
+  };
   return JSON.stringify({
     coordinate_system: "canvas 960x540, origin top-left, x right, y down",
     week,
@@ -251,5 +275,6 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
     battle,
     cypher,
     identity,
+    relationships,
   });
 }

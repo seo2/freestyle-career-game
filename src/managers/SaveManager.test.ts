@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createNewState } from "../core/state";
+import { RelationshipConfig } from "../data/config/RelationshipConfig";
 import type { GameState } from "../core/types";
 import type { BattleState } from "../core/types";
 import { SAVE_KEY, LEGACY_SAVE_KEY_V1, createSaveManager, type StorageLike } from "./SaveManager";
@@ -360,6 +361,59 @@ describe("SaveManager", () => {
     expect(loaded?.voice).toBe(2);
     expect(loaded?.difficulty).toBe("dificil");
     expect(loaded?.items).toEqual(["microfono", "gorra"]);
+  });
+
+  it("keeps bonds and rivalries across a save/load", () => {
+    const storage = createMemoryStorage();
+    const manager = createSaveManager(storage);
+    const state = createNewState("MC Lazos", 7);
+    state.bonds.familia = { affinity: 12, fedWeek: 4 };
+    state.bonds.crew = { affinity: 91, fedWeek: 6 };
+    state.rivalries = [{ name: "La Sombra", faced: 3, won: 2, lost: 1, heat: 64, lastWeek: 6 }];
+
+    manager.save(state);
+    const loaded = manager.load();
+    expect(loaded?.bonds.familia).toEqual({ affinity: 12, fedWeek: 4 });
+    expect(loaded?.bonds.crew).toEqual({ affinity: 91, fedWeek: 6 });
+    expect(loaded?.rivalries).toEqual([{ name: "La Sombra", faced: 3, won: 2, lost: 1, heat: 64, lastWeek: 6 }]);
+  });
+
+  it("gives a save from before relationships the same start a new career gets", () => {
+    const storage = createMemoryStorage();
+    const manager = createSaveManager(storage);
+    const state = createNewState("MC Viejo", 3);
+    manager.save(state);
+    // Strip the fields the way a save written before Fase 7 would not have them.
+    const raw = JSON.parse(storage.map.get(SAVE_KEY) as string);
+    delete raw.bonds;
+    delete raw.rivalries;
+    storage.setItem(SAVE_KEY, JSON.stringify(raw));
+
+    // load() only parses; the migration happens in normalize(), which is what
+    // GameController runs on a resumed career.
+    const loaded = manager.normalize(manager.load() as GameState);
+    // Project rule 3: never break a saved game. And nobody wakes up estranged
+    // because the game grew a feature — the family is where a new career has it.
+    const fresh = createNewState("MC Viejo", 3);
+    expect(loaded.bonds).toEqual(fresh.bonds);
+    // Rivalries backfill EMPTY: an old save has no record of who it humiliated,
+    // and inventing grudges would be a lie about the player's own career.
+    expect(loaded.rivalries).toEqual([]);
+  });
+
+  it("clamps a tampered affinity and heat instead of trusting the file", () => {
+    const storage = createMemoryStorage();
+    const manager = createSaveManager(storage);
+    manager.save(createNewState("MC Roto", 3));
+    const raw = JSON.parse(storage.map.get(SAVE_KEY) as string);
+    raw.bonds = { familia: { affinity: 9999, fedWeek: 2 }, crew: { affinity: -50, fedWeek: 1 } };
+    raw.rivalries = [{ name: "La Sombra", faced: 1, won: 1, lost: 0, heat: 5000, lastWeek: 1 }];
+    storage.setItem(SAVE_KEY, JSON.stringify(raw));
+
+    const loaded = manager.normalize(manager.load() as GameState);
+    expect(loaded.bonds.familia.affinity).toBe(RelationshipConfig.bonds.max);
+    expect(loaded.bonds.crew.affinity).toBe(RelationshipConfig.bonds.min);
+    expect(loaded.rivalries[0].heat).toBe(RelationshipConfig.rivalry.max);
   });
 
   it("delete removes both the v2 and v1 saves", () => {

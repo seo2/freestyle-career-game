@@ -103,6 +103,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -299,6 +317,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -495,6 +531,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -691,6 +745,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -887,6 +959,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -1083,6 +1173,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -1279,6 +1387,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -1475,6 +1601,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -1661,6 +1805,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -1867,6 +2029,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -2064,6 +2244,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -2280,6 +2478,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -2487,6 +2703,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -2713,6 +2947,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -2930,6 +3182,24 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
       }
     }
   },
@@ -3140,6 +3410,33 @@
         "destiny": null,
         "stageStartedWeek": 1,
         "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 1,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 1,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": [
+          {
+            "name": "Nico Cuaderno",
+            "faced": 1,
+            "won": 0,
+            "lost": 1,
+            "heat": 8,
+            "line": null
+          }
+        ]
       }
     }
   }

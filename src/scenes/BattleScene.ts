@@ -23,6 +23,7 @@ import { resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { EasedValue, Pulse, Shake } from "../ui/fx";
 import { rivalArchetypes } from "../data/rivals";
+import { rivalryLine } from "../systems/RelationshipSystem";
 import { battleEnergyCost, battleRoundSeconds, projectedHypeGain } from "../systems/BattleSystem";
 import { maxEnergy } from "../core/derived";
 import type { BattleResource, BattleState, GameState } from "../core/types";
@@ -308,6 +309,11 @@ export class BattleScene extends Phaser.Scene {
     // from state, so the player can read the rival and play to the crowd
     // instead of guessing.
     this.draw.centeredText(824, 52, rivalArchetypes[battle.rivalArchetype].label.toUpperCase(), 11, palette.muted);
+    // What this rival remembers about you (Fase 7). It sits under the archetype
+    // because it is the same kind of fact: who you are facing. Silent on a first
+    // meeting — a warning over every opponent would hide the real grudges.
+    const grudge = rivalryLine(state, battle.rivalName);
+    if (grudge) this.draw.centeredText(824, 66, grudge, 10, palette.red);
     this.drawHudSide(202, 42, state.energy, maxEnergy(state), this.playerHype.value);
     this.drawHudSide(600, 42, battle.rivalEnergy, battle.rivalEnergyMax, this.rivalHype.value);
     this.draw.centeredDisplayText(483, 29, `RONDA ${battle.round}`, 26, palette.ink);
