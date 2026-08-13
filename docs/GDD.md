@@ -143,6 +143,23 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
   carta sigue siendo exactamente lo que paga ganar — en la Final Nacional el
   Punchline se ve +20 y la Métrica +8. La pantalla dice en una línea qué quiere
   esa sala, para que jugarle al público sea una decisión y no una adivinanza.
+
+### Decisiones de game feel (Fase 5 · cierre, 2026-08-12)
+
+- **Nada se anima con tweens de Phaser**: el arnés congela `Date.now` y el
+  TweenManager de Phaser 4 saca su delta de ahí, así que un tween queda quieto en
+  toda captura. Los primitivos viven en `src/ui/fx.ts` y avanzan con el **delta de
+  frame**: `EasedValue` (persigue un objetivo, independiente del framerate),
+  `Shake` (decae y **siempre vuelve a cero**, sin `Math.random` para no romper
+  paridad) y `Pulse` (rampa 0→1 con salida suave).
+- **Qué se siente en la batalla:** la mano **entra deslizándose** cuando se
+  reparte la ronda; los medidores de hype **persiguen** su valor en vez de saltar;
+  la pantalla **tiembla** al resolverse la ronda, más fuerte cuando el golpe lo
+  recibes tú que cuando lo das; y la **sala responde al hype** (calidez creciente
+  + un destello cuando la ronda gana mucho hype).
+- **Honestidad del público:** el *sprite* de multitud sigue pendiente
+  (`docs/ASSETS.md`). Lo que reacciona es la **luz de la escena existente**, no
+  una multitud inventada.
 - **Hype** modifica votos, presión y público.
 
 ### IA del rival

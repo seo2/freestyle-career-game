@@ -34,6 +34,12 @@ export class BattleDraw {
     private readonly layer: Phaser.GameObjects.Container,
   ) {}
 
+  // Same primitives aimed at another container — the card dock gets its own
+  // layer so it can be animated as a group without moving the rest of the HUD.
+  withLayer(layer: Phaser.GameObjects.Container): BattleDraw {
+    return new BattleDraw(this.scene, layer);
+  }
+
   // Shadowed pixel bar; segmented mode splits orange/yellow like the mockup.
   hudBar(
     x: number,

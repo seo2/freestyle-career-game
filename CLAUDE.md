@@ -67,6 +67,12 @@ node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev se
   en vez de tweens cuando el resultado deba ser verificable.
 - Los textos de Phaser usan `resolution: 1` a propósito (con `2` el escalado
   pixelArt come filas de glifos: "HYPE" salía "HYPF"). No subirlo.
+- **En headless cada frame trae cientos de ms de delta**, así que una animación
+  corta (200–300 ms) se completa dentro de un solo frame y **ninguna captura la
+  alcanza a muestrear**. Las animaciones se verifican con tests unitarios de su
+  matemática (`src/ui/fx.test.ts`) y por su **estado persistente** (p. ej. el
+  brillo de la sala según el hype, que sí se puede medir en un PNG). No dar por
+  buena una animación porque "el código está bien".
 - **Las coordenadas de página NO son las del juego.** `#app` tiene padding y el
   canvas escala con FIT, así que con un viewport de 960×540 el canvas real queda
   en ~(21, 12) y 917×516. Un `mouse.click(x, y)` con coordenadas del juego cae
