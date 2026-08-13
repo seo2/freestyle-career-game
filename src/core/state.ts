@@ -56,5 +56,10 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     animationTime: 0,
     battle: null,
     cypher: null,
+    // Mismo origen: every axis starts neutral and only decisions move it.
+    axes: { undergroundComercial: 0, batalleroMusico: 0, soloCrew: 0, autenticoPolemico: 0 },
+    decisions: [],
+    pendingDilemma: null,
+    seenDilemmas: [],
   };
 }

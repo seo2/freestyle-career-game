@@ -4,8 +4,10 @@
 // clock) are migrated on load and re-persisted under the v2 key.
 
 import type {
+  DecisionRecord,
   Difficulty,
   GameState,
+  IdentityAxes,
   PlannedDayRecord,
   ScheduledOpportunity,
   WeekPlan,
@@ -14,6 +16,7 @@ import type {
 import { createNewState } from "../core/state";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { PlanConfig } from "../data/config/PlanConfig";
+import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import { emptyPlan } from "../systems/PlanSystem";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
@@ -84,6 +87,36 @@ function backfillWeekLog(value: unknown): WeekSummary[] {
   );
   // Trim to the bound even if an older save (or a hand-edited one) carries more.
   return log.slice(-PlanConfig.history.maxWeeks);
+}
+
+function backfillAxes(value: unknown): IdentityAxes {
+  const neutral: IdentityAxes = {
+    undergroundComercial: 0,
+    batalleroMusico: 0,
+    soloCrew: 0,
+    autenticoPolemico: 0,
+  };
+  if (typeof value !== "object" || value === null) return neutral;
+  const saved = value as Partial<Record<keyof IdentityAxes, unknown>>;
+  for (const axis of Object.keys(neutral) as (keyof IdentityAxes)[]) {
+    const raw = saved[axis];
+    if (typeof raw === "number" && Number.isFinite(raw)) {
+      neutral[axis] = clamp(raw, DilemmaConfig.axes.min, DilemmaConfig.axes.max);
+    }
+  }
+  return neutral;
+}
+
+function backfillDecisions(value: unknown): DecisionRecord[] {
+  if (!Array.isArray(value)) return [];
+  const records = value.filter(
+    (entry): entry is DecisionRecord =>
+      typeof entry === "object" &&
+      entry !== null &&
+      typeof (entry as DecisionRecord).dilemmaId === "string" &&
+      typeof (entry as DecisionRecord).optionId === "string",
+  );
+  return records.slice(-DilemmaConfig.log.maxDecisions);
 }
 
 function backfillItems(value: string[] | undefined): string[] {
@@ -163,6 +196,17 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
             )
           : [],
         opportunitiesWeek: typeof saved.opportunitiesWeek === "number" ? saved.opportunitiesWeek : 0,
+        // Fase 7: identity and the decision log ARE the career, so they are
+        // persisted. A save from before it backfills neutral — nobody is born
+        // commercial or underground.
+        axes: backfillAxes(saved.axes),
+        decisions: backfillDecisions(saved.decisions),
+        // A dilemma waiting for an answer is not persisted: reloading mid-choice
+        // should not trap the player on a screen with no context.
+        pendingDilemma: null,
+        seenDilemmas: Array.isArray(saved.seenDilemmas)
+          ? saved.seenDilemmas.filter((id): id is string => typeof id === "string")
+          : [],
         weekOpening: saved.weekOpening ?? {
           cash: saved.cash ?? 0,
           fans: saved.fans ?? 0,

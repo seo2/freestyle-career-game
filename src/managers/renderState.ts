@@ -18,6 +18,7 @@ import {
   todaysPlan,
 } from "../systems/PlanSystem";
 import { findOpportunity, isBurntOut } from "../systems/OpportunitySystem";
+import { identitySummary } from "../systems/DilemmaSystem";
 import { resourceById } from "../data/battle";
 import { momentumMood } from "../core/derived";
 import type { CareerView, GameState, TimeAdvance } from "../core/types";
@@ -161,6 +162,20 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
         finished: liveCypher.finished,
       }
     : null;
+  // Identity (Fase 7): who this MC is becoming, the pending decision and the
+  // career's memory. The axes are the shape of the run, so the harness sees them.
+  const identity = {
+    axes: state.axes,
+    leaning: identitySummary(state),
+    pendingDilemma: state.pendingDilemma,
+    decisions: state.decisions.map((entry) => ({
+      week: entry.week,
+      day: entry.day,
+      dilemma: entry.dilemmaId,
+      choice: entry.optionId,
+      label: entry.choice,
+    })),
+  };
   return JSON.stringify({
     coordinate_system: "canvas 960x540, origin top-left, x right, y down",
     week,
@@ -229,5 +244,6 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
     actions,
     battle,
     cypher,
+    identity,
   });
 }

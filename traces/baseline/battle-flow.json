@@ -89,7 +89,18 @@
       "recommendedItem": null,
       "actions": [],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -271,7 +282,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -453,7 +475,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -635,7 +668,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -817,7 +861,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -999,7 +1054,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -1181,7 +1247,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -1363,7 +1440,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -1535,7 +1623,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -1727,7 +1826,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -1910,7 +2020,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -2112,7 +2233,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -2305,7 +2437,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -2517,7 +2660,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -2720,7 +2874,18 @@
           }
         ]
       },
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -2916,7 +3081,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   }
 ]

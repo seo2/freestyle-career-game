@@ -36,6 +36,7 @@ sus títulos numerados. Resultado — archivos exactos por pantalla:
 | 10 | Batalla (ronda) | `06_52_01 a.m. (1).png` (plaza) · `06_52_02 a.m. (4).png` (evento grande) |
 | — | Batalla (resultado de ronda) | `06_25_07 a.m. (1).png` |
 | 13 | **Estadísticas** | `06_25_08 a.m. (3).png` |
+| — | **Dilema (decisión de carrera)** | sin mockup: pantalla nueva de 2026-08-13. La pregunta arriba y dos respuestas lado a lado como bifurcación; cada una muestra costo y premio con el mismo peso, y hacia qué eje de identidad te mueve |
 | — | **Cypher (entrenamiento)** | sin mockup: pantalla nueva de 2026-08-13, construida con el lenguaje visual de la batalla (paneles pixel, cartas, cursor amarillo) pero deliberadamente **sin** HUD de rival ni medidor de hype |
 
 ### Lo que revela el mockup 4 (calendario) — importante para el diseño

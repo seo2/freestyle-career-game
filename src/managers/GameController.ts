@@ -26,6 +26,7 @@ import { eventBus } from "../events/EventBus";
 import { addXp, finalizeEvent } from "../systems/ProgressionSystem";
 import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
+import { resolveDilemma as resolveDilemmaSys, rollDilemma } from "../systems/DilemmaSystem";
 import {
   advanceCypher as advanceCypherSys,
   finishCypher as finishCypherSys,
@@ -171,6 +172,9 @@ export class GameController {
     // with the event, not silently) and a new week knocks with its own.
     const missed = expireOpportunities(this.state);
     this.ensureWeekOpportunities();
+    // The Bible's loop puts events after consequences: a lived day can bring a
+    // decision. Rolled here so every path that spends time can raise one.
+    const dilemma = result.type === "event" ? rollDilemma(this.state, this.rng) : null;
     if (result.type === "event") {
       if (result.fx) this.startTimeFx(result.fx);
       this.setEvent([...result.parts, ...missed]);
@@ -180,6 +184,7 @@ export class GameController {
     } else if (result.type === "cypher-started") {
       eventBus.emit("MODE_CHANGED", this.state.mode);
     }
+    if (dilemma) eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
@@ -385,6 +390,19 @@ export class GameController {
     this.startTimeFx(result.fx);
     this.setEvent(result.parts);
     eventBus.emit("BATTLE_FINISHED", undefined);
+    eventBus.emit("MODE_CHANGED", this.state.mode);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // --- Dilemmas (Fase 7: mismo origen, destinos distintos) ---------------------
+
+  // Answering the dilemma. No RNG: the outcome is the player's decision, and it
+  // is written into the career's memory before anything else happens.
+  answerDilemma(optionId: string): void {
+    const resolution = resolveDilemmaSys(this.state, optionId);
+    if (!resolution) return;
+    this.careerView = "base";
+    this.setEvent(resolution.parts);
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
   }
