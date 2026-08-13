@@ -2,7 +2,9 @@
 
 // "cypher" is training with its own screen (owner decision, 2026-08-13): the
 // any-day outlet that lets the stage battle keep its weekend appointment.
-export type GameMode = "start" | "career" | "battle" | "cypher";
+// "dilemma" is a decision with its own screen: the loop stops, because a choice
+// that shapes who you become should not be a line in a log.
+export type GameMode = "start" | "career" | "battle" | "cypher" | "dilemma";
 // Career difficulty picked once on the Crear MC screen. Mechanical effects live
 // in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
 export type Difficulty = "facil" | "normal" | "dificil";
@@ -70,6 +72,62 @@ export interface CypherState {
   // The turn whose verdict is on screen; null while choosing.
   pending: CypherTurn | null;
   finished: boolean;
+}
+
+// The identity axes of the GDD ("mismo origen, destinos distintos"). Every axis
+// runs -100..+100 and starts at 0: nobody is born commercial or underground, you
+// become it by deciding. They gate which dilemmas and offers appear, and the
+// endings of the Bible are attractors over them — never a menu.
+export type IdentityAxis = "undergroundComercial" | "batalleroMusico" | "soloCrew" | "autenticoPolemico";
+
+export type IdentityAxes = Record<IdentityAxis, number>;
+
+// What one option of a dilemma does. Nothing here is "the right answer": each
+// side pays and costs something.
+export interface DilemmaOption {
+  id: string;
+  label: string;
+  detail: string;
+  // How this choice moves who you are becoming.
+  axes: Partial<Record<IdentityAxis, number>>;
+  cash?: number;
+  fans?: number;
+  respect?: number;
+  fame?: number;
+  health?: number;
+  energy?: number;
+  momentum?: number;
+  xp?: number;
+  // The line the log and the event feed show afterwards.
+  outcome: string;
+}
+
+export interface DilemmaDef {
+  id: string;
+  title: string;
+  // The situation, in the MC's world.
+  text: string;
+  options: DilemmaOption[];
+  // Earliest stage it can appear at.
+  minStage: StageId;
+  // Axis gates: the dilemma only shows up when the axis is at least / at most
+  // these values, which is how identity starts steering what happens to you.
+  requires?: Partial<Record<IdentityAxis, { min?: number; max?: number }>>;
+  // Some dilemmas should only ever land once in a career.
+  once?: boolean;
+}
+
+// A decision that was actually made. This is the career's memory: the GDD calls
+// it barely-costly now and impossible to retro-fit later.
+export interface DecisionRecord {
+  dilemmaId: string;
+  optionId: string;
+  week: number;
+  day: number;
+  title: string;
+  choice: string;
+  outcome: string;
+  axes: Partial<Record<IdentityAxis, number>>;
 }
 
 // An offer scheduled for a weekday (Fase 6). It is the same shape whether it is
@@ -306,6 +364,15 @@ export interface GameState {
   battle: BattleState | null;
   // A cypher in progress (training with its own screen). Never persisted.
   cypher: CypherState | null;
+  // Who this MC is becoming (Fase 7). Starts at 0 on every axis: the divergence
+  // is played, never configured.
+  axes: IdentityAxes;
+  // Every key decision, in order. The career's memory.
+  decisions: DecisionRecord[];
+  // The dilemma waiting for an answer, if any (id only: the definition is data).
+  pendingDilemma: string | null;
+  // Dilemma ids already seen, so a once-only dilemma never repeats.
+  seenDilemmas: string[];
 }
 
 export interface UpgradeDef {

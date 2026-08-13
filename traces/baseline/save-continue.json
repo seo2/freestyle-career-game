@@ -89,7 +89,18 @@
       "recommendedItem": null,
       "actions": [],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -271,7 +282,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -459,7 +481,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -515,7 +548,7 @@
         "xpNext": 70,
         "energy": 59,
         "health": 90,
-        "cash": 77,
+        "cash": 78,
         "fans": 0,
         "respect": 0,
         "fame": 0,
@@ -548,7 +581,7 @@
         "to": "Mañana",
         "daysPassed": 1
       },
-      "lastEvent": "Trabajaste 2 bloques: +$52. Impulso +1: Frio. Paso un dia.",
+      "lastEvent": "Trabajaste 2 bloques: +$53. Impulso +1: Frio. Paso un dia.",
       "goals": [
         {
           "label": "Abrir Plaza",
@@ -653,7 +686,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -709,7 +753,7 @@
         "xpNext": 70,
         "energy": 59,
         "health": 90,
-        "cash": 77,
+        "cash": 78,
         "fans": 0,
         "respect": 0,
         "fame": 0,
@@ -760,7 +804,18 @@
       },
       "actions": [],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   },
   {
@@ -816,7 +871,7 @@
         "xpNext": 70,
         "energy": 59,
         "health": 90,
-        "cash": 77,
+        "cash": 78,
         "fans": 0,
         "respect": 0,
         "fame": 0,
@@ -948,7 +1003,18 @@
         }
       ],
       "battle": null,
-      "cypher": null
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "decisions": []
+      }
     }
   }
 ]

@@ -91,7 +91,7 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 
 - El cypher dejó de ser una acción que se resolvía en una línea: es **entrenamiento con su propia pantalla** (tiras un recurso, ruedas contra tus stats, te llevas puntos en las stats que ese recurso ejercita). Eso resuelve la pregunta de si las batallas debían ser estrictamente de fin de semana: hay **dos niveles** — cypher cualquier día, evento de etapa con fecha. Decisiones en `docs/GDD.md`. Evidencia: `output/web-game/cypher/`.
 
-### Fase 7 — Progresión, eventos y primer arco completo — gauntlets 11–14
+### Fase 7 — Progresión, eventos y primer arco completo ⏳ en curso — gauntlets 11–14
 
 - `EventSystem`: eventos semanales probabilísticos con decisiones sin respuesta correcta (entrevista, hate, polémica, sponsor, lesión…).
 - **Registro de decisiones + ejes de identidad** (ver "Identidad de carrera y destinos" en el GDD): desde el primer dilema, cada decisión clave queda en el `GameState` y mueve los ejes (underground↔comercial, etc.). Es la semilla de los destinos múltiples — barata de implementar ahora, imposible de retro-instalar después.
@@ -99,6 +99,8 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - Metas por etapa con el mapa de progreso (pantalla 5) funcional; desbloqueo de nodos (gimnasio, estudio).
 - Arco Pieza → Plaza completo con cierre y apertura de Regional.
 - **Criterio de cierre:** partida nueva → ascenso a Plaza en 30–60 min con al menos 3 dilemas encontrados.
+- **Hecho (2026-08-13): dilemas, ejes de identidad y registro de decisiones.** Los cuatro ejes del GDD viven en el save (todos en 0 al empezar), 8 dilemas con dos caminos que se excluyen, **pantalla propia** que muestra el costo con el mismo peso que el premio, los ejes ya **filtran** qué dilemas te alcanzan, y Estadísticas muestra "QUIEN VAS SIENDO". Decisiones en `docs/GDD.md` › "Dilemas e identidad". Evidencia: `output/web-game/fase7-dilemas/`.
+- **Falta de esta fase:** `RelationshipSystem` (familia, crew, rivales con afinidad y rivalidades persistentes), desbloqueo de nodos del mapa por metas, y el cierre del arco Pieza → Plaza con su epílogo.
 
 ### Fase 8 — Audio y juice final
 

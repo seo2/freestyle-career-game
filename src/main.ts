@@ -14,6 +14,7 @@ import { CreateMcScene } from "./scenes/CreateMcScene";
 import { CareerScene } from "./scenes/CareerScene";
 import { BattleScene } from "./scenes/BattleScene";
 import { CypherScene } from "./scenes/CypherScene";
+import { DilemmaScene } from "./scenes/DilemmaScene";
 import { hex, palette } from "./ui/palette";
 
 const controller = new GameController(localStorage);
@@ -40,7 +41,7 @@ fontsReady.then(() => {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene, CypherScene],
+    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene, CypherScene, DilemmaScene],
   });
   new SceneDirector(game, controller);
 });

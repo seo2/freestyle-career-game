@@ -197,6 +197,37 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
     la PLAZA del mapa sigue abierta. Cerrarla es ahora seguro (el cypher cubre el
     hueco) si el owner lo quiere; es una línea.
 
+### Dilemas e identidad (Fase 7 · primera tajada, 2026-08-13)
+
+Aquí el principio rector deja de ser una intención y pasa a ser código.
+
+- **Cuatro ejes** (`state.axes`, −100..+100, **todos en 0** al empezar):
+  underground↔comercial, batallero↔músico, lobo solitario↔crew,
+  auténtico↔polémico. Nadie nace comercial: el eje se mueve **solo** decidiendo.
+- **Los dilemas tienen pantalla propia** (`DilemmaScene`): la pregunta arriba y
+  las dos respuestas lado a lado como una bifurcación. Cada opción muestra **lo
+  que cuesta con el mismo tamaño que lo que paga** — esconder el costo haría que
+  un lado pareciera la respuesta correcta, y la regla de la Bible es que no la
+  hay. Debajo, "TE MUEVE HACIA" dice a qué te acerca cada camino: es la parte
+  honesta de la pantalla.
+- **Un test fija la regla**, no solo el comentario: ningún dilema puede tener dos
+  opciones que muevan **todos** los ejes igual, porque entonces habría una
+  respuesta correcta.
+- **Registro de decisiones** (`state.decisions`): cada elección queda con semana,
+  día, qué elegiste y qué movió. Es la memoria de la carrera. Acotado a 60 para
+  no inflar el save — y cuando una línea vieja se cae, **los ejes que movió ya
+  están horneados**, así que no se pierde historia real.
+- **Los ejes ya deciden qué te pasa**: un dilema puede exigir un umbral de eje
+  (`requires`), así dos jugadores en la misma semana pueden recibir situaciones
+  distintas. Ahí empieza la divergencia.
+- **Se ve en pantalla**: Estadísticas tiene "QUIEN VAS SIENDO" con los cuatro
+  ejes como sliders y la última decisión. Un MC que no decidió nada dice **"Sin
+  definir"** en vez de inventarle una etiqueta.
+- **Ritmo**: como máximo **un dilema por semana** y ninguno en la primera (el
+  jugador necesita entender el loop antes de que le pidan jugarse algo). El
+  sorteo consume una cantidad fija de draws para no correr el arnés.
+- Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
+
 ### El cypher como entrenamiento (decisión del owner, 2026-08-13)
 
 - **Su propia pantalla** (`src/scenes/CypherScene.ts`), no la de batalla: sin HUD
