@@ -163,6 +163,14 @@ export interface RivalryState {
   lastWeek: number;
 }
 
+// Sound settings (Fase 8). The mockup's menu carries a "MUSICA: SI/NO" line, so
+// music and sfx are separate switches rather than one master mute.
+export interface AudioSettings {
+  volume: number;
+  sfxOn: boolean;
+  musicOn: boolean;
+}
+
 // An offer scheduled for a weekday (Fase 6). It is the same shape whether it is
 // still live, taken or missed, so the week's history keeps what you turned down.
 export interface ScheduledOpportunity {
@@ -419,6 +427,10 @@ export interface GameState {
   // the grudge, which is what makes a rival the same person twice.
   bonds: Record<BondId, BondState>;
   rivalries: RivalryState[];
+  // Audio (Fase 8). In the save because the plan's closing criterion is that the
+  // volume survives a reload — a player who turned the sound off did so on
+  // purpose, and asking them again every launch is a bug.
+  audio: AudioSettings;
 }
 
 export interface UpgradeDef {

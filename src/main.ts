@@ -17,10 +17,24 @@ import { CypherScene } from "./scenes/CypherScene";
 import { DilemmaScene } from "./scenes/DilemmaScene";
 import { EpilogueScene } from "./scenes/EpilogueScene";
 import { hex, palette } from "./ui/palette";
+import { AudioService } from "./services/AudioService";
+import { wireAudio } from "./game/audioWiring";
+import { eventBus } from "./events/EventBus";
 
 const controller = new GameController(localStorage);
 const input = new InputRouter(controller);
+// Audio (Fase 8): synthesized, so there is nothing to preload. It reads its
+// settings from the loaded save and stays in step through the controller.
+const audio = new AudioService(controller.state.audio);
+controller.attachAudio(audio);
+wireAudio(eventBus, audio, () => controller.state);
 setGameContext({ controller, input });
+
+// Browsers refuse to start an AudioContext without a gesture, so the first real
+// input unlocks it. Once is enough, hence { once: true } on both.
+const unlock = (): void => audio.unlock();
+window.addEventListener("keydown", unlock, { once: true });
+window.addEventListener("pointerdown", unlock, { once: true });
 
 // The arcade display face must resolve before any scene measures text, or
 // Phaser caches metrics for the fallback font. Boot is gated on it, with a
@@ -53,11 +67,16 @@ window.advanceTime = (ms: number) => {
   const steps = Math.max(1, Math.round(ms / (1000 / 60)));
   for (let i = 0; i < steps; i += 1) controller.update(1 / 60);
 };
+// Sound cannot be screenshotted, so the sounds the game asked for since the last
+// call are readable instead. Draining keeps each assertion about the action that
+// was just performed.
+window.audio_log = () => audio.drainLog();
 
 declare global {
   interface Window {
     render_game_to_text: () => string;
     advanceTime: (ms: number) => void;
+    audio_log: () => string[];
   }
 }
 

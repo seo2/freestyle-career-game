@@ -10,6 +10,7 @@ import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
 import { palette } from "../ui/palette";
+import { addHitZone } from "../ui/kit";
 import {
   addAnchoredText,
   addLogoLockup,
@@ -77,8 +78,21 @@ export class MenuScene extends Phaser.Scene {
     const focus = gameContext().input.menuFocus;
     entries.forEach((entry, index) => this.menuButton(entry, index, index === focus));
     addAnchoredText(this, this.layer, 33, 502, "v0.1.0", 16, "#9aaedb", 0);
-    addAnchoredText(this, this.layer, 812, 499, "♪", 22, "#b8c9ef", 0);
-    addAnchoredText(this, this.layer, 830, 500, "MUSICA: SI", 16, "#b8c9ef", 0);
+    this.soundToggle();
+  }
+
+  // The mockup's "♪ MUSICA: SI" corner label, made real (Fase 8). It used to be a
+  // hardcoded "SI" on a game with no audio at all, which is the kind of label that
+  // teaches a player not to trust the UI. Now it reads the save and switches it,
+  // by click or by M — a letter is safe here because nothing types on the menu.
+  private soundToggle(): void {
+    const controller = gameContext().controller;
+    const on = controller.state.audio.sfxOn || controller.state.audio.musicOn;
+    const color = on ? "#b8c9ef" : "#6a6f85";
+    addAnchoredText(this, this.layer, 812, 499, "♪", 22, color, 0);
+    addAnchoredText(this, this.layer, 830, 500, `MUSICA: ${on ? "SI" : "NO"}`, 16, color, 0);
+    addAnchoredText(this, this.layer, 830, 517, "[M]", 10, "#6a6f85", 0);
+    addHitZone(this, this.layer, 806, 486, 132, 40, () => controller.toggleSound());
   }
 
   private menuButton(entry: MenuEntry, index: number, selected: boolean): void {

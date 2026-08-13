@@ -90,7 +90,9 @@ export class InputRouter {
     }
     if (!slot.actionId) return;
     const action = this.controller.careerActions().find((item) => item.id === slot.actionId);
-    if (action && !action.disabledReason) this.controller.runCareerAction(action.id);
+    if (!action) return;
+    if (action.disabledReason) this.controller.playSound("uiDenied");
+    else this.controller.runCareerAction(action.id);
   }
 
   private setBattleFocus(value: number, lastCard: number): void {
@@ -130,6 +132,13 @@ export class InputRouter {
           event.preventDefault();
           return;
         }
+        // Sound on/off (Fase 8). Safe as a letter HERE only: on the menu nothing
+        // types, while the name screen below turns every letter into a character.
+        if (event.key === "m" || event.key === "M") {
+          c.toggleSound();
+          event.preventDefault();
+          return;
+        }
         return;
       }
       if (isConfirm) {
@@ -156,6 +165,7 @@ export class InputRouter {
         return;
       }
       if (event.key === "Escape") {
+        c.playSound("uiBack");
         c.setCareerView("base");
         event.preventDefault();
         return;
@@ -176,6 +186,8 @@ export class InputRouter {
         if (c.careerView === "calendar") {
           // Fase 6: the calendar plans, it does not act. Digit n cycles what
           // day n holds, exactly like clicking that card; Enter lives the day.
+          // The sound lives in the command (GameController.cyclePlanForDay), so
+          // the keyboard and the clickable cards cannot drift apart.
           if (number <= PlanConfig.week.days) c.cyclePlanForDay(number);
         } else if (c.careerView === "training") {
           const stat = trainingStats[number - 1];
@@ -221,7 +233,11 @@ export class InputRouter {
       }
       if (Number.isInteger(number) && number > 0) {
         const action = actions[number - 1];
-        if (action && !action.disabledReason) c.runCareerAction(action.id);
+        if (!action) return;
+        // A refusal says so out loud: a key that does nothing is the worst kind of
+        // silence, because the player cannot tell it from a dropped input.
+        if (action.disabledReason) c.playSound("uiDenied");
+        else c.runCareerAction(action.id);
       }
       return;
     }
@@ -259,6 +275,9 @@ export class InputRouter {
       }
       if (isConfirm) {
         const focusedId = battle.hand[clamp(this.battleFocus, 0, lastCard)];
+        // The sound lives in the command: a card can be played by digit, by Enter
+        // on the focused card, or by clicking it, and only one of those was heard
+        // when the sound sat here.
         if (focusedId) c.resolveBattle(resourceById(focusedId));
         event.preventDefault();
         return;
