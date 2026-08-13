@@ -264,8 +264,34 @@ dos que ya están antes de que nadie sepa tu nombre, más los rivales:
   que **no** estaba libre — tapaba el nombre del MC, el nivel de carrera y la
   barra de XP. Se aplicó la regla del owner para el cypher: si merece pantalla,
   que tenga la propia.
+- **La visita paga una vez por semana y el decay se cobra siempre.** Primero era
+  al revés (cada acción sumaba, el decay solo si no habías aparecido) y una
+  medición del arco completo lo desarmó: los dos lazos terminaban en **100/100**
+  en cinco semanas, o sea el lazo era un trinquete hacia arriba y el decay nunca
+  mordía. Con la regla corregida, la misma partida termina con **familia 93 y
+  crew 36** — el jugador descansa seguido y va poco al cypher, y eso se ve en
+  quién lo acompaña. Es la diferencia entre una mecánica y una planilla.
 - Números en `src/data/config/RelationshipConfig.ts`, contenido en
   `src/data/bonds.ts`, reglas en `src/systems/RelationshipSystem.ts`.
+
+### Desbloqueo de nodos del mapa (Fase 7, decisión 2026-08-13)
+
+El plan pedía "desbloqueo de nodos (gimnasio, estudio)". Quedó así:
+
+- **El estudio se canda solo, y bien**: su acción `record` exige 60% de canción y
+  plata, y el mapa dibuja el candado con ese motivo. No se le agregó una segunda
+  reja de progresión: dos rejas sobre la misma puerta terminan contradiciéndose.
+- **El gimnasio NO se canda**, y es deliberado. Lo implementé (nivel 3, respetado
+  por el mapa, el dock y la tecla) y al verlo funcionando lo reversé por dos
+  razones concretas: un jugador nuevo aprieta ENTRENAR —lo más obvio en un RPG—
+  y recibe "todavía no", lo que **esconde el vocabulario de los siete stats** en
+  el primer minuto; y practicar en la pieza es la fantasía inicial declarada del
+  juego ("empezaste rapeando contra la pared de tu cuarto"). Además el arnés de
+  trazas perdía la cobertura de esa pantalla. Si el owner lo quiere candado
+  igual, es una línea de data.
+- Lo que el mapa **sí** hace desde la Fase 4 y sigue: la meta de etapa con su
+  progreso ("SIGUIENTE META: Abrir Plaza · Nv 3/5 · Resp 12/45") y el candado de
+  cada lugar leído de la acción real que hay detrás, nunca inventado.
 
 ### Epílogo de arco: los destinos se leen, no se eligen (Fase 7, 2026-08-13)
 

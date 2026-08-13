@@ -109,13 +109,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -323,13 +323,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -537,13 +537,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -751,13 +751,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -965,13 +965,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -1179,13 +1179,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -1393,13 +1393,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -1607,13 +1607,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -1811,13 +1811,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -2035,13 +2035,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -2250,13 +2250,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -2484,13 +2484,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -2709,13 +2709,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -2953,13 +2953,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -3188,13 +3188,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],
@@ -3416,13 +3416,13 @@
           {
             "id": "familia",
             "affinity": 62,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           },
           {
             "id": "crew",
             "affinity": 40,
-            "fedWeek": 1,
+            "fedWeek": 0,
             "temperature": "steady"
           }
         ],

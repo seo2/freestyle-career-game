@@ -38,12 +38,31 @@ describe("bonds decay when you stop showing up", () => {
     expect(affinityOf(state, "familia")).toBe(before - RelationshipConfig.bonds.decayPerWeek);
   });
 
-  it("charges nothing for a week you did show up", () => {
+  it("makes a week you showed up net positive and a week you skipped net negative", () => {
+    // The decay is charged EVERY week; the visit is what outruns it. Skipping the
+    // charge on fed weeks turned the bonds into a ratchet that sat at 100/100
+    // after a measured five-week arc.
+    const shown = career(3);
+    const before = affinityOf(shown, "familia");
+    feedBonds(shown, "rest");
+    decayRelationships(shown);
+    expect(affinityOf(shown, "familia")).toBeGreaterThan(before);
+
+    const skipped = career(3);
+    decayRelationships(skipped);
+    expect(affinityOf(skipped, "familia")).toBeLessThan(before);
+  });
+
+  it("pays the visit once a week, however many times you turn up", () => {
     const state = career(3);
+    const before = affinityOf(state, "familia");
     feedBonds(state, "rest");
-    const after = affinityOf(state, "familia");
-    decayRelationships(state);
-    expect(affinityOf(state, "familia")).toBe(after);
+    const once = affinityOf(state, "familia");
+    feedBonds(state, "rest");
+    feedBonds(state, "rest");
+    // What the bond counts is that you came, not how many blocks you spent.
+    expect(affinityOf(state, "familia")).toBe(once);
+    expect(once).toBeGreaterThan(before);
   });
 
   it("says it out loud the week a bond turns cold, and only that week", () => {
@@ -65,7 +84,12 @@ describe("bonds decay when you stop showing up", () => {
     state.bonds.crew = { affinity: 1, fedWeek: 1 };
     for (let i = 0; i < 10; i += 1) decayRelationships(state);
     expect(affinityOf(state, "crew")).toBe(RelationshipConfig.bonds.min);
-    for (let i = 0; i < 40; i += 1) feedBonds(state, "cypher");
+    // One visit per week, so reaching the ceiling takes weeks — which is the
+    // point: a bond is built, not bought.
+    for (let i = 0; i < 60; i += 1) {
+      state.week += 1;
+      feedBonds(state, "cypher");
+    }
     expect(affinityOf(state, "crew")).toBe(RelationshipConfig.bonds.max);
   });
 });

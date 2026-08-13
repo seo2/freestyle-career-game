@@ -196,6 +196,17 @@ async function run() {
   report.estimatedMinutes = `${Math.round((inputs * 3) / 60)}-${Math.round((inputs * 6) / 60)} (cota alta)`;
   report.consoleErrors = consoleErrors.length;
   const finalState = await read();
+  // The decay is a mechanic I added, so whether a reasonable player ends the arc
+  // with cold bonds is a balance question that has to be measured, not assumed.
+  report.relationships = {
+    bonds: (finalState.relationships?.bonds ?? []).map(
+      (bond) => `${bond.id} ${bond.affinity} (${bond.temperature})`,
+    ),
+    summary: finalState.relationships?.summary ?? null,
+    rivalries: (finalState.relationships?.rivalries ?? []).map(
+      (r) => `${r.name} ${r.won}-${r.lost} heat ${r.heat}${r.line ? ` "${r.line}"` : ""}`,
+    ),
+  };
   report.final = {
     stage: finalState.player.stage,
     level: finalState.player.level,

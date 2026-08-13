@@ -131,7 +131,7 @@ function backfillBonds(value: unknown): Record<BondId, BondState> {
   // the family is there, the crew is something you build. Not at zero — nobody
   // wakes up estranged because the game grew a feature.
   const fresh = {} as Record<BondId, BondState>;
-  for (const def of bondDefs) fresh[def.id] = { affinity: def.start, fedWeek: 1 };
+  for (const def of bondDefs) fresh[def.id] = { affinity: def.start, fedWeek: 0 };
   if (typeof value !== "object" || value === null) return fresh;
   const saved = value as Partial<Record<BondId, unknown>>;
   for (const def of bondDefs) {
@@ -142,7 +142,7 @@ function backfillBonds(value: unknown): Record<BondId, BondState> {
       affinity: typeof bond.affinity === "number" && Number.isFinite(bond.affinity)
         ? clamp(bond.affinity, cfg.min, cfg.max)
         : def.start,
-      fedWeek: typeof bond.fedWeek === "number" && Number.isFinite(bond.fedWeek) ? bond.fedWeek : 1,
+      fedWeek: typeof bond.fedWeek === "number" && Number.isFinite(bond.fedWeek) ? bond.fedWeek : 0,
     };
   }
   return fresh;
