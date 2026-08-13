@@ -1,0 +1,1673 @@
+[
+  {
+    "step": 0,
+    "input": "initial",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "start",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "Escribe tu nombre artistico y empieza desde la pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null
+    }
+  },
+  {
+    "step": 1,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 2,
+    "input": "key:1",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 24,
+        "xpNext": 70,
+        "energy": 70,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 50,
+        "momentumMood": "Frio",
+        "lastActionId": "practice",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Practicar",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Practicaste en la pieza: +1 Impro. Impulso +8: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso -4",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 3,
+    "input": "key:2",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 2,
+        "timeLabel": "Noche",
+        "xp": 44,
+        "xpNext": 70,
+        "energy": 56,
+        "health": 88,
+        "cash": 25,
+        "fans": 3,
+        "respect": 7,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 62,
+        "momentumMood": "Activo",
+        "lastActionId": "cypher",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Cypher",
+        "blocks": 1,
+        "from": "Tarde",
+        "to": "Noche",
+        "daysPassed": 0
+      },
+      "lastEvent": "El cypher te dio respeto local. Impulso +12: Activo.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 7/8",
+          "value": 84,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +5",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso -3",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso -2",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +6",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +15",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +13",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 4,
+    "input": "key:3",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 2,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 54,
+        "xpNext": 70,
+        "energy": 45,
+        "health": 90,
+        "cash": 71,
+        "fans": 3,
+        "respect": 7,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 57,
+        "momentumMood": "Activo",
+        "lastActionId": "work",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 3,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Trabajar",
+        "blocks": 2,
+        "from": "Noche",
+        "to": "Tarde",
+        "daysPassed": 1
+      },
+      "lastEvent": "Trabajaste 2 bloques: +$46. Impulso -2: Activo. Paso un dia.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 7/8",
+          "value": 84,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": {
+        "id": "cuaderno",
+        "label": "Cuaderno de rimas",
+        "category": "otros",
+        "price": 60,
+        "affordable": true
+      },
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso -11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 5,
+    "input": "key:4",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 2,
+        "block": 2,
+        "timeLabel": "Noche",
+        "xp": 2,
+        "xpNext": 103,
+        "energy": 51,
+        "health": 95,
+        "cash": 71,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 68,
+        "momentumMood": "Activo",
+        "lastActionId": "social",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Redes",
+        "blocks": 1,
+        "from": "Tarde",
+        "to": "Noche",
+        "daysPassed": 0
+      },
+      "lastEvent": "Subiste un clip: +11 fans. Impulso +11: Activo. Subiste a nivel 2: +1 Impro.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": {
+        "id": "cuaderno",
+        "label": "Cuaderno de rimas",
+        "category": "otros",
+        "price": 60,
+        "affordable": true
+      },
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +5",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso -2",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso -4",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +6",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +15",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +13",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 6,
+    "input": "key:5",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 3,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 24,
+        "xpNext": 103,
+        "energy": 42,
+        "health": 97,
+        "cash": 71,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 25,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 71,
+        "momentumMood": "Activo",
+        "lastActionId": "write",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 2,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Escribir",
+        "blocks": 1,
+        "from": "Noche",
+        "to": "Mañana",
+        "daysPassed": 1
+      },
+      "lastEvent": "Escribiste: +25% de cancion. Impulso +6: Activo. Paso un dia.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "25% escrito",
+          "value": 25,
+          "max": 80
+        }
+      ],
+      "recommendedItem": {
+        "id": "cuaderno",
+        "label": "Cuaderno de rimas",
+        "category": "otros",
+        "price": 60,
+        "affordable": true
+      },
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso -3",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 7,
+    "input": "key:u",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 3,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 41,
+        "xpNext": 103,
+        "energy": 42,
+        "health": 97,
+        "cash": 11,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 25,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [
+          "cuaderno"
+        ],
+        "momentum": 81,
+        "momentumMood": "En racha",
+        "lastActionId": "buy-item",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 4,
+          "metrica": 2,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Cuaderno de rimas",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Compraste Cuaderno de rimas por $60: +2 a Punchline. Impulso +10: En racha.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "25% escrito",
+          "value": 25,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 8,
+    "input": "key:c",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "calendar",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 3,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 41,
+        "xpNext": 103,
+        "energy": 42,
+        "health": 97,
+        "cash": 11,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 25,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [
+          "cuaderno"
+        ],
+        "momentum": 81,
+        "momentumMood": "En racha",
+        "lastActionId": "buy-item",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 4,
+          "metrica": 2,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Cuaderno de rimas",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Compraste Cuaderno de rimas por $60: +2 a Punchline. Impulso +10: En racha.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "25% escrito",
+          "value": 25,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 9,
+    "input": "key:4",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "calendar",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 3,
+        "block": 2,
+        "timeLabel": "Noche",
+        "xp": 41,
+        "xpNext": 103,
+        "energy": 80,
+        "health": 100,
+        "cash": 11,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 25,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [
+          "cuaderno"
+        ],
+        "momentum": 83,
+        "momentumMood": "En racha",
+        "lastActionId": "rest",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 4,
+          "metrica": 2,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Descansar",
+        "blocks": 1,
+        "from": "Tarde",
+        "to": "Noche",
+        "daysPassed": 0
+      },
+      "lastEvent": "Descansaste y ordenaste la cabeza. Impulso +2: En racha.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "25% escrito",
+          "value": 25,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +5",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso -2",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +6",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +15",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +13",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso -10",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 10,
+    "input": "key:Escape",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 2,
+        "week": 1,
+        "day": 3,
+        "block": 2,
+        "timeLabel": "Noche",
+        "xp": 41,
+        "xpNext": 103,
+        "energy": 80,
+        "health": 100,
+        "cash": 11,
+        "fans": 14,
+        "respect": 7,
+        "fame": 1,
+        "songs": 0,
+        "discProgress": 25,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [
+          "cuaderno"
+        ],
+        "momentum": 83,
+        "momentumMood": "En racha",
+        "lastActionId": "rest",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 4,
+          "metrica": 2,
+          "improvisacion": 4,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Descansar",
+        "blocks": 1,
+        "from": "Tarde",
+        "to": "Noche",
+        "daysPassed": 0
+      },
+      "lastEvent": "Descansaste y ordenaste la cabeza. Impulso +2: En racha.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 2/2 · Resp 7/8",
+          "value": 97,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "25% escrito",
+          "value": 25,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +5",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso -2",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +6",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +15",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +13",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso -10",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  }
+]

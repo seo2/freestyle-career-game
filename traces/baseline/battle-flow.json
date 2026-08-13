@@ -1,0 +1,1556 @@
+[
+  {
+    "step": 0,
+    "input": "initial",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "start",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "Escribe tu nombre artistico y empieza desde la pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null
+    }
+  },
+  {
+    "step": 1,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 2,
+    "input": "key:c",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "calendar",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +16",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  },
+  {
+    "step": 3,
+    "input": "key:6",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 1,
+        "score": "0-0",
+        "hype": 50,
+        "rivalEnergy": 76,
+        "rivalEnergyMax": 100,
+        "rivalHype": 50,
+        "stimulus": "Corona",
+        "prompt": "La corona esta en juego y todos lo saben.",
+        "timerSeconds": 15,
+        "pendingResult": null,
+        "results": [],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 8
+          },
+          {
+            "key": "2",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 9
+          },
+          {
+            "key": "3",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": true,
+            "projectedHype": 15
+          },
+          {
+            "key": "4",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          },
+          {
+            "key": "5",
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 8
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 4,
+    "input": "key:1",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 1,
+        "score": "0-1",
+        "hype": 43,
+        "rivalEnergy": 68,
+        "rivalEnergyMax": 100,
+        "rivalHype": 62,
+        "stimulus": "Corona",
+        "prompt": "La corona esta en juego y todos lo saben.",
+        "timerSeconds": 15,
+        "pendingResult": {
+          "round": 1,
+          "choice": "metrica",
+          "rivalChoice": "defensa",
+          "tensionNotes": [],
+          "playerHypeDelta": -7,
+          "playerVerdict": "DEBIL",
+          "rivalHypeDelta": 12,
+          "rivalVerdict": "BIEN"
+        },
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 3
+          },
+          {
+            "key": "2",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 9
+          },
+          {
+            "key": "3",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": true,
+            "projectedHype": 15
+          },
+          {
+            "key": "4",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          },
+          {
+            "key": "5",
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 8
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 5,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 2,
+        "score": "0-1",
+        "hype": 43,
+        "rivalEnergy": 68,
+        "rivalEnergyMax": 100,
+        "rivalHype": 62,
+        "stimulus": "Respeto",
+        "prompt": "Piden respeto: el publico mide cada palabra.",
+        "timerSeconds": 15,
+        "pendingResult": null,
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "2",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 9
+          },
+          {
+            "key": "3",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 3
+          },
+          {
+            "key": "4",
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 8
+          },
+          {
+            "key": "5",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 6,
+    "input": "key:2",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 2,
+        "score": "0-2",
+        "hype": 36,
+        "rivalEnergy": 60,
+        "rivalEnergyMax": 100,
+        "rivalHype": 74,
+        "stimulus": "Respeto",
+        "prompt": "Piden respeto: el publico mide cada palabra.",
+        "timerSeconds": 15,
+        "pendingResult": {
+          "round": 2,
+          "choice": "storytelling",
+          "rivalChoice": "punchline",
+          "tensionNotes": [],
+          "playerHypeDelta": -7,
+          "playerVerdict": "DEBIL",
+          "rivalHypeDelta": 12,
+          "rivalVerdict": "BIEN"
+        },
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
+            "choice": "storytelling",
+            "rivalChoice": "punchline",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "2",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 4
+          },
+          {
+            "key": "3",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 8
+          },
+          {
+            "key": "4",
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 8
+          },
+          {
+            "key": "5",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 7,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 3,
+        "score": "0-2",
+        "hype": 36,
+        "rivalEnergy": 60,
+        "rivalEnergyMax": 100,
+        "rivalHype": 74,
+        "stimulus": "Rival",
+        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "timerSeconds": 15,
+        "pendingResult": null,
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
+            "choice": "storytelling",
+            "rivalChoice": "punchline",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
+          },
+          {
+            "key": "2",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          },
+          {
+            "key": "3",
+            "id": "defensa",
+            "label": "Defensa",
+            "boosted": false,
+            "projectedHype": 8
+          },
+          {
+            "key": "4",
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": true,
+            "projectedHype": 14
+          },
+          {
+            "key": "5",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 8,
+    "input": "key:3",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 3,
+        "score": "0-3",
+        "hype": 29,
+        "rivalEnergy": 52,
+        "rivalEnergyMax": 100,
+        "rivalHype": 86,
+        "stimulus": "Rival",
+        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "timerSeconds": 15,
+        "pendingResult": {
+          "round": 3,
+          "choice": "defensa",
+          "rivalChoice": "respuesta",
+          "tensionNotes": [],
+          "playerHypeDelta": -7,
+          "playerVerdict": "DEBIL",
+          "rivalHypeDelta": 12,
+          "rivalVerdict": "BIEN"
+        },
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
+            "choice": "storytelling",
+            "rivalChoice": "punchline",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 3,
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": false,
+        "result": null,
+        "hand": [
+          {
+            "key": "1",
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
+          },
+          {
+            "key": "2",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          },
+          {
+            "key": "3",
+            "id": "defensa",
+            "label": "Defensa",
+            "boosted": false,
+            "projectedHype": 3
+          },
+          {
+            "key": "4",
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": true,
+            "projectedHype": 14
+          },
+          {
+            "key": "5",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 9,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "battle",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 0/8",
+          "value": 63,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": {
+        "event": "Cypher de pieza",
+        "rival": "Nico Cuaderno",
+        "round": 3,
+        "score": "0-3",
+        "hype": 29,
+        "rivalEnergy": 52,
+        "rivalEnergyMax": 100,
+        "rivalHype": 86,
+        "stimulus": "Rival",
+        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "timerSeconds": 15,
+        "pendingResult": null,
+        "results": [
+          {
+            "round": 1,
+            "choice": "metrica",
+            "rivalChoice": "defensa",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
+            "choice": "storytelling",
+            "rivalChoice": "punchline",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 3,
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          }
+        ],
+        "finished": true,
+        "result": "loss",
+        "hand": [
+          {
+            "key": "1",
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
+          },
+          {
+            "key": "2",
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
+          },
+          {
+            "key": "3",
+            "id": "defensa",
+            "label": "Defensa",
+            "boosted": false,
+            "projectedHype": 3
+          },
+          {
+            "key": "4",
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": true,
+            "projectedHype": 14
+          },
+          {
+            "key": "5",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          }
+        ]
+      }
+    }
+  },
+  {
+    "step": 10,
+    "input": "key:Enter",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "mode": "career",
+      "careerView": "base",
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 1,
+        "timeLabel": "Tarde",
+        "xp": 15,
+        "xpNext": 70,
+        "energy": 64,
+        "health": 88,
+        "cash": 25,
+        "fans": 3,
+        "respect": 2,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 36,
+        "momentumMood": "Frio",
+        "lastActionId": "battle",
+        "actionStreak": 1,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": {
+        "label": "Cypher de pieza",
+        "blocks": 1,
+        "from": "Mañana",
+        "to": "Tarde",
+        "daysPassed": 0
+      },
+      "lastEvent": "Perdiste en Cypher de pieza (1 bloque): +$0, +3 fans, +2 respeto. Impulso -6: Frio.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/2 · Resp 2/8",
+          "value": 69,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [
+        {
+          "key": "1",
+          "id": "practice",
+          "label": "Practicar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -16 energia",
+          "rhythm": "Impulso +8",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "2",
+          "id": "cypher",
+          "label": "Cypher",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -14 energia",
+          "rhythm": "Impulso +12",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "3",
+          "id": "work",
+          "label": "Trabajar",
+          "durationBlocks": 2,
+          "cost": "2 bloques / -20 energia",
+          "rhythm": "Impulso +1",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "4",
+          "id": "social",
+          "label": "Subir clip",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -12 energia",
+          "rhythm": "Impulso +11",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "5",
+          "id": "write",
+          "label": "Escribir tema",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -18 energia",
+          "rhythm": "Impulso +9",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "6",
+          "id": "record",
+          "label": "Grabar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / $35 / -16 energia",
+          "rhythm": "Impulso +18",
+          "disabled": true,
+          "reason": "Necesitas 80% de cancion."
+        },
+        {
+          "key": "7",
+          "id": "battle",
+          "label": "Batalla casera",
+          "durationBlocks": 1,
+          "cost": "1 bloque / -22 energia",
+          "rhythm": "Impulso +4",
+          "disabled": false,
+          "reason": null
+        },
+        {
+          "key": "8",
+          "id": "rest",
+          "label": "Descansar",
+          "durationBlocks": 1,
+          "cost": "1 bloque / +energia / +salud",
+          "rhythm": "Impulso +2",
+          "disabled": false,
+          "reason": null
+        }
+      ],
+      "battle": null
+    }
+  }
+]
