@@ -75,8 +75,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -190,8 +190,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -392,8 +392,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -594,8 +594,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -745,8 +745,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -926,8 +926,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -1093,8 +1093,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -1289,8 +1289,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -1470,8 +1470,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -1680,8 +1680,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -1883,8 +1883,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -2092,8 +2092,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 0/8",
-          "value": 63,
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
           "max": 100
         },
         {
@@ -2307,8 +2307,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -2522,8 +2522,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -2739,8 +2739,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -2950,8 +2950,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -3161,8 +3161,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -3372,8 +3372,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -3589,8 +3589,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
@@ -3806,8 +3806,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 0/8",
-          "value": 75,
+          "detail": "Nv 2/5 · Resp 0/45",
+          "value": 38,
           "max": 100
         },
         {
