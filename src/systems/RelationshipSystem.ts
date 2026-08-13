@@ -63,6 +63,13 @@ export function bondTemperature(state: GameState, id: BondId): "warm" | "cold" |
 
 // Showing up. Called with the action the player just lived; every bond that
 // counts that action as attention warms up and remembers the week.
+//
+// The visit pays ONCE PER WEEK. Without that cap the bonds were a ratchet: a
+// measured arc (scripts/playthrough.mjs) ended with both at 100/100 because
+// resting twice a week paid +22 against a decay of 6, so the decay never bit and
+// the whole mechanic collapsed into the bookkeeping it exists to avoid. Now a week
+// you show up is worth about +5 net and a week you don't is -6, which is an
+// economy the player can actually feel.
 export function feedBonds(state: GameState, actionId: string): string[] {
   const messages: string[] = [];
   const { min, max } = RelationshipConfig.bonds;
@@ -70,6 +77,9 @@ export function feedBonds(state: GameState, actionId: string): string[] {
     const gain = def.fedBy[actionId];
     if (!gain) continue;
     const bond = bondOf(state, def.id);
+    // Already visited this week: turning up twice does not buy twice. What the
+    // bond counts is that you came, not how many blocks you spent.
+    if (bond.fedWeek >= state.week) continue;
     const before = bond.affinity;
     const after = clamp(before + gain, min, max);
     state.bonds[def.id] = { affinity: after, fedWeek: state.week };
@@ -197,8 +207,9 @@ export function decayRelationships(state: GameState): string[] {
   const bonds = RelationshipConfig.bonds;
   for (const def of bondDefs) {
     const bond = bondOf(state, def.id);
-    // Fed this week? Then this week costs nothing.
-    if (bond.fedWeek >= state.week) continue;
+    // Charged EVERY week, whether you showed up or not. Skipping it on a fed week
+    // was what let the bonds ratchet to full and never come back down; the visit
+    // is what outruns the decay, not what cancels it.
     const before = bond.affinity;
     const after = clamp(before - bonds.decayPerWeek, bonds.min, bonds.max);
     state.bonds[def.id] = { affinity: after, fedWeek: bond.fedWeek };

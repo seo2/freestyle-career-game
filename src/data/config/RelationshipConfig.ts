@@ -5,9 +5,10 @@ export const RelationshipConfig = {
   bonds: {
     min: 0,
     max: 100,
-    // What a week of not showing up costs. This is the whole point of bonds: if
-    // affinity only ever went up, keeping it would not be a decision. At 6 a
-    // neglected bond falls from full to cold in about three months of career.
+    // Charged every week, against a visit that pays once. That is the whole point
+    // of bonds: if affinity only ever went up, keeping it would not be a decision.
+    // A measured arc proved it — with the decay skipped on fed weeks both bonds
+    // sat at 100/100 after five weeks.
     decayPerWeek: 6,
     // Above this a bond is "firme" and pays its bonus; below the low mark it is
     // "fria" and charges its penalty. Between them it is simply there.

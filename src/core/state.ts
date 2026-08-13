@@ -70,10 +70,11 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     stageStartedWeek: 1,
     epilogueFromWeek: 1,
     // The family is already there when the career starts; the crew is something
-    // you build. Both start "fed" so week 1 does not open with a bill.
+    // you build. fedWeek 0 means "nobody has visited yet", so week 1's visit still
+    // counts — a 1 here used to swallow it, because the visit now pays once a week.
     bonds: {
-      familia: { affinity: bondStart("familia"), fedWeek: 1 },
-      crew: { affinity: bondStart("crew"), fedWeek: 1 },
+      familia: { affinity: bondStart("familia"), fedWeek: 0 },
+      crew: { affinity: bondStart("crew"), fedWeek: 0 },
     },
     rivalries: [],
   };
