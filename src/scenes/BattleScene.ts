@@ -20,6 +20,7 @@ import { AssetRegistry, battleBackdropKey, battleChoiceIconKey } from "../game/A
 import { hex, palette } from "../ui/palette";
 import { addButton, addDisplayText, addHitZone, addRect, addSpriteImage, addText, TEXT_PAD } from "../ui/kit";
 import { resourceById } from "../data/battle";
+import { rivalArchetypes } from "../data/rivals";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { battleEnergyCost, battleRoundSeconds, projectedHypeGain } from "../systems/BattleSystem";
 import { maxEnergy } from "../core/derived";
@@ -202,6 +203,10 @@ export class BattleScene extends Phaser.Scene {
     this.drawScreenPixelBorder();
     this.addCenteredText(134, 33, "TU", 18, palette.ink);
     this.addCenteredText(824, 33, "RIVAL", 18, palette.ink);
+    // Who you are facing and what this room rewards (gauntlet 10): both come
+    // from state, so the player can read the rival and play to the crowd
+    // instead of guessing.
+    this.addCenteredText(824, 52, rivalArchetypes[battle.rivalArchetype].label.toUpperCase(), 11, palette.muted);
     this.drawHudSide(202, 42, state.energy, maxEnergy(state), battle.hype);
     this.drawHudSide(600, 42, battle.rivalEnergy, battle.rivalEnergyMax, battle.rivalHype);
     this.addCenteredDisplayText(483, 29, `RONDA ${battle.round}`, 26, palette.ink);
@@ -210,6 +215,9 @@ export class BattleScene extends Phaser.Scene {
     const onResultScreen = battle.finished || battle.pendingResult !== null;
     if (!onResultScreen) this.drawDecisionTimer(battle);
     this.drawStimulus(battle, onResultScreen ? STIMULUS_TOP_RESULT : STIMULUS_TOP_ROUND);
+    // The crowd's taste rides just under the card dock, where the round screen
+    // has room; the verdict beat needs that band for its panels.
+    if (!onResultScreen) this.addCenteredText(W / 2, CARD_TOP + CARD_H + 60, battle.crowdLine, 11, LABEL_CYAN);
   }
 
   // Discreet countdown bar under RONDA n. Only exists while choosing a card

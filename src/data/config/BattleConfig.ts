@@ -1,6 +1,8 @@
 // Battle tuning values. Formula shapes live in src/systems/BattleSystem.ts;
 // every number they consume lives here.
 
+import type { BattleResourceId } from "../../core/types";
+
 export const BattleConfig = {
   entry: {
     energyCostBase: 22,
@@ -23,6 +25,38 @@ export const BattleConfig = {
     roundSeconds: 15,
     passHypePenalty: 10,
     passLabel: "PASADA",
+  },
+  // How the rival picks their resource (gauntlet 10). Personality weights and
+  // the archetype bias are added to a flat base so every resource keeps a
+  // chance; the pick then costs exactly ONE RNG draw over the cumulative
+  // weight, which is what keeps the trace harness deterministic.
+  rivalAi: {
+    baseWeight: 4,
+    // Which personality trait lifts which resource, and by how much per point.
+    agresividadPerPoint: { ataque: 0.9, punchline: 0.5, defensa: -0.3 },
+    humorPerPoint: { humor: 0.9, storytelling: 0.3 },
+    metricaPerPoint: { metrica: 0.8, dobletempo: 0.6, storytelling: 0.2 },
+    // Risk-takers reach for the high-hype swings and stop hiding behind guard.
+    riesgoPerPoint: { punchline: 0.5, dobletempo: 0.4, improvisacion: 0.5, defensa: -0.4 },
+    // A weight can never go to zero or below: a legible rival still surprises.
+    minWeight: 1,
+  },
+  // The resource the rival performs now feeds their roll: a Punchline from a
+  // punchline rival hits harder than the same card from a metric technician.
+  rivalResource: {
+    flowWeight: 1.2,
+    punchlineWeight: 1.2,
+    // Which of the rival's two stats each resource leans on (the rest lean on
+    // neither and roll on power alone).
+    flowResources: ["flow", "dobletempo", "improvisacion", "respuesta"] as BattleResourceId[],
+    punchlineResources: ["punchline", "ataque", "humor", "storytelling"] as BattleResourceId[],
+  },
+  // Crowd taste (per event, data in src/data/rivals.ts): scales the hype a won
+  // round awards. Applied inside projectedHypeGain, so the +N previewed on the
+  // card is exactly what a win pays.
+  crowd: {
+    lovesMultiplier: 1.35,
+    coldsMultiplier: 0.7,
   },
   // Tension rules (Bible): the counter pays, boring the crowd costs, and both
   // surface as verdict-panel notes.

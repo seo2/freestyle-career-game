@@ -445,6 +445,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 1,
         "score": "0-0",
         "hype": 50,
@@ -464,7 +482,7 @@
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 5
           },
           {
             "key": "2",
@@ -492,7 +510,7 @@
             "id": "humor",
             "label": "Humor",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 10
           }
         ]
       }
@@ -569,6 +587,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 1,
         "score": "0-1",
         "hype": 43,
@@ -581,7 +617,7 @@
         "pendingResult": {
           "round": 1,
           "choice": "metrica",
-          "rivalChoice": "defensa",
+          "rivalChoice": "ataque",
           "tensionNotes": [],
           "playerHypeDelta": -7,
           "playerVerdict": "DEBIL",
@@ -592,7 +628,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -608,7 +644,7 @@
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 3
+            "projectedHype": 2
           },
           {
             "key": "2",
@@ -636,7 +672,7 @@
             "id": "humor",
             "label": "Humor",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 10
           }
         ]
       }
@@ -713,6 +749,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
         "score": "0-1",
         "hype": 43,
@@ -727,7 +781,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -757,21 +811,21 @@
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 3
+            "projectedHype": 2
           },
           {
             "key": "4",
             "id": "humor",
             "label": "Humor",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 10
           },
           {
             "key": "5",
-            "id": "punchline",
-            "label": "Punchline",
-            "boosted": false,
-            "projectedHype": 15
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": true,
+            "projectedHype": 20
           }
         ]
       }
@@ -848,6 +902,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
         "score": "0-2",
         "hype": 36,
@@ -871,7 +943,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -911,21 +983,21 @@
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 5
           },
           {
             "key": "4",
             "id": "humor",
             "label": "Humor",
             "boosted": false,
-            "projectedHype": 8
+            "projectedHype": 10
           },
           {
             "key": "5",
-            "id": "punchline",
-            "label": "Punchline",
-            "boosted": false,
-            "projectedHype": 15
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": true,
+            "projectedHype": 14
           }
         ]
       }
@@ -1002,6 +1074,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
         "score": "0-2",
         "hype": 36,
@@ -1016,7 +1106,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1147,6 +1237,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
         "score": "0-3",
         "hype": 29,
@@ -1159,7 +1267,7 @@
         "pendingResult": {
           "round": 3,
           "choice": "defensa",
-          "rivalChoice": "respuesta",
+          "rivalChoice": "storytelling",
           "tensionNotes": [],
           "playerHypeDelta": -7,
           "playerVerdict": "DEBIL",
@@ -1170,7 +1278,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1190,7 +1298,7 @@
           {
             "round": 3,
             "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "rivalChoice": "storytelling",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1311,6 +1419,24 @@
       "battle": {
         "event": "Cypher de pieza",
         "rival": "Nico Cuaderno",
+        "rivalStyle": "nervioso pero creativo",
+        "rivalArchetype": "callejero",
+        "rivalFlow": 3,
+        "rivalPunchline": 2,
+        "rivalPersonality": {
+          "agresividad": 2,
+          "humor": 4,
+          "metrica": 3,
+          "frecuenciaDeRiesgo": 5
+        },
+        "crowdLoves": [
+          "improvisacion",
+          "humor"
+        ],
+        "crowdColds": [
+          "metrica"
+        ],
+        "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
         "score": "0-3",
         "hype": 29,
@@ -1325,7 +1451,7 @@
           {
             "round": 1,
             "choice": "metrica",
-            "rivalChoice": "defensa",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1345,7 +1471,7 @@
           {
             "round": 3,
             "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "rivalChoice": "storytelling",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",

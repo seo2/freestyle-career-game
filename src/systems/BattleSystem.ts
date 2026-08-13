@@ -14,7 +14,8 @@ import type {
 import { maxEnergy, stageIndex } from "../core/derived";
 import { clamp } from "../utils/math";
 import type { RandomSource } from "../services/RandomService";
-import { battleResources, battleRivals, battleStimuli } from "../data/battle";
+import { battleResources, battleStimuli } from "../data/battle";
+import { crowdByStage, rivalArchetypes, rivalRoster } from "../data/rivals";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
 import { advanceClock, formatDuration } from "./CalendarSystem";
@@ -74,7 +75,20 @@ export function projectedHypeGain(battle: BattleState, choice: BattleResource): 
   const responseBonus =
     choice.id === "respuesta" && previous?.rivalChoice === "ataque" ? BattleConfig.tension.responseBonus : 0;
   const repetitionPenalty = previous?.choice === choice.id ? BattleConfig.tension.repetitionPenalty : 0;
-  return choice.baseHype + stimulusBonus + responseBonus - repetitionPenalty;
+  const raw = choice.baseHype + stimulusBonus + responseBonus - repetitionPenalty;
+  // The crowd of this event has the last word (Bible: publico/jueces valoran
+  // distinto segun el evento). It lives here so the +N previewed on the card is
+  // exactly what a won round pays.
+  return Math.floor(raw * crowdMultiplier(battle, choice.id));
+}
+
+// How much this event's crowd rewards a resource: >1 when they love it, <1 when
+// it leaves them cold, 1 when they are indifferent.
+export function crowdMultiplier(battle: BattleState, choice: BattleResourceId): number {
+  const crowd = BattleConfig.crowd;
+  if (battle.crowdLoves.includes(choice)) return crowd.lovesMultiplier;
+  if (battle.crowdColds.includes(choice)) return crowd.coldsMultiplier;
+  return 1;
 }
 
 // Deals the round's hand: BattleConfig.hand.size distinct resources, drawn
@@ -95,13 +109,53 @@ function dealHand(rng: RandomSource, rivalLastChoice: BattleResourceId | null): 
   return hand;
 }
 
-// Gauntlet 10 seam: the rival's visible resource for the current round.
-// AI Rivals will replace this seeded uniform pick with personality-driven
-// choice (agresividad, humor, frecuencia de riesgo...) — same signature,
-// same single RNG draw contract.
+// Resolution of the single RNG draw that picks the rival's move: the draw is an
+// integer, so it is scaled into a cursor over the cumulative weight — 1000 steps
+// keep fractional personality weights meaningful.
+const PICK_RESOLUTION = 1000;
+
+// How much this rival wants each resource: a flat base so nothing is ever
+// impossible, plus their personality weights and their archetype's bias. The
+// weights are what make a rival legible — an Agresivo keeps attacking, a
+// Tecnico builds structures — so the player can learn to read them.
+export function rivalMoveWeights(battle: BattleState): Map<BattleResourceId, number> {
+  const ai = BattleConfig.rivalAi;
+  const p = battle.rivalPersonality;
+  const weights = new Map<BattleResourceId, number>(
+    battleResources.map((resource) => [resource.id, ai.baseWeight]),
+  );
+  const lift = (table: Partial<Record<BattleResourceId, number>>, points: number): void => {
+    for (const [id, perPoint] of Object.entries(table) as [BattleResourceId, number][]) {
+      weights.set(id, (weights.get(id) ?? ai.baseWeight) + perPoint * points);
+    }
+  };
+  lift(ai.agresividadPerPoint, p.agresividad);
+  lift(ai.humorPerPoint, p.humor);
+  lift(ai.metricaPerPoint, p.metrica);
+  lift(ai.riesgoPerPoint, p.frecuenciaDeRiesgo);
+  lift(rivalArchetypes[battle.rivalArchetype].bias, 1);
+  // Floor every weight: a legible rival must still be able to surprise, and a
+  // zero/negative weight would also break the cumulative pick below.
+  for (const [id, weight] of weights) weights.set(id, Math.max(ai.minWeight, weight));
+  return weights;
+}
+
+// The rival's visible resource for the round: a weighted pick over
+// rivalMoveWeights that consumes EXACTLY ONE RNG draw, like the uniform pick it
+// replaces — the deterministic trace harness depends on the draw count.
 export function chooseRivalMove(battle: BattleState, rng: RandomSource): BattleResourceId {
-  void battle; // personalities (gauntlet 10) will read rivalStyle/rivalPower
-  return battleResources[rng.int(0, battleResources.length - 1)].id;
+  const weights = rivalMoveWeights(battle);
+  let total = 0;
+  for (const weight of weights.values()) total += weight;
+  // rng.int is the only draw primitive; scale it to a fine-grained cursor so
+  // fractional weights still matter.
+  const cursor = (rng.int(0, PICK_RESOLUTION - 1) / PICK_RESOLUTION) * total;
+  let seen = 0;
+  for (const [id, weight] of weights) {
+    seen += weight;
+    if (cursor < seen) return id;
+  }
+  return battleResources[battleResources.length - 1].id;
 }
 
 // Returns false (no mutation, no RNG consumed) when too tired to enter.
@@ -157,15 +211,23 @@ type BattleTier = Omit<
 
 function getBattleTier(state: GameState): BattleTier {
   const idx = stageIndex(state);
-  const picked = battleRivals[idx] ?? battleRivals[0];
+  const profile = rivalRoster[idx] ?? rivalRoster[0];
+  const crowd = crowdByStage[profile.stage];
   const tier = BattleConfig.tier;
   // Difficulty is the one mechanical choice of the Crear MC screen: it shifts
   // how strong every rival is (and, at payout time, how much a battle pays).
   const difficulty = difficultyRules(state.difficulty);
   return {
-    eventName: picked[0],
-    rivalName: picked[1],
-    rivalStyle: picked[2],
+    eventName: profile.eventName,
+    rivalName: profile.name,
+    rivalStyle: profile.style,
+    rivalArchetype: profile.archetype,
+    rivalFlow: profile.flow,
+    rivalPunchline: profile.punchline,
+    rivalPersonality: profile.personality,
+    crowdLoves: crowd.loves,
+    crowdColds: crowd.colds,
+    crowdLine: crowd.line,
     rivalPower: Math.max(
       DifficultyConfig.rivalPowerFloor,
       tier.rivalPowerBase +
@@ -192,11 +254,23 @@ function verdictFor(delta: number): string {
 }
 
 // The rival's side of a round: power + round pressure + seeded swing.
-function rollRival(battle: BattleState, rng: RandomSource): number {
+// What the rival's own stats add to the resource they just performed: a
+// Punchline from a punchline rival hits harder than the same card from a
+// metric technician (which of their two stats each resource leans on is data).
+function rivalResourceBonus(battle: BattleState, choice: BattleResourceId): number {
+  const conf = BattleConfig.rivalResource;
+  let bonus = 0;
+  if (conf.flowResources.includes(choice)) bonus += battle.rivalFlow * conf.flowWeight;
+  if (conf.punchlineResources.includes(choice)) bonus += battle.rivalPunchline * conf.punchlineWeight;
+  return Math.floor(bonus);
+}
+
+function rollRival(battle: BattleState, rng: RandomSource, choice: BattleResourceId): number {
   const roll = BattleConfig.roll;
   return (
     battle.rivalPower * roll.rivalPowerWeight +
     battle.round * roll.roundWeight +
+    rivalResourceBonus(battle, choice) +
     rng.int(roll.rivalRandomMin, roll.rivalRandomMax)
   );
 }
@@ -249,7 +323,7 @@ export function resolveBattle(state: GameState, rng: RandomSource, choice: Battl
     presenceBonus +
     Math.floor(battle.hype / roll.hypeDivisor) +
     rng.int(roll.playerRandomMin, roll.playerRandomMax);
-  const rivalRoll = rollRival(battle, rng);
+  const rivalRoll = rollRival(battle, rng, rivalChoice);
   const wonRound = playerRoll >= rivalRoll;
 
   // Tension rules (Bible): repeating bores the crowd on any outcome; the
@@ -298,7 +372,7 @@ export function expireBattleRound(state: GameState, rng: RandomSource): void {
   const battle = state.battle;
   if (!battle || battle.finished || battle.pendingResult) return;
   const rivalChoice = chooseRivalMove(battle, rng);
-  const rivalRoll = rollRival(battle, rng);
+  const rivalRoll = rollRival(battle, rng, rivalChoice);
   const playerHypeDelta = -BattleConfig.timer.passHypePenalty;
   const rivalHypeDelta = BattleConfig.rival.hypeWinGain;
 

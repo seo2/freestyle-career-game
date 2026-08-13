@@ -43,6 +43,38 @@ export interface StageDef {
   minFame: number;
 }
 
+// The 7 rival archetypes of the Bible.
+export type RivalArchetype =
+  | "agresivo"
+  | "tecnico"
+  | "humoristico"
+  | "callejero"
+  | "viral"
+  | "veteranisimo"
+  | "campeon";
+
+// The Bible's rival personality: four weights that decide which resource the
+// rival reaches for. Read by BattleSystem.chooseRivalMove, never by a scene.
+export interface RivalPersonality {
+  agresividad: number;
+  humor: number;
+  metrica: number;
+  frecuenciaDeRiesgo: number;
+}
+
+// A rival as the Bible describes them: name, their own flow/punchline, an
+// archetype and a personality. Roster in src/data/rivals.ts.
+export interface RivalProfile {
+  stage: StageId;
+  eventName: string;
+  name: string;
+  style: string;
+  archetype: RivalArchetype;
+  flow: number;
+  punchline: number;
+  personality: RivalPersonality;
+}
+
 // Per-round stimulus (the Bible's "Estimulo"): the big keyword of the round.
 // `best` lists the resources the crowd rewards on it — the hand is dealt
 // independently, so reading the stimulus means recognizing when the hand fits.
@@ -90,6 +122,19 @@ export interface BattleState {
   rivalName: string;
   rivalStyle: string;
   rivalPower: number;
+  // Who this rival is, not just how strong: the archetype drives which
+  // resource they reach for, and flow/punchline feed the roll of the resource
+  // they perform (gauntlet 10).
+  rivalArchetype: RivalArchetype;
+  rivalFlow: number;
+  rivalPunchline: number;
+  rivalPersonality: RivalPersonality;
+  // What this event's crowd rewards and what leaves it cold: it scales the
+  // hype a won round awards, and the screen states it so the player can play
+  // to the room instead of guessing.
+  crowdLoves: BattleResourceId[];
+  crowdColds: BattleResourceId[];
+  crowdLine: string;
   // Real rival meters (mockup HUD right side). Initialized by
   // BattleSystem.startBattle from BattleConfig.rival and updated every round
   // from actual outcomes — the scene only reads them.
