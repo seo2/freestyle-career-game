@@ -8,6 +8,9 @@ export const AssetRegistry = {
     pieza: { key: "scene-pieza", path: "/assets/scenes/pieza-home-studio-v1.png" },
     plaza: { key: "scene-plaza", path: "/assets/scenes/plaza-cypher-v1.png" },
     regional: { key: "scene-regional", path: "/assets/scenes/regional-stage-v1.png" },
+    // The isometric night city of the map mockup, cut from reference/ and cleaned
+    // of its baked-in UI (see scripts/build-map-city.mjs).
+    mapCity: { key: "scene-map-city", path: "/assets/scenes/map-city-v1.png" },
   },
   cover: {
     sky: { key: "cover-sky", path: "/assets/main-menu/bg_sky_night.png" },

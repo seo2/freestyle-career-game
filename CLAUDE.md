@@ -26,6 +26,7 @@ npm run traces     # comparar el juego actual contra traces/baseline/ (falla si 
 node scripts/compare-traces.mjs --update    # aceptar la conducta actual como nuevo baseline
 node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
 node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo del primer arco (dev server corriendo)
+node scripts/build-map-city.mjs             # reconstruye el fondo isométrico del mapa desde reference/
 ```
 
 ## Arquitectura (Fases 1–4)
@@ -42,6 +43,7 @@ node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo 
 - **Identidad del MC** (nombre, apodo, aspecto, piel, voz) e **inventario de ítems** (`src/data/items.ts`) existen desde la Fase 4; la dificultad es la única elección con efecto mecánico (`DifficultyConfig`).
 - **Relaciones (Fase 7):** los lazos (familia/crew) **decaen** si no apareces y cobran en salud del descanso y hype de batalla; las rivalidades guardan récord y rencor, que le compra poder y agresividad al rival. Reglas en `src/systems/RelationshipSystem.ts`, números en `RelationshipConfig`.
 - Personajes con sprites reales desde la Fase 3; el arte pendiente está listado en `docs/ASSETS.md`.
+- **El mapa usa la ciudad isométrica del mockup** (`public/assets/scenes/map-city-v1.png`, generada con `scripts/build-map-city.mjs`). El arte trae solo la ciudad: nodos, anillos, píldoras, candados, caminos y el MC los dibuja el juego desde el estado, porque un camino pintado no puede saber que el estudio está candado.
 
 ## Reglas del proyecto
 
