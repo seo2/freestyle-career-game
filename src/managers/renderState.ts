@@ -19,6 +19,7 @@ import {
 } from "../systems/PlanSystem";
 import { findOpportunity, isBurntOut } from "../systems/OpportunitySystem";
 import { identitySummary } from "../systems/DilemmaSystem";
+import { destinyFor } from "../systems/EpilogueSystem";
 import { resourceById } from "../data/battle";
 import { momentumMood } from "../core/derived";
 import type { CareerView, GameState, TimeAdvance } from "../core/types";
@@ -168,6 +169,11 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
     axes: state.axes,
     leaning: identitySummary(state),
     pendingDilemma: state.pendingDilemma,
+    // The chapter waiting to be read, and the destiny the axes point at: the
+    // harness can assert the milestone without a screenshot.
+    pendingEpilogue: state.pendingEpilogue,
+    destiny: destinyFor(state)?.label ?? null,
+    stageStartedWeek: state.stageStartedWeek,
     decisions: state.decisions.map((entry) => ({
       week: entry.week,
       day: entry.day,

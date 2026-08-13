@@ -160,9 +160,21 @@ Original prompt: Quiero desarrollar un juego basado en la cultura del freestyle 
   - **Defectos que encontré verificando:** un off-by-one por un nombre ambiguo en la config (`firstWeek` no bloqueaba la semana 1; lo renombré a `quietWeeks`, que es la intención); los acentos del texto rompían la tipografía display ("SE ARMó") y violaban la convención sin acentos del proyecto; mostrar "Batallero −6" leía como castigo cuando la etiqueta ya dice la dirección (ahora es magnitud); y en el panel de identidad el 4º eje chocaba con el resumen, que además se truncaba con cuatro etiquetas (ahora nombra las dos más fuertes, sin números, porque los sliders ya muestran la posición).
   - **Verificación:** 268 tests (22 nuevos, incluyendo que dos caminos opuestos del **mismo** dilema llevan a identidades opuestas), tsc/ESLint/build, migración 12/12 (una partida anterior arranca con ejes neutros y sin decisiones), trazas re-baselineadas y deterministas en dos corridas, cero errores de consola. Evidencia en `output/web-game/fase7-dilemas/`.
 
+- 2026-08-13 — **Epílogo de arco: los destinos se leen, no se eligen** (rama `fase-7/epilogo-arco`). Es el cierre del círculo de los ejes de identidad: sin esto acumulaban sin pagar nunca.
+  - **Al cambiar de etapa el loop se detiene** y muestra el capítulo. Nada está enlatado: se compone desde los ejes que moviste, las decisiones de **ese** capítulo, las batallas y las semanas que tardaste. Lo probé con dos carreras de estado **idéntico** que solo diferían en las decisiones: una leyó "Leyenda underground" y la otra "Estrella", con líneas distintas.
+  - **Los destinos de la Bible son atractores**, no un menú. Cuando varios calzan gana **el que marcaste más fuerte** (punteo por cuánto pasaste cada umbral). Lo cambié después de ver que con +52 comercial y +30 músico leía "Productor" solo porque estaba primero en la lista. Y un test verifica que **todos** los atractores son alcanzables — un perfil que nunca se puede leer es contenido muerto.
+  - **Sin decisiones no hay destino:** un MC que no se definió lee eso mismo en vez de recibir un final inventado.
+  - **Cuatro bugs que encontré verificando, no escribiendo:**
+    1. Las líneas del capítulo se dibujaban **invisibles**: calculaba el alpha del reveal una sola vez al dibujar y nunca lo actualizaba. Es la misma trampa del tween congelado, con otra cara — ahora el reveal se aplica **cada frame** sobre handles.
+    2. "Semanas 1" y "Decisiones 0" en un capítulo de 5 semanas con 2 decisiones: pisaba el inicio del capítulo (`stageStartedWeek`) **antes** de leerlo. Ahora el inicio del capítulo que cierra vive en su propio campo.
+    3. El sprite del MC quedaba detrás del panel del registro; esta pantalla son palabras, así que lo saqué.
+    4. El orden de los atractores decidía el destino (arreglado con el punteo de arriba).
+  - **Verificación:** 279 tests (11 nuevos), tsc/ESLint/build, migración 12/12, trazas deterministas y re-baselineadas, cero errores de consola. Evidencia en `output/web-game/fase7-epilogo/`.
+
 ## TODO
 
-- Next: cerrar la **Fase 7** — `RelationshipSystem` (familia, crew, rivales con afinidad; rivalidades que persisten), desbloqueo de nodos del mapa por metas, y el cierre del arco **Pieza → Plaza** con su epílogo, que es donde los ejes de identidad se cobran de verdad.
+- Next: cerrar la **Fase 7** con lo que queda — `RelationshipSystem` (familia, crew, rivales con afinidad; rivalidades que persisten, que es lo que haría que un rival al que humillaste te espere después) y el desbloqueo de nodos del mapa por metas.
+- Y después medir el **criterio de cierre** del plan de verdad: partida nueva → Plaza en 30–60 min con al menos 3 dilemas encontrados. Hoy todas las piezas existen; falta jugarlo de punta a punta y ajustar el balance con lo que se vea.
 - **Pendiente de decisión del owner** (`docs/GDD.md`): ¿las batallas deben ser estrictamente de fin de semana? Hoy la cita rige el plan y el nodo PLAZA del mapa sigue abierto cualquier día.
 - Assets pendientes con su hueco ya reservado en pantalla: ver `docs/ASSETS.md` (iconos de ítem, ilustraciones de trabajo, carrito, multitud de batalla, ciudad isométrica del mapa, variantes de aspecto/piel del MC).
 - Backlog absorbed into `docs/PLAN.md` fases 3–10: mockup-faithful screens (create-MC, shop tabs, calendar cards, battle choice cards), week-end summary, richer rival archetypes, stage-specific assets, true transparent sprite sheets beyond the logo, and Capacitor packaging.

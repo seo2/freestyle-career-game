@@ -27,6 +27,7 @@ import { addXp, finalizeEvent } from "../systems/ProgressionSystem";
 import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
 import { resolveDilemma as resolveDilemmaSys, rollDilemma } from "../systems/DilemmaSystem";
+import { closeEpilogue as closeEpilogueSys } from "../systems/EpilogueSystem";
 import {
   advanceCypher as advanceCypherSys,
   finishCypher as finishCypherSys,
@@ -394,6 +395,19 @@ export class GameController {
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
+  // --- Arc epilogue (Fase 7) ---------------------------------------------------
+
+  // Closing the chapter. It is a read of the state, so nothing is stored: the
+  // same epilogue can always be rebuilt from the career that produced it.
+  closeEpilogue(): void {
+    if (!this.state.pendingEpilogue) return;
+    closeEpilogueSys(this.state);
+    this.careerView = "base";
+    this.saveState();
+    eventBus.emit("MODE_CHANGED", this.state.mode);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
   // --- Dilemmas (Fase 7: mismo origen, destinos distintos) ---------------------
 
   // Answering the dilemma. No RNG: the outcome is the player's decision, and it
@@ -475,6 +489,8 @@ export class GameController {
     // A save from before this week's roll (or from before Fase 6) gets its
     // offers here, so resuming never lands on an empty week by accident.
     this.ensureWeekOpportunities();
+    // A chapter that closed before the player quit is still owed to them.
+    if (this.state.pendingEpilogue) this.state.mode = "epilogue";
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
   }

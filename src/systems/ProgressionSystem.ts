@@ -9,6 +9,7 @@ import { ProgressionConfig } from "../data/config/ProgressionConfig";
 import { stages } from "../data/stages";
 import { statLabels } from "../data/stats";
 import { clamp } from "../utils/math";
+import { openEpilogue } from "./EpilogueSystem";
 
 export function addStat(state: GameState, stat: StatKey, amount: number): void {
   state.stats[stat] = clamp(
@@ -58,7 +59,11 @@ export function maybeUnlockStage(state: GameState): string | null {
     state.respect >= next.minRespect &&
     state.fame >= next.minFame;
   if (!unlocks) return null;
+  const leftStage = state.stage;
   state.stage = next.id;
+  // Closing a chapter stops the loop and shows what it says about you (Fase 7):
+  // without this the identity axes would accumulate and never be paid.
+  openEpilogue(state, leftStage);
   return `Nuevo circuito desbloqueado: ${next.title}.`;
 }
 

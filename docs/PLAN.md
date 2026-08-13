@@ -100,7 +100,8 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - Arco Pieza → Plaza completo con cierre y apertura de Regional.
 - **Criterio de cierre:** partida nueva → ascenso a Plaza en 30–60 min con al menos 3 dilemas encontrados.
 - **Hecho (2026-08-13): dilemas, ejes de identidad y registro de decisiones.** Los cuatro ejes del GDD viven en el save (todos en 0 al empezar), 8 dilemas con dos caminos que se excluyen, **pantalla propia** que muestra el costo con el mismo peso que el premio, los ejes ya **filtran** qué dilemas te alcanzan, y Estadísticas muestra "QUIEN VAS SIENDO". Decisiones en `docs/GDD.md` › "Dilemas e identidad". Evidencia: `output/web-game/fase7-dilemas/`.
-- **Falta de esta fase:** `RelationshipSystem` (familia, crew, rivales con afinidad y rivalidades persistentes), desbloqueo de nodos del mapa por metas, y el cierre del arco Pieza → Plaza con su epílogo.
+- **Hecho (2026-08-13): el cierre del arco con su epílogo.** Al cambiar de etapa el loop se detiene y muestra el capítulo, compuesto desde los ejes que el jugador movió, las decisiones de ese capítulo, las batallas y las semanas. Los destinos de la Bible son **atractores** que se leen (gana el más marcado), no un menú. Decisiones en `docs/GDD.md` › "Epílogo de arco". Evidencia: `output/web-game/fase7-epilogo/`.
+- **Falta de esta fase:** `RelationshipSystem` (familia, crew, rivales con afinidad y rivalidades persistentes) y el desbloqueo de nodos del mapa por metas.
 
 ### Fase 8 — Audio y juice final
 

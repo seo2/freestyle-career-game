@@ -10,6 +10,7 @@ import type {
   IdentityAxes,
   PlannedDayRecord,
   ScheduledOpportunity,
+  StageId,
   WeekPlan,
   WeekSummary,
 } from "../core/types";
@@ -207,6 +208,13 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         seenDilemmas: Array.isArray(saved.seenDilemmas)
           ? saved.seenDilemmas.filter((id): id is string => typeof id === "string")
           : [],
+        // A chapter waiting to be read survives a reload: it is a milestone, not
+        // a transient screen.
+        pendingEpilogue: typeof saved.pendingEpilogue === "string" ? (saved.pendingEpilogue as StageId) : null,
+        stageStartedWeek:
+          typeof saved.stageStartedWeek === "number" && saved.stageStartedWeek > 0 ? saved.stageStartedWeek : 1,
+        epilogueFromWeek:
+          typeof saved.epilogueFromWeek === "number" && saved.epilogueFromWeek > 0 ? saved.epilogueFromWeek : 1,
         weekOpening: saved.weekOpening ?? {
           cash: saved.cash ?? 0,
           fans: saved.fans ?? 0,
