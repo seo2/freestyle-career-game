@@ -32,8 +32,19 @@ Fase 2 replaced it with a 58-line bootstrap plus Phaser scenes under
 `src/scenes/` (presentation-only, per the rules above). The Fase 3 deviation for
 the oversized `src/scenes/careerViews.ts` is gone too — Fase 4 split it into
 `src/scenes/views/*.ts` (one file per career sub-view plus a shared
-`viewKit.ts`), leaving `careerViews.ts` as a 33-line dispatcher. No file exceeds
-the 500-line rule now.
+`viewKit.ts`), leaving `careerViews.ts` as a 33-line dispatcher.
+
+Open, and recorded rather than silently ignored: **`src/managers/GameController.ts`
+is 527 lines, ~5% over the 500-line rule.** Fase 6 moved the
+renderer-independent state dump out to `src/managers/renderState.ts` (verified
+byte-identical by the trace harness, which compares exactly that output), which
+brought it down from 712. What remains is the command surface itself — every
+player intention arrives here. The next honest cut is the weekly-plan block
+(`planDay`, `cyclePlanForDay`, `runPlannedDay`, `livePlannedOpportunity`), which
+is cohesive but leans on private helpers (`setEvent`, `startTimeFx`), so it needs
+a small collaborator instead of a copy-paste move. `src/scenes/BattleScene.ts`
+had the same problem after gauntlet 9 (578 lines) and was split into
+`battleDraw.ts` in Fase 5, proven pixel-identical.
 
 ## Fase 4 notes
 

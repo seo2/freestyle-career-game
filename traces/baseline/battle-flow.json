@@ -20,6 +20,8 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -110,6 +112,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -281,6 +293,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -452,6 +474,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -623,6 +655,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -794,6 +836,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -965,6 +1017,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1136,6 +1198,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1307,6 +1379,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1410,17 +1492,17 @@
         "hand": [
           {
             "key": "1",
-            "id": "metrica",
-            "label": "Metrica",
+            "id": "defensa",
+            "label": "Defensa",
             "boosted": false,
-            "projectedHype": 5
+            "projectedHype": 8
           },
           {
             "key": "2",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 9
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
           },
           {
             "key": "3",
@@ -1431,17 +1513,17 @@
           },
           {
             "key": "4",
-            "id": "punchline",
-            "label": "Punchline",
+            "id": "respuesta",
+            "label": "Respuesta",
             "boosted": false,
-            "projectedHype": 15
+            "projectedHype": 10
           },
           {
             "key": "5",
-            "id": "humor",
-            "label": "Humor",
+            "id": "storytelling",
+            "label": "Storytelling",
             "boosted": false,
-            "projectedHype": 10
+            "projectedHype": 9
           }
         ]
       }
@@ -1468,6 +1550,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1566,8 +1658,8 @@
         "timerSeconds": 15,
         "pendingResult": {
           "round": 1,
-          "choice": "metrica",
-          "rivalChoice": "ataque",
+          "choice": "defensa",
+          "rivalChoice": "respuesta",
           "tensionNotes": [],
           "playerHypeDelta": -7,
           "playerVerdict": "DEBIL",
@@ -1577,8 +1669,8 @@
         "results": [
           {
             "round": 1,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1591,17 +1683,17 @@
         "hand": [
           {
             "key": "1",
-            "id": "metrica",
-            "label": "Metrica",
+            "id": "defensa",
+            "label": "Defensa",
             "boosted": false,
-            "projectedHype": 2
+            "projectedHype": 3
           },
           {
             "key": "2",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 9
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
           },
           {
             "key": "3",
@@ -1612,17 +1704,17 @@
           },
           {
             "key": "4",
-            "id": "punchline",
-            "label": "Punchline",
+            "id": "respuesta",
+            "label": "Respuesta",
             "boosted": false,
-            "projectedHype": 15
+            "projectedHype": 10
           },
           {
             "key": "5",
-            "id": "humor",
-            "label": "Humor",
+            "id": "storytelling",
+            "label": "Storytelling",
             "boosted": false,
-            "projectedHype": 10
+            "projectedHype": 9
           }
         ]
       }
@@ -1649,6 +1741,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1742,15 +1844,15 @@
         "rivalEnergy": 68,
         "rivalEnergyMax": 100,
         "rivalHype": 62,
-        "stimulus": "Respeto",
-        "prompt": "Piden respeto: el publico mide cada palabra.",
+        "stimulus": "Barrio",
+        "prompt": "El estimulo apunta a tu barrio y tus calles.",
         "timerSeconds": 15,
         "pendingResult": null,
         "results": [
           {
             "round": 1,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1763,38 +1865,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
+            "id": "punchline",
+            "label": "Punchline",
             "boosted": false,
-            "projectedHype": 11
+            "projectedHype": 15
           },
           {
             "key": "2",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 9
-          },
-          {
-            "key": "3",
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 2
+            "projectedHype": 5
+          },
+          {
+            "key": "3",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": true,
+            "projectedHype": 13
           },
           {
             "key": "4",
-            "id": "humor",
-            "label": "Humor",
-            "boosted": false,
-            "projectedHype": 10
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
           },
           {
             "key": "5",
-            "id": "respuesta",
-            "label": "Respuesta",
-            "boosted": true,
-            "projectedHype": 20
+            "id": "flow",
+            "label": "Flow",
+            "boosted": false,
+            "projectedHype": 9
           }
         ]
       }
@@ -1821,6 +1923,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1914,13 +2026,13 @@
         "rivalEnergy": 60,
         "rivalEnergyMax": 100,
         "rivalHype": 74,
-        "stimulus": "Respeto",
-        "prompt": "Piden respeto: el publico mide cada palabra.",
+        "stimulus": "Barrio",
+        "prompt": "El estimulo apunta a tu barrio y tus calles.",
         "timerSeconds": 15,
         "pendingResult": {
           "round": 2,
-          "choice": "storytelling",
-          "rivalChoice": "punchline",
+          "choice": "metrica",
+          "rivalChoice": "ataque",
           "tensionNotes": [],
           "playerHypeDelta": -7,
           "playerVerdict": "DEBIL",
@@ -1930,8 +2042,8 @@
         "results": [
           {
             "round": 1,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1940,8 +2052,8 @@
           },
           {
             "round": 2,
-            "choice": "storytelling",
-            "rivalChoice": "punchline",
+            "choice": "metrica",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -1954,38 +2066,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
+            "id": "punchline",
+            "label": "Punchline",
             "boosted": false,
-            "projectedHype": 11
+            "projectedHype": 15
           },
           {
             "key": "2",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 4
-          },
-          {
-            "key": "3",
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
-            "projectedHype": 5
+            "projectedHype": 2
+          },
+          {
+            "key": "3",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": true,
+            "projectedHype": 13
           },
           {
             "key": "4",
-            "id": "humor",
-            "label": "Humor",
-            "boosted": false,
-            "projectedHype": 10
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 16
           },
           {
             "key": "5",
-            "id": "respuesta",
-            "label": "Respuesta",
-            "boosted": true,
-            "projectedHype": 14
+            "id": "flow",
+            "label": "Flow",
+            "boosted": false,
+            "projectedHype": 9
           }
         ]
       }
@@ -2012,6 +2124,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -2112,8 +2234,8 @@
         "results": [
           {
             "round": 1,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -2122,8 +2244,8 @@
           },
           {
             "round": 2,
-            "choice": "storytelling",
-            "rivalChoice": "punchline",
+            "choice": "metrica",
+            "rivalChoice": "ataque",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -2136,38 +2258,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "ataque",
-            "label": "Ataque",
-            "boosted": true,
-            "projectedHype": 16
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 2
           },
           {
             "key": "2",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "3",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 9
+          },
+          {
+            "key": "4",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
             "projectedHype": 15
           },
           {
-            "key": "3",
-            "id": "defensa",
-            "label": "Defensa",
-            "boosted": false,
-            "projectedHype": 8
-          },
-          {
-            "key": "4",
+            "key": "5",
             "id": "respuesta",
             "label": "Respuesta",
             "boosted": true,
-            "projectedHype": 14
-          },
-          {
-            "key": "5",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
-            "boosted": false,
-            "projectedHype": 11
+            "projectedHype": 20
           }
         ]
       }
@@ -2194,6 +2316,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -2292,8 +2424,8 @@
         "timerSeconds": 15,
         "pendingResult": {
           "round": 3,
-          "choice": "defensa",
-          "rivalChoice": "storytelling",
+          "choice": "storytelling",
+          "rivalChoice": "metrica",
           "tensionNotes": [],
           "playerHypeDelta": -7,
           "playerVerdict": "DEBIL",
@@ -2303,6 +2435,16 @@
         "results": [
           {
             "round": 1,
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
@@ -2312,19 +2454,9 @@
             "rivalVerdict": "BIEN"
           },
           {
-            "round": 2,
-            "choice": "storytelling",
-            "rivalChoice": "punchline",
-            "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
-          },
-          {
             "round": 3,
-            "choice": "defensa",
-            "rivalChoice": "storytelling",
+            "choice": "storytelling",
+            "rivalChoice": "metrica",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -2337,38 +2469,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "ataque",
-            "label": "Ataque",
-            "boosted": true,
-            "projectedHype": 16
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 5
           },
           {
             "key": "2",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "3",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 4
+          },
+          {
+            "key": "4",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
             "projectedHype": 15
           },
           {
-            "key": "3",
-            "id": "defensa",
-            "label": "Defensa",
-            "boosted": false,
-            "projectedHype": 3
-          },
-          {
-            "key": "4",
+            "key": "5",
             "id": "respuesta",
             "label": "Respuesta",
             "boosted": true,
             "projectedHype": 14
-          },
-          {
-            "key": "5",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
-            "boosted": false,
-            "projectedHype": 11
           }
         ]
       }
@@ -2395,6 +2527,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -2495,6 +2637,16 @@
         "results": [
           {
             "round": 1,
+            "choice": "defensa",
+            "rivalChoice": "respuesta",
+            "tensionNotes": [],
+            "playerHypeDelta": -7,
+            "playerVerdict": "DEBIL",
+            "rivalHypeDelta": 12,
+            "rivalVerdict": "BIEN"
+          },
+          {
+            "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
@@ -2504,19 +2656,9 @@
             "rivalVerdict": "BIEN"
           },
           {
-            "round": 2,
-            "choice": "storytelling",
-            "rivalChoice": "punchline",
-            "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
-          },
-          {
             "round": 3,
-            "choice": "defensa",
-            "rivalChoice": "storytelling",
+            "choice": "storytelling",
+            "rivalChoice": "metrica",
             "tensionNotes": [],
             "playerHypeDelta": -7,
             "playerVerdict": "DEBIL",
@@ -2529,38 +2671,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "ataque",
-            "label": "Ataque",
-            "boosted": true,
-            "projectedHype": 16
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 5
           },
           {
             "key": "2",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "3",
+            "id": "storytelling",
+            "label": "Storytelling",
+            "boosted": false,
+            "projectedHype": 4
+          },
+          {
+            "key": "4",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
             "projectedHype": 15
           },
           {
-            "key": "3",
-            "id": "defensa",
-            "label": "Defensa",
-            "boosted": false,
-            "projectedHype": 3
-          },
-          {
-            "key": "4",
+            "key": "5",
             "id": "respuesta",
             "label": "Respuesta",
             "boosted": true,
             "projectedHype": 14
-          },
-          {
-            "key": "5",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
-            "boosted": false,
-            "projectedHype": 11
           }
         ]
       }
@@ -2595,6 +2737,16 @@
             "outcome": "loss"
           }
         ],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },

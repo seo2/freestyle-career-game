@@ -20,6 +20,8 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     plan: emptyPlan(),
     weekRecord: [],
     weekLog: [],
+    opportunities: [],
+    opportunitiesWeek: 0,
     weekOpening: {
       cash: NewGameConfig.startingCash,
       fans: 0,

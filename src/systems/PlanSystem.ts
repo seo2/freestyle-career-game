@@ -14,6 +14,12 @@ import type { GameState, PlannedDayRecord, WeekPlan, WeekSummary } from "../core
 import { PlanConfig } from "../data/config/PlanConfig";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { clamp } from "../utils/math";
+import { opportunityPlannableOn } from "./OpportunitySystem";
+
+// The plan slot id that means "take the offer scheduled for this day". It is
+// not a career action: ActionsSystem knows nothing about it, the controller
+// resolves it through OpportunitySystem.
+export const OFFER_ACTION_ID = "offer";
 
 // An empty week: every day open. Used for a new career and every week rollover.
 export function emptyPlan(): WeekPlan {
@@ -60,6 +66,9 @@ export function planDay(state: GameState, day: number, actionId: string | null):
   // only fits its scheduled weekday. Planning something else there is allowed —
   // skipping the battle is a real decision, not a bug.
   if (actionId === "battle" && day !== PlanConfig.week.battleDay) return false;
+  // An offer can only be planned on the day it was scheduled for: that date is
+  // the whole reason it is an opportunity and not just another action.
+  if (actionId === OFFER_ACTION_ID && !opportunityPlannableOn(state, day)) return false;
   state.plan[slotOf(day)] = actionId;
   return true;
 }
@@ -132,6 +141,8 @@ export function closeWeek(state: GameState): WeekSummary {
   while (state.weekLog.length > PlanConfig.history.maxWeeks) state.weekLog.shift();
   state.weekRecord = [];
   state.plan = emptyPlan();
+  // The new week knocks with its own offers (the controller rolls them).
+  state.opportunities = [];
   state.weekOpening = weekOpeningSnapshot(state);
   return summary;
 }

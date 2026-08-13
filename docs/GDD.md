@@ -166,6 +166,21 @@ Cada ronda: **Estímulo → jugador elige recurso → IA responde → comparaci�
   puede cambiar sin aviso.
 - **Las flechas del mockup ya no son decorativas**: navegan el historial de
   semanas cerradas que guarda el save, acotado a 12 semanas para no inflarlo.
+- **Oportunidades con fecha** (`src/data/opportunities.ts`): cada semana golpean
+  hasta dos ofertas (radio, cypher sorpresa, pega extra, videoclip, sponsor,
+  podcast, colaboración), filtradas por etapa. Se agendan **solo el día que
+  llegaron**, cuestan energía y bloques, y **se pierden con aviso** si el día
+  pasa. Algunas tienen filo: el sponsor paga bien y **baja respeto**, la pega
+  extra da plata y **baja impulso**. El sorteo consume una cantidad **fija** de
+  draws de RNG (tres por ranura) para que el arnés determinista no se corra según
+  el resultado, y hay semanas en que no golpea nada — eso es lo que hace que las
+  semanas cargadas se sientan cargadas.
+- **Descanso obligatorio** (`OpportunityConfig.burnout`): bajo el piso de salud
+  mental **todo se cierra menos descansar**, con el motivo dicho en cada acción.
+  El juego deja de permitirte cavar más hondo.
+- **Impulso visible**: es un modificador real de las tiradas de batalla, así que
+  el panel de planificación lo muestra con su ánimo en vez de dejarlo escondido
+  dentro del texto de los eventos.
 - **Pregunta abierta para el owner:** ¿las batallas deberían ser **estrictamente**
   eventos de fin de semana? Se probó cerrar la acción `battle` fuera del sábado y
   funciona (el nodo PLAZA del mapa se bloquea solo, porque lee el motivo real),

@@ -18,28 +18,24 @@ import type {
   UpgradeKey,
 } from "../core/types";
 import { createNewState } from "../core/state";
-import { momentumMood } from "../core/derived";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
 import { createStateRng, type RandomSource } from "../services/RandomService";
 import { createSaveManager, type SaveManagerApi } from "./SaveManager";
-import { resourceById } from "../data/battle";
 import { eventBus } from "../events/EventBus";
-import { finalizeEvent, getCareerGoals } from "../systems/ProgressionSystem";
-import { formatBlock } from "../systems/CalendarSystem";
+import { addXp, finalizeEvent } from "../systems/ProgressionSystem";
+import { spendActionTime } from "../systems/CalendarSystem";
+import { renderStateToText } from "./renderState";
 import {
   advanceBattleRound as advanceBattleRoundSys,
   expireBattleRound as expireBattleRoundSys,
   finishBattle as finishBattleSys,
-  projectedHypeGain,
   resolveBattle as resolveBattleSys,
 } from "../systems/BattleSystem";
 import {
   buyItem as buyItemSys,
   buyRecommendedItem as buyRecommendedItemSys,
   buyUpgradeByKey as buyUpgradeByKeySys,
-  canAffordItem,
-  recommendedItem,
 } from "../systems/StoreSystem";
 import { trainSpecificStat as trainSpecificStatSys } from "../systems/TrainingSystem";
 import { publishSocialPost as publishSocialPostSys } from "../systems/SocialSystem";
@@ -49,8 +45,7 @@ import {
   battleDay,
   clearPlan as clearPlanSys,
   dayAlreadyLived,
-  lastWeekSummary,
-  openDays,
+  OFFER_ACTION_ID,
   planDay as planDaySys,
   plannedActionFor,
   recordBattleOutcome,
@@ -58,6 +53,13 @@ import {
   todaysPlan,
 } from "../systems/PlanSystem";
 import { PlanConfig } from "../data/config/PlanConfig";
+import {
+  expireOpportunities,
+  findOpportunity,
+  opportunityOn,
+  rollWeekOpportunities,
+  takeOpportunity,
+} from "../systems/OpportunitySystem";
 import { calendarActionIds } from "../data/actions";
 
 export interface TimeAdvanceFx extends TimeAdvance {
@@ -160,14 +162,26 @@ export class GameController {
   }
 
   private applyResult(result: ActionResult): void {
+    // Time may have moved, so offers whose day has passed die here (announced
+    // with the event, not silently) and a new week knocks with its own.
+    const missed = expireOpportunities(this.state);
+    this.ensureWeekOpportunities();
     if (result.type === "event") {
       if (result.fx) this.startTimeFx(result.fx);
-      this.setEvent(result.parts);
+      this.setEvent([...result.parts, ...missed]);
     } else if (result.type === "battle-started") {
       eventBus.emit("BATTLE_STARTED", undefined);
       eventBus.emit("MODE_CHANGED", this.state.mode);
     }
     eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // Rolls this week's offers exactly once. Driven by state (the week marker), so
+  // the RNG stream stays deterministic however many times this is called.
+  private ensureWeekOpportunities(): void {
+    if (this.state.opportunitiesWeek === this.state.week) return;
+    this.state.opportunitiesWeek = this.state.week;
+    this.state.opportunities = rollWeekOpportunities(this.state, this.rng);
   }
 
   // --- Career commands ---------------------------------------------------------
@@ -181,13 +195,23 @@ export class GameController {
   // The label the UI shows for an action id, taken from the same source the
   // action list uses so the calendar can never name an action differently.
   private actionLabel(actionId: string): string {
+    // The offer slot is not a career action: it names the offer scheduled for
+    // that day, so the calendar never shows a raw id.
+    if (actionId === OFFER_ACTION_ID) {
+      const entry = opportunityOn(this.state, this.state.day);
+      return findOpportunity(entry?.id ?? "")?.label ?? "Oportunidad";
+    }
     return this.careerActions().find((action) => action.id === actionId)?.label ?? actionId;
   }
 
   // Writing intent into a day. Free and reversible: the cost is in living it.
   planDay(day: number, actionId: string | null): void {
     if (!planDaySys(this.state, day, actionId)) return;
-    this.state.lastEvent = actionId === null ? `Dia ${day} liberado.` : `Dia ${day}: ${this.actionLabel(actionId)}.`;
+    const named =
+      actionId === OFFER_ACTION_ID
+        ? (findOpportunity(opportunityOn(this.state, day)?.id ?? "")?.label ?? "Oportunidad")
+        : this.actionLabel(actionId ?? "");
+    this.state.lastEvent = actionId === null ? `Dia ${day} liberado.` : `Dia ${day}: ${named}.`;
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
@@ -197,6 +221,8 @@ export class GameController {
   cyclePlanForDay(day: number): void {
     const options: (string | null)[] = [
       null,
+      // The day's offer comes first: it is the thing with a deadline.
+      ...(opportunityOn(this.state, day) ? [OFFER_ACTION_ID] : []),
       ...calendarActionIds.filter((id) => id !== "battle" || day === battleDay()),
     ];
     const current = plannedActionFor(this.state, day);
@@ -231,6 +257,10 @@ export class GameController {
       this.runDayAs("rest", drift.message);
       return;
     }
+    if (planned === OFFER_ACTION_ID) {
+      this.livePlannedOpportunity();
+      return;
+    }
     const info = this.careerActions().find((action) => action.id === planned);
     if (info?.disabledReason) {
       // The plan broke: you scheduled more than the week could carry, so the day
@@ -242,6 +272,34 @@ export class GameController {
     const result = executeAction(this.state, this.rng, planned);
     recordDay(this.state, planned, planned, result.type === "event" ? result.parts[0] : this.actionLabel(planned));
     this.applyResult(result);
+  }
+
+  // Living the day an offer was scheduled for: it pays out and costs its own
+  // energy and blocks. Falls back to rest (explaining it) when the day arrives
+  // and the energy is not there, exactly like a broken plan.
+  private livePlannedOpportunity(): void {
+    const entry = opportunityOn(this.state, this.state.day);
+    const offer = entry ? findOpportunity(entry.id) : null;
+    if (!offer) {
+      // The offer is gone (taken or expired): the day is open again.
+      this.state.lastEvent = "Esa oportunidad ya no esta.";
+      eventBus.emit("STATE_CHANGED", undefined);
+      return;
+    }
+    const payout = takeOpportunity(this.state, this.state.day);
+    if (!payout) {
+      recordDay(this.state, OFFER_ACTION_ID, "rest", PlanConfig.brokenPlan.message);
+      this.runDayAs("rest", PlanConfig.brokenPlan.message);
+      return;
+    }
+    // Time and energy are the calendar's business, so they go through the same
+    // path every action uses.
+    const clock = spendActionTime(this.state, offer.energyCost, offer.blocks, offer.label);
+    addXp(this.state, offer.xp ?? 0);
+    recordDay(this.state, OFFER_ACTION_ID, OFFER_ACTION_ID, payout.message);
+    this.startTimeFx(clock.fx);
+    this.setEvent([payout.message, ...clock.messages]);
+    eventBus.emit("STATE_CHANGED", undefined);
   }
 
   // Runs a fallback action for the day and puts the reason in front of the
@@ -345,6 +403,9 @@ export class GameController {
     this.creatingNew = false;
     this.careerView = "base";
     this.timeFx = null;
+    // The week's offers are rolled before the first decision: an opportunity
+    // you cannot see coming is not an opportunity.
+    this.ensureWeekOpportunities();
     this.saveState();
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
@@ -361,6 +422,9 @@ export class GameController {
     this.creatingNew = false;
     this.careerView = "base";
     this.timeFx = null;
+    // A save from before this week's roll (or from before Fase 6) gets its
+    // offers here, so resuming never lands on an empty week by accident.
+    this.ensureWeekOpportunities();
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);
   }
@@ -445,183 +509,7 @@ export class GameController {
   // --- Deterministic test hook (kept renderer-independent) --------------------------
 
   renderGameToText(): string {
-    const state = this.state;
-    const recommended = recommendedItem(state);
-    const actions =
-      state.mode === "career"
-        ? getCareerActions(state).map((action, index) => ({
-            key: String(index + 1),
-            id: action.id,
-            label: action.label,
-            durationBlocks: action.durationBlocks,
-            cost: action.cost,
-            rhythm: action.rhythm,
-            disabled: Boolean(action.disabledReason),
-            reason: action.disabledReason ?? null,
-          }))
-        : [];
-    const liveBattle = state.battle;
-    const battle = liveBattle
-      ? {
-          event: liveBattle.eventName,
-          rival: liveBattle.rivalName,
-          // Who the rival is (gauntlet 10): the archetype and the personality
-          // weights that decide which resource they reach for.
-          rivalStyle: liveBattle.rivalStyle,
-          rivalArchetype: liveBattle.rivalArchetype,
-          rivalFlow: liveBattle.rivalFlow,
-          rivalPunchline: liveBattle.rivalPunchline,
-          rivalPersonality: liveBattle.rivalPersonality,
-          // What this event's crowd rewards and what leaves it cold.
-          crowdLoves: liveBattle.crowdLoves,
-          crowdColds: liveBattle.crowdColds,
-          crowdLine: liveBattle.crowdLine,
-          round: liveBattle.round,
-          score: `${liveBattle.playerScore}-${liveBattle.rivalScore}`,
-          hype: liveBattle.hype,
-          rivalEnergy: liveBattle.rivalEnergy,
-          rivalEnergyMax: liveBattle.rivalEnergyMax,
-          rivalHype: liveBattle.rivalHype,
-          stimulus: liveBattle.prompt.label,
-          prompt: liveBattle.prompt.text,
-          // Whole seconds only (determinism contract): the millisecond
-          // remainder varies run to run, whole seconds cannot within a
-          // capture step. Frozen while a verdict beat is on screen.
-          timerSeconds: Math.ceil(liveBattle.timeLeft),
-          // Round-result beat on screen (Enter/CONTINUAR advances past it).
-          pendingResult: liveBattle.pendingResult
-            ? {
-                round: liveBattle.pendingResult.round,
-                choice: liveBattle.pendingResult.choice,
-                rivalChoice: liveBattle.pendingResult.rivalChoice,
-                tensionNotes: [...liveBattle.pendingResult.tensionNotes],
-                playerHypeDelta: liveBattle.pendingResult.playerHypeDelta,
-                playerVerdict: liveBattle.pendingResult.playerVerdict,
-                rivalHypeDelta: liveBattle.pendingResult.rivalHypeDelta,
-                rivalVerdict: liveBattle.pendingResult.rivalVerdict,
-              }
-            : null,
-          // Per-round verdicts of everything resolved so far.
-          results: liveBattle.results.map((entry) => ({
-            round: entry.round,
-            choice: entry.choice,
-            rivalChoice: entry.rivalChoice,
-            tensionNotes: [...entry.tensionNotes],
-            playerHypeDelta: entry.playerHypeDelta,
-            playerVerdict: entry.playerVerdict,
-            rivalHypeDelta: entry.rivalHypeDelta,
-            rivalVerdict: entry.rivalVerdict,
-          })),
-          finished: liveBattle.finished,
-          result: liveBattle.result,
-          // The dealt hand of 5, digit hotkeys 1..5. projectedHype is the
-          // exact hype a win would award (single source in BattleSystem).
-          hand: liveBattle.hand.map((id, index) => {
-            const resource = resourceById(id);
-            return {
-              key: String(index + 1),
-              id,
-              label: resource.label,
-              boosted: liveBattle.prompt.best.includes(id),
-              projectedHype: projectedHypeGain(liveBattle, resource),
-            };
-          }),
-        }
-      : null;
-    // Weekly plan (Fase 6): the intent per day, what today holds, what is still
-    // open and the last closed week. Renderer-independent, like everything else
-    // in this dump, so the harness can verify planning without a screenshot.
-    const lastWeek = lastWeekSummary(state);
-    const week = {
-      number: state.week,
-      day: state.day,
-      plan: state.plan,
-      today: todaysPlan(state),
-      openDays: openDays(state),
-      battleDay: battleDay(),
-      record: state.weekRecord,
-      lastClosed: lastWeek
-        ? {
-            week: lastWeek.week,
-            cash: lastWeek.cash,
-            fans: lastWeek.fans,
-            respect: lastWeek.respect,
-            xp: lastWeek.xp,
-            battlesWon: lastWeek.battlesWon,
-            battlesLost: lastWeek.battlesLost,
-            days: lastWeek.days,
-          }
-        : null,
-      closedWeeks: state.weekLog.length,
-    };
-    return JSON.stringify({
-      coordinate_system: "canvas 960x540, origin top-left, x right, y down",
-      week,
-      mode: state.mode,
-      careerView: state.mode === "career" ? this.careerView : null,
-      player: {
-        name: state.playerName,
-        nickname: state.nickname,
-        look: state.look,
-        skin: state.skin,
-        voice: state.voice,
-        difficulty: state.difficulty,
-        stage: state.stage,
-        level: state.level,
-        week: state.week,
-        day: state.day,
-        block: state.block,
-        timeLabel: formatBlock(state.block),
-        xp: state.xp,
-        xpNext: state.xpNext,
-        energy: state.energy,
-        health: state.health,
-        cash: state.cash,
-        fans: state.fans,
-        respect: state.respect,
-        fame: state.fame,
-        songs: state.songs,
-        discProgress: state.discProgress,
-        upgrades: {
-          outfit: state.outfitLevel,
-          studio: state.studioLevel,
-          home: state.homeLevel,
-        },
-        items: [...state.items],
-        momentum: state.momentum,
-        momentumMood: momentumMood(state),
-        lastActionId: state.lastActionId,
-        actionStreak: state.actionStreak,
-        stats: state.stats,
-      },
-      timeFx: this.timeFx
-        ? {
-            label: this.timeFx.label,
-            blocks: this.timeFx.blocks,
-            from: formatBlock(this.timeFx.fromBlock),
-            to: formatBlock(this.timeFx.toBlock),
-            daysPassed: this.timeFx.daysPassed,
-          }
-        : null,
-      lastEvent: state.lastEvent,
-      goals: getCareerGoals(state).map((goal) => ({
-        label: goal.label,
-        detail: goal.detail,
-        value: goal.value,
-        max: goal.max,
-      })),
-      recommendedItem: recommended
-        ? {
-            id: recommended.id,
-            label: recommended.label,
-            category: recommended.category,
-            price: recommended.price,
-            affordable: canAffordItem(state, recommended),
-          }
-        : null,
-      actions,
-      battle,
-    });
+    return renderStateToText(this.state, this.careerView, this.timeFx);
   }
 
   // Convenience reads shared by scenes.

@@ -13,6 +13,9 @@ import { palette } from "../../ui/palette";
 import { addButton, addDisplayText, addHitZone, addPanel, addSpriteImage, addText, addTextBlock } from "../../ui/kit";
 import { eventBus } from "../../events/EventBus";
 import { battleDay, dayAlreadyLived, openDays, plannedActionFor, todaysPlan } from "../../systems/PlanSystem";
+import { findOpportunity, isBurntOut, pendingOpportunities } from "../../systems/OpportunitySystem";
+import { OpportunityConfig } from "../../data/config/OpportunityConfig";
+import { momentumMood } from "../../core/derived";
 import type { GameState, WeekSummary } from "../../core/types";
 import { currentStage } from "../../core/derived";
 import { actionAccent, actionIcon, actionShortLabel, rect } from "./viewKit";
@@ -36,6 +39,10 @@ const CARD = {
   iconH: 56,
   iconMaxW: 80,
   labelCenterY: 270,
+  // Offer badge (Fase 6): between the day name (ends ~172) and the icon
+  // (starts ~188), so it headlines the day without covering it.
+  offerBadgeDy: 36,
+  offerBadgeH: 13,
   slotDx: 12,
   slotDy: 165,
   slotW: 92,
@@ -66,6 +73,7 @@ const CONTINUE = { x: 732, y: 445, w: 189, h: 47 } as const;
 // DESCANSAR / ESCRIBIR / BATALLA / LIBRE). Kept as data so a long action label
 // can never push a card to three lines.
 const CARD_LABELS: Record<string, string> = {
+  offer: "OPORTUNIDAD",
   practice: "ENTRENAR",
   social: "REDES",
   work: "TRABAJAR",
@@ -114,6 +122,7 @@ function renderLiveWeek(ctx: ViewCtx, state: GameState, controller: ViewCtx["con
     // A day that already happened shows what it ended up being, not the intent.
     const shownId = past ? (record?.ran ?? null) : planned;
     const isBattleSlot = dayNumber === battleDay();
+    const offerEntry = state.opportunities.find((entry) => entry.day === dayNumber);
     dayCard(ctx, index, day, {
       shownId,
       label: shownId ? cardLabel(shownId, actions.find((item) => item.id === shownId)?.label) : "LIBRE",
@@ -124,6 +133,13 @@ function renderLiveWeek(ctx: ViewCtx, state: GameState, controller: ViewCtx["con
       // day from today's numbers would be a lie.
       warn: Boolean(!past && dayNumber === state.day && planned && action?.disabledReason),
       battleSlot: isBattleSlot,
+      // What knocked on this day, if anything: live, taken or already gone.
+      offer: offerEntry
+        ? {
+            label: findOpportunity(offerEntry.id)?.label ?? offerEntry.id,
+            state: offerEntry.taken ? "taken" : offerEntry.missed ? "missed" : "live",
+          }
+        : null,
     });
     if (!past) {
       const x = CARD.x0 + index * CARD.pitch;
@@ -158,6 +174,8 @@ function renderHistoryWeek(ctx: ViewCtx, summary: WeekSummary): void {
       past: true,
       warn: false,
       battleSlot: index + 1 === battleDay(),
+      // A closed week's offers are not re-shown: the record is what it ran.
+      offer: null,
     });
   });
   const body = [
@@ -189,6 +207,7 @@ function signed(value: number): string {
 function planningBrief(state: GameState, controller: ViewCtx["controller"]): string {
   const open = openDays(state);
   const appointment = plannedActionFor(state, battleDay()) === "battle";
+  const pending = pendingOpportunities(state);
   const lines = [
     state.lastEvent || currentStage(state).nextHint,
     appointment
@@ -200,6 +219,17 @@ function planningBrief(state: GameState, controller: ViewCtx["controller"]): str
     ...(todaysPlan(state) && controller.careerActions().find((a) => a.id === todaysPlan(state))?.disabledReason
       ? [`Hoy no te alcanza: ${controller.careerActions().find((a) => a.id === todaysPlan(state))?.disabledReason}`]
       : []),
+    // Offers with a deadline: what is still on the table this week.
+    ...(pending.length > 0
+      ? pending.map((entry) => {
+          const offer = findOpportunity(entry.id);
+          return `${DAYS[entry.day - 1]}: ${offer?.label ?? entry.id} — se va si no la tomas.`;
+        })
+      : []),
+    // Momentum is a real modifier (it moves battle rolls), so it is stated here
+    // where the week is decided instead of only surfacing inside event text.
+    `Impulso ${Math.round(state.momentum)}/100 · ${momentumMood(state)}.`,
+    ...(isBurntOut(state) ? [OpportunityConfig.burnout.notice] : []),
   ];
   return lines.join("\n");
 }
@@ -264,10 +294,12 @@ interface DayCardState {
   // Planned but no longer affordable: flagged while you can still change it.
   warn: boolean;
   battleSlot: boolean;
+  // An offer scheduled for this day (Fase 6): the thing with a deadline.
+  offer: { label: string; state: "live" | "taken" | "missed" } | null;
 }
 
 function dayCard(ctx: ViewCtx, index: number, day: string, card: DayCardState): void {
-  const { shownId, label, active, past, warn, battleSlot } = card;
+  const { shownId, label, active, past, warn, battleSlot, offer } = card;
   const actionId = shownId ?? "rest";
   const blocked = past;
   const x = CARD.x0 + index * CARD.pitch;
@@ -329,6 +361,27 @@ function dayCard(ctx: ViewCtx, index: number, day: string, card: DayCardState): 
   // The week's appointment is marked even when nothing is planned on it, so the
   // player can see the fixture before deciding.
   if (battleSlot) rect(ctx, x + CARD.slotDx, slotY - 4, CARD.slotW, 2, palette.yellow, past ? 0.3 : 0.8);
+
+  // Offer badge: a bright strip with its name, dim once taken or gone. It sits
+  // above the day label so it reads as "something is happening today".
+  if (offer) {
+    const live = offer.state === "live";
+    // Between the day name and the icon: high enough to read as a headline for
+    // the day, low enough not to sit on top of the day itself.
+    const badgeY = CARD.y + CARD.offerBadgeDy;
+    rect(ctx, x + 6, badgeY, CARD.w - 12, CARD.offerBadgeH, live ? palette.yellow : CARD_COLORS.borderBlocked, live ? 0.9 : 0.5);
+    const badge = addText(
+      ctx.scene,
+      ctx.layer,
+      x + CARD.w / 2,
+      badgeY + CARD.offerBadgeH / 2,
+      offer.label.toUpperCase(),
+      8,
+      live ? "#0b1020" : palette.muted,
+      { align: "center", wordWrap: { width: CARD.w - 16 } },
+    );
+    badge.setOrigin(0.5, 0.5).setPosition(x + CARD.w / 2, badgeY + CARD.offerBadgeH / 2);
+  }
 
   if (active) cornerBrackets(ctx, x - 1, CARD.y - 1, CARD.w + 2, CARD.h + 2);
 }

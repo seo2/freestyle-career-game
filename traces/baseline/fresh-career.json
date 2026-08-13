@@ -20,6 +20,8 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -110,6 +112,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -281,6 +293,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -458,6 +480,16 @@
         "openDays": 7,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -481,8 +513,8 @@
         "energy": 56,
         "health": 88,
         "cash": 25,
-        "fans": 3,
-        "respect": 7,
+        "fans": 2,
+        "respect": 5,
         "fame": 0,
         "songs": 0,
         "discProgress": 0,
@@ -517,8 +549,8 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 7/8",
-          "value": 84,
+          "detail": "Nv 1/2 · Resp 5/8",
+          "value": 78,
           "max": 100
         },
         {
@@ -635,6 +667,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -655,11 +697,11 @@
         "timeLabel": "Tarde",
         "xp": 54,
         "xpNext": 70,
-        "energy": 45,
+        "energy": 46,
         "health": 90,
-        "cash": 71,
-        "fans": 3,
-        "respect": 7,
+        "cash": 79,
+        "fans": 2,
+        "respect": 5,
         "fame": 0,
         "songs": 0,
         "discProgress": 0,
@@ -680,7 +722,7 @@
           "improvisacion": 3,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -690,12 +732,12 @@
         "to": "Tarde",
         "daysPassed": 1
       },
-      "lastEvent": "Trabajaste 2 bloques: +$46. Impulso -2: Activo. Paso un dia.",
+      "lastEvent": "Trabajaste 2 bloques: +$54. Impulso -2: Activo. Paso un dia.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/2 · Resp 7/8",
-          "value": 84,
+          "detail": "Nv 1/2 · Resp 5/8",
+          "value": 78,
           "max": 100
         },
         {
@@ -818,6 +860,16 @@
         "openDays": 6,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -838,11 +890,11 @@
         "timeLabel": "Noche",
         "xp": 2,
         "xpNext": 103,
-        "energy": 51,
+        "energy": 52,
         "health": 95,
-        "cash": 71,
-        "fans": 14,
-        "respect": 7,
+        "cash": 79,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
         "discProgress": 0,
@@ -863,7 +915,7 @@
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -873,12 +925,12 @@
         "to": "Noche",
         "daysPassed": 0
       },
-      "lastEvent": "Subiste un clip: +11 fans. Impulso +11: Activo. Subiste a nivel 2: +1 Impro.",
+      "lastEvent": "Subiste un clip: +10 fans. Impulso +11: Activo. Subiste a nivel 2: +1 Impro.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
@@ -1001,6 +1053,16 @@
         "openDays": 5,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1021,14 +1083,14 @@
         "timeLabel": "Mañana",
         "xp": 24,
         "xpNext": 103,
-        "energy": 42,
+        "energy": 44,
         "health": 97,
-        "cash": 71,
-        "fans": 14,
-        "respect": 7,
+        "cash": 79,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1041,12 +1103,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 2,
-          "metrica": 2,
+          "punchline": 3,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1056,18 +1118,18 @@
         "to": "Mañana",
         "daysPassed": 1
       },
-      "lastEvent": "Escribiste: +25% de cancion. Impulso +6: Activo. Paso un dia.",
+      "lastEvent": "Escribiste: +20% de cancion. Impulso +6: Activo. Paso un dia.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -1184,6 +1246,16 @@
         "openDays": 5,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1204,14 +1276,14 @@
         "timeLabel": "Tarde",
         "xp": 41,
         "xpNext": 103,
-        "energy": 42,
+        "energy": 44,
         "health": 97,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1226,12 +1298,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1245,14 +1317,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -1363,6 +1435,16 @@
         "openDays": 5,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1383,14 +1465,14 @@
         "timeLabel": "Tarde",
         "xp": 41,
         "xpNext": 103,
-        "energy": 42,
+        "energy": 44,
         "health": 97,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1405,12 +1487,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1424,14 +1506,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -1542,6 +1624,16 @@
         "openDays": 4,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1562,14 +1654,14 @@
         "timeLabel": "Tarde",
         "xp": 41,
         "xpNext": 103,
-        "energy": 42,
+        "energy": 44,
         "health": 97,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1584,12 +1676,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1603,14 +1695,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -1721,6 +1813,16 @@
         "openDays": 4,
         "battleDay": 6,
         "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1741,14 +1843,14 @@
         "timeLabel": "Tarde",
         "xp": 41,
         "xpNext": 103,
-        "energy": 42,
+        "energy": 44,
         "health": 97,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1763,12 +1865,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1782,14 +1884,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -1907,6 +2009,16 @@
             "note": "Dia sin plan: se te fue en nada."
           }
         ],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -1927,14 +2039,14 @@
         "timeLabel": "Noche",
         "xp": 41,
         "xpNext": 103,
-        "energy": 80,
+        "energy": 84,
         "health": 100,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -1949,12 +2061,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -1968,14 +2080,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
@@ -2093,6 +2205,16 @@
             "note": "Dia sin plan: se te fue en nada."
           }
         ],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
         "lastClosed": null,
         "closedWeeks": 0
       },
@@ -2113,14 +2235,14 @@
         "timeLabel": "Noche",
         "xp": 41,
         "xpNext": 103,
-        "energy": 80,
+        "energy": 84,
         "health": 100,
-        "cash": 11,
-        "fans": 14,
-        "respect": 7,
+        "cash": 19,
+        "fans": 12,
+        "respect": 5,
         "fame": 1,
         "songs": 0,
-        "discProgress": 25,
+        "discProgress": 20,
         "upgrades": {
           "outfit": 0,
           "studio": 0,
@@ -2135,12 +2257,12 @@
         "actionStreak": 1,
         "stats": {
           "flow": 2,
-          "punchline": 4,
-          "metrica": 2,
+          "punchline": 5,
+          "metrica": 1,
           "improvisacion": 4,
           "escena": 1,
           "carisma": 1,
-          "disciplina": 1
+          "disciplina": 2
         }
       },
       "timeFx": {
@@ -2154,14 +2276,14 @@
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 2/2 · Resp 7/8",
-          "value": 97,
+          "detail": "Nv 2/2 · Resp 5/8",
+          "value": 91,
           "max": 100
         },
         {
           "label": "Primer tema",
-          "detail": "25% escrito",
-          "value": 25,
+          "detail": "20% escrito",
+          "value": 20,
           "max": 80
         }
       ],
