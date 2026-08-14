@@ -228,6 +228,36 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Costo de vivir: que la plata sea escasa (Fase 9, 2026-08-13)
+
+Medido con `node scripts/measure-economy.mjs`. La Bible pide que **"el dinero
+nunca debe sobrar"**, y la medición mostró algo peor que sobrar: **la plata no
+bajaba nunca**. Diez semanas simuladas, 210 acciones, y el saldo seguía en los $25
+del arranque. No había **ningún** sumidero: trabajar pagaba, las batallas pagaban,
+y lo único que sacaba plata eran compras voluntarias. Un turno de trabajo
+financiaba una carrera entera, así que "trabajar" era un botón que nadie
+necesitaba apretar.
+
+- **La semana se cobra al cerrarse** (`LivingSystem`): $58 en la pieza, +$26 por
+  etapa. Dimensionado contra el trabajo, que paga ~$48 por turno de dos bloques:
+  la semana cuesta poco más de un turno, o sea **un octavo de los 21 bloques**.
+  Suficiente para que el presupuesto sea una línea real del plan, no tanto como
+  para que el juego se vuelva un empleo.
+- **Aprieta más al principio.** Los premios de batalla suben más rápido (+$85 por
+  etapa) que el costo de vivir (+$26), así que la presión afloja a medida que la
+  carrera crece — que es la forma correcta.
+- **No alcanzar no termina nada** (regla de la Bible: no hay Game Over). Pagas lo
+  que tengas y el resto **aterriza en la gente**: baja el lazo con la familia
+  ("lo cubrieron en tu casa"), baja el momentum y duermes peor. Es una historia,
+  no un muro. Y **no cuenta como visita**: la deuda no repone el lazo.
+- **Lo que esto destapó de golpe:** con la plata escasa, el recorrido autónomo
+  pasó de ganar 5 de 5 batallas a **3-2**, de terminar con $250 a $81, y **la crew
+  se le enfrió a 24** ("Te estás alejando de: Crew") porque tuvo que trabajar en
+  vez de ir al cypher. La economía dejó de ser un número y se volvió una
+  consecuencia de relación: exactamente el tipo de enganche entre sistemas que
+  busca el filtro de la Bible.
+- Números en `src/data/config/LivingConfig.ts`.
+
 ### Balance de batalla (Fase 9, 2026-08-13)
 
 Medido con `node scripts/measure-battles.mjs`, que juega miles de batallas con las

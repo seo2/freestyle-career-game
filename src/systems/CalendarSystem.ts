@@ -9,6 +9,7 @@ import { CalendarConfig } from "../data/config/CalendarConfig";
 import { clamp } from "../utils/math";
 import { closeWeek } from "./PlanSystem";
 import { decayRelationships } from "./RelationshipSystem";
+import { chargeLiving } from "./LivingSystem";
 
 export interface ClockResult {
   messages: string[];
@@ -54,6 +55,9 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
       // Close the week BEFORE the counter moves, so the summary carries the
       // number of the week that actually ended (Bible: resumen semanal), and
       // the fresh plan and opening snapshot belong to the new one.
+      // The week costs money to have lived (Fase 9). Charged BEFORE the summary is
+      // built, so its cash line is the truth about the week that just ended.
+      relationshipMessages.push(...chargeLiving(state));
       closedWeek = closeWeek(state);
       // The people you did not see this week (Fase 7). Charged BEFORE the
       // counter moves, so the bond that cooled belongs to the week that ended.
@@ -78,7 +82,7 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
   }
   if (weekChanged && closedWeek) {
     messages.push(
-      `Semana ${closedWeek.week} cerrada: +$${closedWeek.cash}, +${closedWeek.fans} fans, +${closedWeek.respect} respeto.`,
+      `Semana ${closedWeek.week} cerrada: ${signedCash(closedWeek.cash)}, +${closedWeek.fans} fans, +${closedWeek.respect} respeto.`,
     );
     messages.push(`Semana ${state.week}: recuperaste energia y la agenda esta vacia.`);
     messages.push(...relationshipMessages);
@@ -91,6 +95,13 @@ export function advanceClock(state: GameState, blocks: number, label: string): C
     daysPassed,
   };
   return { messages, fx };
+}
+
+// A week can now close in the red (Fase 9 charges rent), and the summary used to
+// print "+$-15" because the plus was hardcoded. Money is the one number here that
+// can go either way.
+function signedCash(amount: number): string {
+  return amount < 0 ? `-$${Math.abs(amount)}` : `+$${amount}`;
 }
 
 export function formatBlock(block: number): string {

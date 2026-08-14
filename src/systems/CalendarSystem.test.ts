@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createNewState } from "../core/state";
+import { weeklyCost } from "./LivingSystem";
 import { maxEnergy } from "../core/derived";
 import { advanceClock, spendActionTime, formatBlock, formatDuration } from "./CalendarSystem";
 
@@ -58,6 +59,8 @@ describe("advanceClock", () => {
     state.day = 7;
     state.block = 2;
     state.energy = 10;
+    // Enough to cover the week (Fase 9): the shortfall path is its own test.
+    state.cash = weeklyCost(state) + 10;
     const result = advanceClock(state, 1, "Descansar");
 
     expect(state.week).toBe(2);
@@ -68,12 +71,15 @@ describe("advanceClock", () => {
     // Health: 88 + 2 (day) + 6 (week) = 96.
     expect(state.health).toBe(96);
     expect(state.momentum).toBe(39);
+    expect(state.cash).toBe(10);
     // Fase 6: the week closes with its summary before the counter moves, so the
     // summary line carries the week that ended, not the one starting.
     expect(result.messages).toEqual([
       "Paso un dia.",
-      "Semana 1 cerrada: +$0, +0 fans, +0 respeto.",
+      // The week closes in the red: it opened on $25 and rent is $58.
+      "Semana 1 cerrada: -$15, +0 fans, +0 respeto.",
       "Semana 2: recuperaste energia y la agenda esta vacia.",
+      `Semana pagada: -$${weeklyCost(state)} de vivir.`,
     ]);
   });
 
