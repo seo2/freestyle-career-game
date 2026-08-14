@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createNewState } from "../core/state";
+import { weeklyCost } from "./LivingSystem";
 import { advanceClock } from "./CalendarSystem";
 import {
   battleDay,
@@ -218,7 +219,10 @@ describe("the clock closes the week", () => {
     const state = createNewState("Test", 1);
     planDay(state, 7, "work");
     recordDay(state, "work", "work", "Trabajaste.");
-    state.cash += 50;
+    // Enough to cover the week's cost of living AND leave the +50 the summary is
+    // about, so this test stays about the plan rollover (Fase 9 added the charge).
+    const cost = weeklyCost(state);
+    state.cash += 50 + cost;
     state.day = 7;
     state.block = 2;
 
