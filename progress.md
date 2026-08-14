@@ -387,3 +387,29 @@ accesorios de brazo, cadenas, tatuajes, pantalón o short, zapatillas o zapatos)
 con lo que se intentó derivar y por qué no sirvió. El owner además dejó abierta la
 opción de definir un **estilo propio** y dibujar el set completo; el pipeline no
 cambia si se reemplaza el sprite base.
+
+### Corrección: sin gorra Y sin anteojos (mismo día)
+
+El owner probó la combinación que yo no había mirado ampliada y tenía razón: se
+veía mal. Medí los spans por fila y aparecieron **tres** agujeros, no uno:
+
+- Filas 57–70 son todas cristal en el original (ya estaba).
+- Bajo la visera, los píxeles que la gorra *sombreaba* se fueron a la capa gorra.
+- **Sobre la fila 48 no hay cabeza en absoluto**: toda la cúpula era gorra. Al
+  sacarla quedaba fondo donde va el cráneo, y ninguna ubicación del pelo lo podía
+  tapar porque el tupé trasplantado solo llega a x 63..85 a la altura de la ceja.
+
+Arreglos: se le da **cráneo** (elipse ajustada a la frente que el sprite sí dibuja,
+con su contorno), el flequillo se hace simétrico **uniendo el pelo con su espejo**
+(sigue siendo 100% píxeles dibujados, solo usados dos veces), y la banda de los
+lentes se rellena **vertical** (frente→pómulo) en vez de horizontal — de lado el
+único tejido real de esas filas son las orejas y salía un bloque plano color oreja
+con costura. El ancla de arriba además tiene que ser **carne y no la ceja**, o toda
+la cuenca interpola desde una línea oscura y queda una barra café cruzando la cara.
+
+El script ahora **falla** si la cabeza queda con agujeros entre los extremos de la
+piel en las filas 40–95 (hasta 95 y no más: en los hombros la polera va
+legítimamente entre el cuello y los brazos). Es lo que se rompió dos veces y solo
+se veía al sacarse algo en el juego.
+
+Trazas idénticas al baseline: cero cambio de conducta.
