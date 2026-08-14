@@ -260,9 +260,15 @@ Original prompt: Quiero desarrollar un juego basado en la cultura del freestyle 
   - **Una corrida dio ceros y no la dejé pasar:** 0 semanas, 0 batallas. Era una carrera contra el dev server recién levantado, no un defecto — la re-corrida de la misma semilla da 5 semanas y 3 dilemas. Reportar una medición sin explicar un cero habría sido deshonesto.
   - **Verificación:** 354 tests (2 nuevos: que el silencio se abre dentro de la semana 1 y que el guardia **no** cambia la cantidad de tiradas, que es lo que el arnés exige), tsc/ESLint/build, **trazas idénticas**.
 
+- 2026-08-13 — **Revisión de diseño antes de invertir en gráfica y narrativa** (`docs/REVISION-2026-08-13.md`). Pedido del owner: ver si el juego va por buen camino antes de gastar esfuerzo en pulir. Todo lo afirmado ahí está medido con las herramientas del repo o contado del código, no recordado. Resumen:
+  - **Fundaciones bien.** Lo más sólido es que los sistemas se hablan: hacer la plata escasa hizo que el recorrido dejara de ir al cypher para trabajar, la crew se enfrió, y eso le quitó hype en batalla. Nadie programó esa cadena.
+  - **El riesgo no está en los cimientos, está en el contenido.** Los tres más graves: la batalla siempre tiene la misma forma (`maxRounds: 3`, sin excepción — 21 rivales cambian *contra quién* juegas, no *qué* juegas); el preview de la carta muestra **hype**, no probabilidad de ganar la ronda, y eso está medido como engañoso; y la identidad —el alma declarada del juego— tiene **8 dilemas**, o sea en dos carreras los viste todos.
+  - **Un hallazgo que no esperaba:** **no existe `EventSystem`**. La Bible pide ~10 tipos de evento semanal y lo que hay son 8 dilemas + 7 oportunidades. Falta la mitad del "te pasan cosas".
+  - **Recomendación de orden:** arreglar el preview (horas), subir los dilemas de 8 a ~25 (solo data, cero sistemas nuevos) y darle forma variable a la batalla. Después la narrativa tiene dónde apoyarse — y el puente natural es **ponerle nombre a la crew**, que hoy es una barra y no gente.
+
 ## TODO
 
-- Next: cerrar la **Fase 9** con el **playtesting con checklist** contra el filtro de 3 preguntas de la Bible, que es lo único que queda de la fase.
+- Next: lo que salga de la **revisión de diseño** (`docs/REVISION-2026-08-13.md`), en el orden que recomienda: preview de la carta, más dilemas, forma variable de la batalla. Eso cierra también el playtesting con checklist de la Fase 9, que era aplicar el filtro de 3 preguntas de la Bible al juego completo.
 - **Decisión pendiente del owner:** el criterio "3 dilemas antes de Plaza" tiene techo de 2 en un arco de 3 semanas. Las salidas son subir la reja de Plaza, permitir dilemas en la semana 1, o aceptar que quien gana todo ve menos historia. Medido y explicado en `docs/GDD.md` › "Contenido de batalla".
 - **Honestidad pendiente de la UI** (anotada en el GDD): el preview de la carta dice cuánto **hype** paga, no qué tan probable es ganar la ronda. En nacional eso hace que "la peor carta por hype" gane más que la primera carta, lo que confunde la lectura del jugador.
 - **Pistas de música definitivas** siguen como asset pendiente (`docs/ASSETS.md`). Los cuatro loops actuales son provisionales y están marcados como tales en el código.
