@@ -17,10 +17,17 @@ export const DilemmaConfig = {
     chancePerDay: 0.4,
     // Never two in the same week: the point is that a decision is an event.
     maxPerWeek: 1,
-    // How many opening weeks stay clear: the first week is for learning the
-    // loop, not for a decision the player cannot judge yet. (Named for the
-    // intention — "firstWeek" read as an off-by-one waiting to happen.)
-    quietWeeks: 1,
+    // How many opening DAYS stay clear. It was a whole quiet WEEK, and measuring
+    // four full arcs showed what that cost: since Fase 9 made battles winnable, a
+    // lucky player promotes in three weeks, and one dilemma a week with week 1
+    // silent gives a ceiling of TWO — below the plan's own closing criterion, and
+    // no probability can lift a ceiling.
+    //
+    // The reason for the silence was "let the player understand the loop before
+    // asking them to gamble something", and that takes DAYS, not twenty-one
+    // blocks. At 4 the earliest dilemma lands on day 5, by which time the room,
+    // the calendar and a battle have all been seen.
+    quietDays: 4,
   },
   axes: {
     min: -100,
