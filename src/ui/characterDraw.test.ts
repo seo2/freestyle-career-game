@@ -6,6 +6,18 @@ import { describe, expect, it } from "vitest";
 import { createNewState } from "../core/state";
 import { describeLook, layerIdsFor, lookOf } from "./characterDraw";
 import { outfits } from "../data/character";
+import {
+  ART_GRID,
+  TONE_CHARS,
+  beardArt,
+  bodyArt,
+  bottomArt,
+  faceArt,
+  hairArt,
+  shoeArt,
+  topArt,
+  wearableArt,
+} from "../data/characterArt";
 import type { GameState } from "../core/types";
 
 function mc(items: string[] = []): GameState {
@@ -39,11 +51,17 @@ describe("the layer stack", () => {
     expect(ids.indexOf("body")).toBeLessThan(ids.indexOf("polera"));
   });
 
-  it("keeps the face above the hair, so a fringe cannot bury the eyes", () => {
-    const state = mc();
-    state.hair = "tapado";
-    const ids = layerIdsFor(lookOf(state));
-    expect(ids.indexOf("face")).toBeLessThan(ids.indexOf("tapado"));
+  it("draws the face LAST of the head, so no fringe and no cap brim buries the eyes", () => {
+    // This test used to assert the opposite, and it was wrong: with the face pushed
+    // before the hair, the hair drew on top of it — the exact thing the comment
+    // claimed to prevent. Painting order is the whole contract of a paper doll.
+    const fringe = mc();
+    fringe.hair = "tapado";
+    const ids = layerIdsFor(lookOf(fringe));
+    expect(ids.indexOf("face")).toBeGreaterThan(ids.indexOf("tapado"));
+
+    const capped = layerIdsFor(lookOf(mc(["gorra"])));
+    expect(capped.indexOf("face")).toBeGreaterThan(capped.indexOf("gorra"));
   });
 });
 
@@ -78,5 +96,65 @@ describe("what he owns is what he wears", () => {
     // Buying a notebook or a beat must not change how he looks.
     const plain = layerIdsFor(lookOf(mc()));
     expect(layerIdsFor(lookOf(mc(["cuaderno", "beat-trap", "mesa"])))).toEqual(plain);
+  });
+});
+
+// The art is hand-authored pixel art in text, so it has exactly two failure modes
+// and both are invisible until something looks wrong on screen: a row one character
+// short, and a look-alike character typed by accident (a Cyrillic "о" for an "o").
+// Authoring the first version produced 113 of the former and 4 of the latter.
+describe("the art itself", () => {
+  const pieces = [
+    bodyArt,
+      faceArt,
+    ...hairArt,
+    ...beardArt,
+    ...topArt,
+    ...bottomArt,
+    ...Object.values(shoeArt),
+    ...Object.values(wearableArt),
+  ];
+
+  it("gives every row exactly the grid's width", () => {
+    for (const piece of pieces) {
+      for (const [index, row] of piece.rows.entries()) {
+        expect(row.length, `${piece.id} fila ${index}`).toBe(ART_GRID.w);
+      }
+    }
+  });
+
+  it("uses only characters the legend defines", () => {
+    const legal = new Set([".", ...Object.keys(TONE_CHARS)]);
+    for (const piece of pieces) {
+      for (const [index, row] of piece.rows.entries()) {
+        const offenders = [...new Set(row.split(""))].filter((ch) => !legal.has(ch));
+        expect(offenders, `${piece.id} fila ${index}`).toEqual([]);
+      }
+    }
+  });
+
+  it("keeps every piece inside the grid", () => {
+    for (const piece of pieces) {
+      expect(piece.y + piece.rows.length, piece.id).toBeLessThanOrEqual(ART_GRID.h);
+      expect(piece.x, piece.id).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("outlines every piece that defines a silhouette", () => {
+    // Not every piece: a goatee or a moustache sits INSIDE an already-outlined
+    // head, and giving it its own outline makes it read as a sticker. The rule is
+    // about the shapes that own an edge against the background.
+    const silhouettes = [
+      bodyArt,
+          ...hairArt,
+      ...topArt,
+      ...bottomArt,
+      ...Object.values(shoeArt),
+      ...Object.values(wearableArt),
+    ];
+    for (const piece of silhouettes) {
+      if (piece.rows.length === 0) continue;
+      expect(piece.rows.join("").includes("o"), String(piece.id)).toBe(true);
+    }
   });
 });

@@ -10,23 +10,20 @@
 
 import type Phaser from "phaser";
 import { addRect } from "./kit";
+import { hairColors, outfits, skinTones, type ToneKey } from "../data/character";
 import {
-  GRID,
-  beardStyles,
-  bodyPiece,
-  bottoms,
-  defaultShoes,
-  facePiece,
-  hairColors,
-  hairStyles,
-  outfits,
-  skinTones,
-  tops,
-  wearables,
-  type Piece,
-  type Rect,
-  type ToneKey,
-} from "../data/character";
+  ART_GRID,
+  TONE_CHARS,
+  beardArt,
+  bodyArt,
+  bottomArt,
+  faceArt,
+  hairArt,
+  shoeArt,
+  topArt,
+  wearableArt,
+  type ArtPiece,
+} from "../data/characterArt";
 import type { GameState } from "../core/types";
 
 export interface CharacterLook {
@@ -59,47 +56,54 @@ function palette(look: CharacterLook): Record<ToneKey, string> {
   return {
     skin: skin.skin,
     skinShade: skin.skinShade,
+    skinLight: skin.skinLight,
     hair: hair.hair,
     hairShade: hair.hairShade,
     top: outfit.colors.top,
     topShade: outfit.colors.topShade,
+    topLight: outfit.colors.topLight,
     bottom: outfit.colors.bottom,
     bottomShade: outfit.colors.bottomShade,
     shoe: outfit.colors.shoe,
-    metal: "#b8bccd",
-    lens: "#0f1220",
-    line: "#12131c",
+    shoeShade: outfit.colors.shoeShade,
+    metal: "#c2c7d6",
+    // The lenses read as glass: a pale fill with the frame drawn in outline.
+    lens: "#eef1fa",
+    // Not pure black. A near-black with a hint of the night palette keeps the
+    // figure from looking cut out of the screen.
+    line: "#0d0e17",
   };
 }
 
 // The stack, bottom to top. Anything the player bought lands above the clothes.
-function layers(look: CharacterLook): Piece[] {
+function layers(look: CharacterLook): ArtPiece[] {
   const outfit = outfits.find((entry) => entry.id === look.look) ?? outfits[0];
-  const stack: Piece[] = [bodyPiece];
+  const stack: ArtPiece[] = [bodyArt];
 
-  const bottom = bottoms.find((piece) => piece.id === outfit.bottom);
+  const bottom = bottomArt.find((piece) => piece.id === outfit.bottom);
   if (bottom) stack.push(bottom);
-  const top = tops.find((piece) => piece.id === outfit.top);
+  const top = topArt.find((piece) => piece.id === outfit.top);
   if (top) stack.push(top);
 
-  // Shoes: the bought pair replaces the default, rather than stacking on it.
-  stack.push(look.items.includes("zapatillas") ? wearables.zapatillas : defaultShoes);
+  // Shoes: the bought pair replaces the default rather than stacking on it.
+  stack.push(look.items.includes("zapatillas") ? shoeArt.zapatillas : shoeArt.zapatos);
   // A jacket goes over the top, and only if he owns one.
-  if (look.items.includes("chaqueta")) stack.push(wearables.chaqueta);
+  if (look.items.includes("chaqueta")) stack.push(wearableArt.chaqueta);
 
-  const beard = beardStyles.find((piece) => piece.id === look.beard);
-  if (beard) stack.push(beard);
-  stack.push(facePiece);
+  const beard = beardArt.find((piece) => piece.id === look.beard);
+  if (beard && beard.rows.length > 0) stack.push(beard);
   // A cap hides the hair, so the hair is skipped when he is wearing one.
-  const wearingCap = look.items.includes("gorra");
-  if (!wearingCap) {
-    const hair = hairStyles.find((piece) => piece.id === look.hair);
-    if (hair) stack.push(hair);
+  if (look.items.includes("gorra")) {
+    stack.push(wearableArt.gorra);
   } else {
-    stack.push(wearables.gorra);
+    const hair = hairArt.find((piece) => piece.id === look.hair);
+    if (hair) stack.push(hair);
   }
-  if (look.items.includes("audifonos")) stack.push(wearables.audifonos);
-  if (look.items.includes("microfono")) stack.push(wearables.microfono);
+  // The face goes on LAST of the head layers: no fringe and no cap brim may bury
+  // the eyes, which is the one thing that makes him a person and not a shape.
+  stack.push(faceArt);
+  if (look.items.includes("audifonos")) stack.push(wearableArt.audifonos);
+  if (look.items.includes("microfono")) stack.push(wearableArt.microfono);
   return stack;
 }
 
@@ -110,8 +114,11 @@ export function layerIdsFor(look: CharacterLook): string[] {
   return layers(look).map((piece) => piece.id);
 }
 
-// Draws him with his feet at (x, feetY), `height` px tall. The grid is 24x56, so
-// one grid unit is height/56 and the figure is 24 units wide.
+// Draws him with his feet at (x, feetY), `height` px tall.
+//
+// Each art row becomes horizontal RUNS of the same tone rather than one rect per
+// pixel: a 32x72 figure is 2304 cells, and one Phaser rectangle per cell would be
+// thousands of game objects per redraw for no visual difference.
 export function drawCharacter(
   scene: Phaser.Scene,
   layer: Phaser.GameObjects.Container,
@@ -120,25 +127,44 @@ export function drawCharacter(
   height: number,
   look: CharacterLook,
 ): void {
-  const unit = height / GRID.h;
-  const left = x - (GRID.w * unit) / 2;
+  const unit = height / ART_GRID.h;
+  const left = x - (ART_GRID.w * unit) / 2;
   const top = feetY - height;
   const tones = palette(look);
 
   // Ground shadow first, so he stands on something.
-  addRect(scene, layer, Math.round(x - 9 * unit), Math.round(feetY - unit), Math.round(18 * unit), Math.round(2 * unit), "#05070f", 0.5);
+  addRect(
+    scene,
+    layer,
+    Math.round(x - 9 * unit),
+    Math.round(feetY - 1.5 * unit),
+    Math.round(18 * unit),
+    Math.max(1, Math.round(2 * unit)),
+    "#05070f",
+    0.45,
+  );
 
-  const put = (rect: Rect): void => {
-    // Rounded to whole device pixels: a fractional rect on a pixel-art figure
-    // shows up as a seam between layers.
-    const rx = Math.round(left + rect.x * unit);
-    const ry = Math.round(top + rect.y * unit);
-    const rw = Math.max(1, Math.round(rect.w * unit));
-    const rh = Math.max(1, Math.round(rect.h * unit));
-    addRect(scene, layer, rx, ry, rw, rh, tones[rect.tone]);
-  };
-
-  for (const piece of layers(look)) for (const rect of piece.rects) put(rect);
+  for (const piece of layers(look)) {
+    piece.rows.forEach((row, rowIndex) => {
+      const gy = piece.y + rowIndex;
+      let runStart = -1;
+      let runTone: ToneKey | null = null;
+      // One past the end so a run that reaches the last column still flushes.
+      for (let col = 0; col <= row.length; col += 1) {
+        const tone: ToneKey | null = col < row.length ? (TONE_CHARS[row[col]] ?? null) : null;
+        if (tone === runTone) continue;
+        if (runTone !== null && runStart >= 0) {
+          const rx = Math.round(left + (piece.x + runStart) * unit);
+          const rw = Math.max(1, Math.round((col - runStart) * unit));
+          const ry = Math.round(top + gy * unit);
+          const rh = Math.max(1, Math.round(unit));
+          addRect(scene, layer, rx, ry, rw, rh, tones[runTone]);
+        }
+        runTone = tone;
+        runStart = col;
+      }
+    });
+  }
 }
 
 // What the player is wearing, in words, for the Crear MC and barbershop readouts.
@@ -146,8 +172,8 @@ export function describeLook(look: CharacterLook): string {
   const outfit = outfits.find((entry) => entry.id === look.look) ?? outfits[0];
   const hair = look.items.includes("gorra")
     ? "con gorra"
-    : (hairStyles.find((piece) => piece.id === look.hair)?.label.toLowerCase() ?? "");
-  const beard = beardStyles.find((piece) => piece.id === look.beard);
-  const beardText = beard && beard.rects.length > 0 ? `, ${beard.label.toLowerCase()}` : "";
+    : (hairArt.find((piece) => piece.id === look.hair)?.label.toLowerCase() ?? "");
+  const beard = beardArt.find((piece) => piece.id === look.beard);
+  const beardText = beard && beard.rows.length > 0 ? `, ${beard.label.toLowerCase()}` : "";
   return `${outfit.label}, ${hair}${beardText}`;
 }

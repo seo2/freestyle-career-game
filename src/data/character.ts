@@ -21,13 +21,16 @@ export const GRID = { w: 24, h: 56 } as const;
 export type ToneKey =
   | "skin"
   | "skinShade"
+  | "skinLight"
   | "hair"
   | "hairShade"
   | "top"
   | "topShade"
+  | "topLight"
   | "bottom"
   | "bottomShade"
   | "shoe"
+  | "shoeShade"
   | "metal"
   | "lens"
   | "line";
@@ -50,12 +53,15 @@ export interface Piece {
 // Sampled from the Crear MC mockup's swatch strip, which is where the player
 // picks them. Each tone carries its own shade so the shading stays in family
 // instead of going grey.
-export const skinTones: { id: number; label: string; skin: string; skinShade: string }[] = [
-  { id: 1, label: "Claro", skin: "#ecb98c", skinShade: "#c9945f" },
-  { id: 2, label: "Trigueno", skin: "#d49765", skinShade: "#a97243" },
-  { id: 3, label: "Moreno", skin: "#aa6c42", skinShade: "#82502e" },
-  { id: 4, label: "Oscuro", skin: "#693c22", skinShade: "#4d2b17" },
-  { id: 5, label: "Muy oscuro", skin: "#3f2617", skinShade: "#2b190e" },
+// Each tone carries THREE values, not two. A single shade reads as a flat cut-out;
+// the highlight is what makes a round head look round, and the original render's
+// style depends on it.
+export const skinTones: { id: number; label: string; skin: string; skinShade: string; skinLight: string }[] = [
+  { id: 1, label: "Claro", skin: "#e0a97c", skinShade: "#b87f52", skinLight: "#f4cfa6" },
+  { id: 2, label: "Trigueno", skin: "#c98a58", skinShade: "#9c6639", skinLight: "#e3ab7d" },
+  { id: 3, label: "Moreno", skin: "#a2673d", skinShade: "#7a4a29", skinLight: "#bf855a" },
+  { id: 4, label: "Oscuro", skin: "#6c4025", skinShade: "#4c2a17", skinLight: "#8a583a" },
+  { id: 5, label: "Muy oscuro", skin: "#452a1a", skinShade: "#2c1a0f", skinLight: "#5e3d29" },
 ];
 
 // --- the body: always drawn, never chosen ----------------------------------
@@ -355,35 +361,78 @@ export const outfits: {
   label: string;
   top: string;
   bottom: string;
-  colors: { top: string; topShade: string; bottom: string; bottomShade: string; shoe: string };
+  colors: {
+    top: string;
+    topShade: string;
+    topLight: string;
+    bottom: string;
+    bottomShade: string;
+    shoe: string;
+    shoeShade: string;
+  };
 }[] = [
   {
+    // The original render's fit: black tee with a white print, bright blue shorts,
+    // white sneakers. Keeping it as look 1 is what makes the modular MC read as the
+    // same character rather than a replacement.
     id: 1,
-    label: "Calle",
+    label: "Clasica",
     top: "polera",
-    bottom: "jeans",
-    colors: { top: "#d8dbe8", topShade: "#9aa0b8", bottom: "#33406e", bottomShade: "#232c4e", shoe: "#e4e7f2" },
+    bottom: "short",
+    colors: {
+      top: "#1b1b20",
+      topShade: "#0e0e12",
+      topLight: "#f2f4fb",
+      bottom: "#1f7fd4",
+      bottomShade: "#155a99",
+      shoe: "#f2f4fb",
+      shoeShade: "#b9bfd0",
+    },
   },
   {
     id: 2,
     label: "Poleron",
     top: "polerontrivio",
     bottom: "buzo",
-    colors: { top: "#4a3f7a", topShade: "#332b57", bottom: "#2a2a33", bottomShade: "#1c1c22", shoe: "#c8ccd8" },
+    colors: {
+      top: "#4a3f7a",
+      topShade: "#332b57",
+      topLight: "#b9a6f0",
+      bottom: "#2a2a33",
+      bottomShade: "#1c1c22",
+      shoe: "#c8ccd8",
+      shoeShade: "#8f95a6",
+    },
   },
   {
     id: 3,
     label: "Camisa",
     top: "camisa",
     bottom: "jeans",
-    colors: { top: "#8d3a3a", topShade: "#6a2a2a", bottom: "#2f3a5e", bottomShade: "#212840", shoe: "#2b2b33" },
+    colors: {
+      top: "#8d3a3a",
+      topShade: "#6a2a2a",
+      topLight: "#e0b4a4",
+      bottom: "#2f3a5e",
+      bottomShade: "#212840",
+      shoe: "#2b2b33",
+      shoeShade: "#1a1a20",
+    },
   },
   {
     id: 4,
     label: "Ancha",
     top: "camiseta",
     bottom: "short",
-    colors: { top: "#2f6b52", topShade: "#22503c", bottom: "#d8dbe8", bottomShade: "#a3a9bd", shoe: "#e4e7f2" },
+    colors: {
+      top: "#2f6b52",
+      topShade: "#22503c",
+      topLight: "#a8e0c4",
+      bottom: "#d8dbe8",
+      bottomShade: "#a3a9bd",
+      shoe: "#e4e7f2",
+      shoeShade: "#aeb4c4",
+    },
   },
 ];
 

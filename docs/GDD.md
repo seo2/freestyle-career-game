@@ -261,6 +261,35 @@ mas en la cadena se toca.
   barba $35, color $90. Marca lo que ya llevas puesto en vez de cobrarte por nada,
   y si no te alcanza **rechaza entero** en lugar de aplicar a medias.
 
+**El arte se autorea como pixel-art en texto** (`src/data/characterArt.ts`). La
+primera version describia cada pieza como una lista de rectangulos, y eso solo puede
+hacer rectangulos: el muñeco salia en bloques al lado del render original, que es
+chibi, contorneado y sombreado en tres tonos. Ahora cada pieza es un bloque de
+strings, un caracter por pixel, y el renderer convierte cada fila en **corridas
+horizontales** — un 32×72 son 2.304 celdas, y un rectangulo de Phaser por celda
+serian miles de objetos por redibujo sin ninguna diferencia visual.
+
+Lo que acerco el estilo al original, en orden de impacto:
+
+1. **La proporcion.** La cabeza pasó de 14% del alto a **~33%**. Ese solo numero era
+   la mayor parte de por que los dos no parecian el mismo personaje.
+2. **Una anatomia fija y escrita** (cabeza 0-21, cuello 22-25, hombros 26-27, torso
+   28-45, caderas 46-48, piernas 49-63, zapatos 64-71). La primera pasada a mano le
+   dio a cada pieza sus propios offsets y el resultado tenia **zapatos flotando bajo
+   los tobillos y brazos escondidos dentro del torso**: piezas que nunca se pusieron
+   de acuerdo sobre donde estaba el cuerpo.
+3. **Contorno cerrado** en toda silueta, y **tres tonos** por material (base, sombra
+   y luz) con la luz siempre desde arriba a la izquierda.
+4. **Los rasgos del original**: los lentes, la sonrisa de lado, la nariz. Y la tenida
+   1 es su tenida — polera negra con estampado, short azul, zapatillas blancas — para
+   que el MC modular se lea como **el mismo** y no como un reemplazo.
+
+**Dos trampas del formato, y las dos ocurrieron.** Una fila con un caracter de menos
+y una **«о» cirilica** tipeada en vez de una «o» son invisibles hasta que algo se ve
+mal en pantalla: la primera version tenia **113 filas cortas y 4 caracteres
+cirilicos**. Hay tests que fijan el ancho exacto, la leyenda de caracteres, que
+ninguna pieza se salga de la grilla y que toda silueta tenga contorno.
+
 **Abierto:** las ocho filas de Crear MC no cabian con el paso anterior — VOZ quedaba
 detras del boton COMENZAR y DIFICULTAD se cortaba. Se apreto el alto de pildora a 36
 y el paso a 47. Si se agregan mas filas, hay que paginar la columna.
