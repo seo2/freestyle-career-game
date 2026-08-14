@@ -28,6 +28,8 @@ import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
 import type { AudioService } from "../services/AudioService";
 import type { SoundId } from "../data/sounds";
+import { beardStyles, hairColors, hairStyles } from "../data/character";
+import { buyLook as buyLookSys, type BarberSlot } from "../systems/BarberSystem";
 import { resolveDilemma as resolveDilemmaSys, rollDilemma } from "../systems/DilemmaSystem";
 import { closeEpilogue as closeEpilogueSys } from "../systems/EpilogueSystem";
 import {
@@ -87,6 +89,15 @@ function wrapIndex(index: number, length: number): number {
 }
 
 // Wraps a 1-based option index (look/skin/voice) by delta inside 1..count.
+// Steps through a piece list by id and wraps. Keeps the data in src/data as the
+// source of truth: adding a hairstyle needs no change here.
+function cycleId(pieces: readonly { id: string }[], current: string, delta: number): string {
+  if (pieces.length === 0) return current;
+  const index = pieces.findIndex((piece) => piece.id === current);
+  const next = ((index < 0 ? 0 : index) + delta + pieces.length) % pieces.length;
+  return pieces[next].id;
+}
+
 function wrapOption(current: number, delta: number, count: number): number {
   return wrapIndex(current - 1 + delta, count) + 1;
 }
@@ -393,6 +404,19 @@ export class GameController {
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
+  // The barbershop (Fase 10). Charged and applied in one place so the screen only
+  // has to say which chair the player sat in.
+  buyLook(slot: BarberSlot, id: string): void {
+    const parts = buyLookSys(this.state, slot, id);
+    if (!parts) {
+      this.playSound("uiDenied");
+      return;
+    }
+    this.playSound("cash");
+    this.setEvent(parts);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
   setCareerView(view: CareerView): void {
     if (this.careerView === view) return;
     this.careerView = view;
@@ -594,6 +618,23 @@ export class GameController {
 
   cycleSkin(delta: number): void {
     this.state.skin = wrapOption(this.state.skin, delta, NewGameConfig.identityOptions.skins);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // The modular pieces (Fase 10). Cycling by id keeps the data as the source of
+  // truth: adding a hairstyle to src/data/character.ts needs no code here.
+  cycleHair(delta: number): void {
+    this.state.hair = cycleId(hairStyles, this.state.hair, delta);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  cycleBeard(delta: number): void {
+    this.state.beard = cycleId(beardStyles, this.state.beard, delta);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  cycleHairColor(delta: number): void {
+    this.state.hairColor = wrapOption(this.state.hairColor, delta, hairColors.length);
     eventBus.emit("STATE_CHANGED", undefined);
   }
 

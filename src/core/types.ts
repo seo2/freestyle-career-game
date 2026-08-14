@@ -19,7 +19,10 @@ export type CareerView =
   | "stats"
   // Fase 7: identity axes, bonds and rivalries. Its own screen because it did
   // not fit inside Estadisticas without covering the profile (see identityView).
-  | "identity";
+  | "identity"
+  // Fase 10: the barbershop, which only means anything now that the MC is a stack
+  // of layers instead of one fixed sprite.
+  | "barberia";
 export type StageId = "pieza" | "plaza" | "regional" | "nacional" | "internacional" | "estrella" | "leyenda";
 export type StatKey =
   | "flow"
@@ -427,6 +430,12 @@ export interface GameState {
   // the grudge, which is what makes a rival the same person twice.
   bonds: Record<BondId, BondState>;
   rivalries: RivalryState[];
+  // The modular look (Fase 10). `look` and `skin` existed since Fase 4 but changed
+  // nothing on screen; these are the pieces the barbershop sells, and the clothes
+  // the player owns are read straight from `items`.
+  hair: string;
+  hairColor: number;
+  beard: string;
   // Music-career milestones already claimed (Fase 10), by id. Persisted: a disco is
   // something that survives, so it had better survive a reload.
   releases: string[];

@@ -31,6 +31,8 @@ const careerNavKeys: CareerNavItem[] = [
   { id: "shop", key: "T" },
   { id: "stats", key: "S" },
   { id: "identity", key: "I" },
+  // "B" is the room and "A" reads as nothing; P for peluqueria.
+  { id: "barberia", key: "P" },
 ];
 
 // Room dock slots (mockup navigation model): the five big tiles are the only
