@@ -79,6 +79,10 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
     },
     rivalries: [],
     releases: [],
+    // The default cut, which the barbershop can change for money.
+    hair: NewGameConfig.identity.hair,
+    hairColor: NewGameConfig.identity.hairColor,
+    beard: NewGameConfig.identity.beard,
     // Sound on, at a volume that is not the loudest thing the game can do.
     audio: { volume: AudioConfig.volume.start, sfxOn: true, musicOn: true },
   };

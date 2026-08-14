@@ -6,9 +6,9 @@
 // origin, so every text call subtracts the font size from the legacy y.
 
 import type Phaser from "phaser";
-import { AssetRegistry } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
-import { addRect, addSpriteImage, addText } from "../../ui/kit";
+import { addRect, addText } from "../../ui/kit";
+import { drawCharacter, lookOf } from "../../ui/characterDraw";
 import { clamp } from "../../utils/math";
 import type { CareerGoal, StatKey } from "../../core/types";
 import type { GameController } from "../../managers/GameController";
@@ -119,19 +119,12 @@ export function actionIcon(ctx: ViewCtx, id: string, x: number, y: number, color
 // The MC figure inside a panel: real sprite plus a grounding shadow (panels
 // have no floor art, so without it the sprite reads as floating).
 export function mcFigure(ctx: ViewCtx, x: number, y: number, s: number): void {
-  const key = AssetRegistry.characters.mcIdle.key;
+  // The MC is composited from his layers now (Fase 10), so the skin tone, the cut
+  // and the clothes he actually owns show up on every screen instead of the same
+  // flat sprite. The height matches what the old sprite drew at this scale, so no
+  // layout moves.
   const feetY = y + 25 * s;
-  if (ctx.scene.textures.exists(key)) {
-    rect(ctx, x - 22 * s, feetY - 4 * s, 44 * s, 5 * s, "#05070f", 0.55);
-    rect(ctx, x - 16 * s, feetY - 3 * s, 32 * s, 3 * s, "#000000", 0.5);
-    addSpriteImage(ctx.scene, ctx.layer, key, x, feetY, Math.round(92 * s), 0.5, 1);
-    return;
-  }
-  rect(ctx, x - 26 * s, y + 20 * s, 52 * s, 7 * s, "#000000", 0.22);
-  rect(ctx, x - 14 * s, y - 7 * s, 28 * s, 32 * s, palette.borderLo);
-  rect(ctx, x - 20 * s, y - 40 * s, 40 * s, 37 * s, palette.panelAlt);
-  rect(ctx, x - 16 * s, y - 64 * s, 32 * s, 28 * s, palette.borderHi);
-  rect(ctx, x - 18 * s, y - 69 * s, 36 * s, 8 * s, palette.yellow);
+  drawCharacter(ctx.scene, ctx.layer, x, feetY, Math.round(92 * s), lookOf(ctx.controller.state));
 }
 
 export function goalRow(ctx: ViewCtx, x: number, y: number, w: number, goal: CareerGoal): void {

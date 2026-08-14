@@ -1,5 +1,5 @@
-// Dispatcher for the eight non-base career views (calendar/map/training/social/
-// work/shop/stats/identity). CareerScene calls renderCareerView() on every redraw with
+// Dispatcher for the nine non-base career views (calendar/map/training/social/
+// work/shop/stats/identity/barberia). CareerScene calls renderCareerView() on every redraw with
 // the container it owns; each view lives in ./views/<name>View.ts and draws
 // through the shared ./views/viewKit helpers. Keyboard input stays global in
 // InputRouter.
@@ -15,6 +15,7 @@ import { renderWork } from "./views/workView";
 import { renderShop } from "./views/shopView";
 import { renderStats } from "./views/statsView";
 import { renderIdentity } from "./views/identityView";
+import { renderBarber } from "./views/barberView";
 
 const viewRenderers = {
   calendar: renderCalendar,
@@ -25,6 +26,7 @@ const viewRenderers = {
   shop: renderShop,
   stats: renderStats,
   identity: renderIdentity,
+  barberia: renderBarber,
 } as const;
 
 export function renderCareerView(

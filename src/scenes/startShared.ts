@@ -18,8 +18,10 @@
 
 import Phaser from "phaser";
 import { AssetRegistry } from "../game/AssetRegistry";
+import { drawCharacter, lookOf } from "../ui/characterDraw";
+import { gameContext } from "../game/context";
 import { hex, palette } from "../ui/palette";
-import { addHitZone, addRect, addSpriteImage, addText, displayStyle, textStyle } from "../ui/kit";
+import { addHitZone, addRect, addText, displayStyle, textStyle } from "../ui/kit";
 
 export const CANVAS_W = 960;
 export const CANVAS_H = 540;
@@ -327,24 +329,10 @@ export interface McFigureOptions {
 // figure stays as the missing-texture fallback.
 export function addMcFigure(scene: Phaser.Scene, layer: Phaser.GameObjects.Container, options: McFigureOptions): void {
   const { centerX, feetY, height } = options;
-  const shadowW = options.shadowWidth ?? Math.round(height * 0.59);
-  const shadow = scene.add.graphics();
-  shadow.fillStyle(hex("#03061a"), 0.62);
-  shadow.fillEllipse(centerX, feetY - 3, shadowW, Math.max(7, Math.round(shadowW * 0.15)));
-  layer.add(shadow);
-  if (addSpriteImage(scene, layer, AssetRegistry.characters.mcIdle.key, centerX, feetY, height, 0.5, 1)) return;
-  // Legacy block placeholder, expressed relative to the ground line.
-  const s = height / 79;
-  const px = (dx: number, dy: number, w: number, h: number, color: string): void => {
-    addRect(scene, layer, Math.round(centerX + dx * s), Math.round(feetY + dy * s), Math.max(1, Math.round(w * s)), Math.max(1, Math.round(h * s)), color);
-  };
-  px(-11, -79, 22, 6, palette.red);
-  px(-9, -73, 18, 16, "#f0bd82");
-  px(-13, -57, 26, 31, palette.teal);
-  px(-11, -26, 9, 22, palette.blue);
-  px(2, -26, 9, 22, palette.blue);
-  px(-12, -4, 11, 4, palette.ink);
-  px(1, -4, 11, 4, palette.ink);
+  // Composited from his layers (Fase 10) so the Crear MC preview is live: the
+  // skin, the cut and the fit change under the player's hands instead of showing
+  // the same render whatever they pick.
+  drawCharacter(scene, layer, centerX, feetY, height, lookOf(gameContext().controller.state));
 }
 
 // --- Rounded pixel chrome ---------------------------------------------------

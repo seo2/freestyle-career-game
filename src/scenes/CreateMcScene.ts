@@ -24,6 +24,7 @@ import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
 import type { GameController } from "../managers/GameController";
 import { palette } from "../ui/palette";
+import { beardStyles, hairStyles } from "../data/character";
 import { addHitZone, addRect } from "../ui/kit";
 import {
   CANVAS_H,
@@ -41,9 +42,12 @@ import {
 
 const PANEL = { x: 12, y: 10, w: 936, h: 520 } as const;
 const PORTRAIT = { x: 20, y: 20, w: 390, h: 500 } as const;
-const PILL = { x: 625, w: 259, h: 44 } as const;
+// Tightened from h 44 / pitch 60.4 when CORTE and BARBA joined (Fase 10): at the
+// old spacing the eight rows ran under the COMENZAR button, hiding VOZ entirely
+// and clipping DIFICULTAD. 8 * 47 + 36 lands at 442, just above the button.
+const PILL = { x: 625, w: 259, h: 36 } as const;
 const ROW_TOP = 70;
-const ROW_PITCH = 60.4;
+const ROW_PITCH = 47;
 const LABEL_X = 494;
 // Labels stay left-aligned until they would touch the pill; the mockup shifts
 // "COLOR DE PIEL" left for exactly this reason.
@@ -64,7 +68,13 @@ const SWATCH = { w: 28, h: 26, gap: 4 } as const;
 // table is what the player sees while character sprite variants are pending.
 const SKIN_TONES = ["#ecb98c", "#d49765", "#aa6c42", "#693c22", "#3f2617"] as const;
 
-type RowId = "nombre" | "apodo" | "look" | "skin" | "voice" | "difficulty";
+// A piece's own name, from the data. Falls back to the first so a save with an
+// unknown id still shows something rather than an empty pill.
+function pieceLabel(pieces: readonly { id: string; label: string }[], id: string): string {
+  return (pieces.find((piece) => piece.id === id) ?? pieces[0])?.label ?? "";
+}
+
+type RowId = "nombre" | "apodo" | "look" | "skin" | "hair" | "beard" | "voice" | "difficulty";
 
 interface RowDef {
   id: RowId;
@@ -76,6 +86,10 @@ const ROWS: readonly RowDef[] = [
   { id: "apodo", label: "APODO" },
   { id: "look", label: "ASPECTO" },
   { id: "skin", label: "COLOR DE PIEL" },
+  // The modular pieces (Fase 10). The barberia sells changes to these later, so
+  // what the player picks here is a starting point, not a life sentence.
+  { id: "hair", label: "CORTE" },
+  { id: "beard", label: "BARBA" },
   { id: "voice", label: "VOZ" },
   { id: "difficulty", label: "DIFICULTAD" },
 ];
@@ -141,7 +155,10 @@ export class CreateMcScene extends Phaser.Scene {
     }
   }
 
-  // --- Static chrome (panel + portrait; none of it depends on GameState) -----
+  // --- Static chrome (panel + portrait). The MC himself is NOT here: he is a
+  // stack of layers read from the state (Fase 10), so he belongs to the dynamic
+  // redraw. He used to live here because the old flat sprite never changed
+  // whatever the player picked — which is exactly the bug this screen had.
 
   private buildChrome(layer: Phaser.GameObjects.Container): void {
     addRect(this, layer, 0, 0, CANVAS_W, CANVAS_H, "#02041a");
@@ -162,7 +179,6 @@ export class CreateMcScene extends Phaser.Scene {
     // watermark; a multiply tint would turn the yellow GAME olive, so the real
     // lockup is simply dropped in opacity instead.
     addLogoLockup(this, layer, { x: 83, y: 74, width: 214, alpha: 0.45 });
-    addMcFigure(this, layer, { centerX: 216, feetY: 434, height: 262 });
     addAnchoredText(this, layer, 41, 43, "2. CREAR MC", 28, palette.ink, 0, true);
   }
 
@@ -172,6 +188,9 @@ export class CreateMcScene extends Phaser.Scene {
     const { controller } = gameContext();
     this.caret = null;
     this.layer.removeAll(true);
+    // The live preview: composited from skin, cut, beard and fit every redraw, so
+    // the figure changes under the player's hands.
+    addMcFigure(this, this.layer, { centerX: 216, feetY: 434, height: 262 });
     ROWS.forEach((row, index) => this.drawRow(controller, row, index));
     addPillButton(
       this,
@@ -243,6 +262,14 @@ export class CreateMcScene extends Phaser.Scene {
       case "skin":
         this.addSkinStrip(cy, state.skin);
         this.addArrows(cy, accent, index, (delta) => controller.cycleSkin(delta));
+        break;
+      case "hair":
+        this.addValue(cy, pieceLabel(hairStyles, state.hair), palette.ink);
+        this.addArrows(cy, accent, index, (delta) => controller.cycleHair(delta));
+        break;
+      case "beard":
+        this.addValue(cy, pieceLabel(beardStyles, state.beard), palette.ink);
+        this.addArrows(cy, accent, index, (delta) => controller.cycleBeard(delta));
         break;
       case "voice":
         this.addValue(cy, optionLabel(state.voice), palette.ink);
@@ -334,6 +361,12 @@ export class CreateMcScene extends Phaser.Scene {
         return;
       case "skin":
         controller.cycleSkin(delta);
+        return;
+      case "hair":
+        controller.cycleHair(delta);
+        return;
+      case "beard":
+        controller.cycleBeard(delta);
         return;
       case "voice":
         controller.cycleVoice(delta);

@@ -101,6 +101,7 @@ const PATHS: readonly { from: string; to: string; bow: number }[] = [
   { from: "pieza", to: "plaza", bow: -14 },
   { from: "pieza", to: "trabajo", bow: -6 },
   { from: "plaza", to: "tienda", bow: 5 },
+  { from: "tienda", to: "barberia", bow: -4 },
   { from: "plaza", to: "estudio", bow: -20 },
 ];
 
@@ -110,6 +111,9 @@ const PLACES: readonly PlaceNode[] = [
   { id: "plaza", label: "PLAZA", kind: "plaza", x: 503, y: 240, labelDy: 85, actionId: "battle" },
   { id: "tienda", label: "TIENDA", kind: "shop", x: 481, y: 421, labelDy: 94, view: "shop" },
   { id: "gimnasio", label: "GIMNASIO", kind: "gym", x: 725, y: 398, labelDy: 71, view: "training", hintActionId: "practice" },
+  // The barbería (Fase 10). Placed on the block between the shop and the gym,
+  // where the art has a row of storefronts.
+  { id: "barberia", label: "BARBERIA", kind: "shop", x: 604, y: 372, labelDy: 62, view: "barberia" },
   { id: "estudio", label: "ESTUDIO", kind: "studio", x: 790, y: 242, labelDy: 102, actionId: "record" },
 ];
 

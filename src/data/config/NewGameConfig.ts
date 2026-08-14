@@ -26,6 +26,11 @@ export const NewGameConfig = {
     nickname: "Freestyler",
     look: 1,
     skin: 1,
+    // The look the MC starts with. The pieces themselves live in
+    // src/data/character.ts; these are just which one is on by default.
+    hair: "corto",
+    hairColor: 1,
+    beard: "lampino",
     voice: 1,
     difficulty: "normal" as Difficulty,
     nameMaxLength: 16,

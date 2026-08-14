@@ -228,6 +228,43 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### El MC es modular, y hay barberia (Fase 10, 2026-08-13)
+
+Pedido del owner: que la creacion del personaje sea de verdad personalizable, que
+sea **modular** para que la ropa y los accesorios comprados se vayan mostrando, y
+agregar una **barberia**.
+
+**Por que es data y no un sprite.** El proyecto tenia **un** PNG plano de 101×240,
+y `reference/sprites` son cielos, muros y parlantes — no hay arte por capas de
+donde recortar. Un muñeco articulado necesita sus piezas separadas, asi que cada
+pieza es data de pixeles en una grilla de 24×56 (la misma proporcion que el render
+viejo) dibujada con rectangulos. Esta hecho para ser **reemplazado**, igual que la
+musica sintetizada: se cambia el `rects` de una pieza por una key de sprite y nada
+mas en la cadena se toca.
+
+- **Las capas y su orden**: cuerpo → pantalon → polera → zapatos → barba → cara →
+  pelo → accesorios comprados. Dos detalles que importan: la **cara va sobre el
+  pelo** (un flequillo no puede tapar los ojos) y la **gorra reemplaza el pelo** en
+  vez de dibujarse encima.
+- **Los colores son roles, no valores** (`skin`, `hair`, `top`, `bottomShade`…), que
+  es lo que permite que un mismo corte funcione en cinco tonos de piel y una misma
+  chaqueta en cuatro combinaciones.
+- **Lo que compras es lo que usas.** Las piezas se indexan por el **id del item de
+  la tienda**, asi que comprar la gorra, la chaqueta, las zapatillas o los
+  audifonos los pone en el MC. Comprar un cuaderno o un beat no cambia nada, y hay
+  un test que lo fija.
+- **`look` y `skin` existian desde la Fase 4 y no cambiaban nada en pantalla.** El
+  MC se dibujaba en el paso **estatico** de la escena de creacion, cuyo comentario
+  decia "nada de esto depende de GameState" — cierto con un sprite fijo, falso desde
+  que el personaje se compone. Ahora vive en el redraw y el preview cambia en vivo.
+- **La barberia** (`BarberSystem`, pantalla 15, nodo del mapa, tecla P): corte $70,
+  barba $35, color $90. Marca lo que ya llevas puesto en vez de cobrarte por nada,
+  y si no te alcanza **rechaza entero** en lugar de aplicar a medias.
+
+**Abierto:** las ocho filas de Crear MC no cabian con el paso anterior — VOZ quedaba
+detras del boton COMENZAR y DIFICULTAD se cortaba. Se apreto el alto de pildora a 36
+y el paso a 47. Si se agregan mas filas, hay que paginar la columna.
+
 ### Tu vida te define, no solo tus respuestas (Fase 10, 2026-08-13)
 
 Pedido del owner: *"quisiera que el juego permitiera, según las decisiones del
