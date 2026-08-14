@@ -26,6 +26,7 @@ npm run traces     # comparar el juego actual contra traces/baseline/ (falla si 
 node scripts/compare-traces.mjs --update    # aceptar la conducta actual como nuevo baseline
 node scripts/verify-save-migration.mjs      # e2e de migración de saves (dev server corriendo)
 node scripts/playthrough.mjs               # recorrido autónomo: mide el ritmo del primer arco (dev server corriendo)
+node scripts/measure-battles.mjs           # curva de dificultad de batalla por perfil y política (dev server corriendo)
 node scripts/build-map-city.mjs             # reconstruye el fondo isométrico del mapa desde reference/
 ```
 

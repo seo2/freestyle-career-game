@@ -114,10 +114,12 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - **Hecho (2026-08-13): SFX sintetizados, el toggle del mockup hecho real y el ajuste persistido.** `AudioService` sintetiza 13 sonidos con WebAudio (`src/data/sounds.ts`) — **sin assets**, porque generarlos gastaría créditos del owner y unos osciladores bastan para blips de pixel-art. El "♪ MUSICA: SI" del menú **era un texto fijo en un juego sin audio**; ahora lee el save y lo cambia por clic o con `M`. El ajuste sobrevive la recarga (verificado leyendo `localStorage`). Evidencia: `output/web-game/fase8-audio/`.
 
 
-### Fase 9 — Balance y contenido
+### Fase 9 — Balance y contenido ⏳ en curso
 
 - Curvas de costos/ganancias en `/data` (el dinero nunca debe sobrar), dificultades, más estímulos y rivales.
 - Playtesting con checklist; validar con el filtro de 3 preguntas de la Bible.
+- **Hecho (2026-08-13): la curva de dificultad de la batalla, medida y arreglada.** `node scripts/measure-battles.mjs` juega miles de batallas con las reglas reales y tres políticas. La curva era un serrucho que terminaba en trámite (8% de victorias en la primera batalla; **100% en regional y nacional con cualquier política**, incluso jugando la peor carta a propósito). Tres causas: dificultad escondida en dados asimétricos, hype que se realimentaba **solo** para el jugador, y un rival que crecía con la etapa mientras el jugador crecía con sus stats. Ahora naive ~46-54% desde Plaza, greedy ~80-97%, worst 14-49%: **entre jugar bien y jugar mal hay 30-70 puntos en cada etapa**. Decisiones en `docs/GDD.md` › "Balance de batalla". Evidencia: `output/web-game/fase9-balance/`.
+- **Falta de esta fase:** la curva de **economía** ("el dinero nunca debe sobrar" — el recorrido termina con $250 sin haberlo necesitado), más estímulos y más rivales por etapa.
 
 ### Fase 10 — Empaquetado
 

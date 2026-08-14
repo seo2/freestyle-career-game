@@ -5,7 +5,8 @@ import { battleResources, battleStimuli, battleRivals, resourceById } from "../d
 import { BattleConfig } from "../data/config/BattleConfig";
 import { crowdByStage, rivalArchetypes, rivalRoster } from "../data/rivals";
 import { stages } from "../data/stages";
-import { DifficultyConfig } from "../data/config/DifficultyConfig";
+import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
+import { trainingStats } from "../data/stats";
 import type { Difficulty, GameState, StageId } from "../core/types";
 import {
   advanceBattleRound,
@@ -75,6 +76,24 @@ function stateAtStage(stage: StageId, energy: number): GameState {
 beforeEach(() => {
   h.log.length = 0;
 });
+
+
+// Rival power, derived from the config instead of pinned to a number. These tests
+// were hardcoded to "3 + idx * 2" and broke as a block the first time Fase 9
+// retuned the curve; deriving them means a future retune breaks only what it
+// actually changes.
+function expectedRivalPower(state: GameState, stageIdx: number): number {
+  const tier = BattleConfig.tier;
+  const trained = trainingStats.reduce((sum, key) => sum + state.stats[key], 0) / trainingStats.length;
+  return Math.max(
+    DifficultyConfig.rivalPowerFloor,
+    tier.rivalPowerBase +
+      stageIdx * tier.rivalPowerPerStage +
+      Math.floor(state.level / tier.rivalPowerLevelDivisor) +
+      Math.floor(trained * tier.rivalPowerPerPlayerStat) +
+      difficultyRules(state.difficulty).rivalPowerBonus,
+  );
+}
 
 describe("battleLabel", () => {
   it("maps each stage to its event label", () => {
@@ -187,8 +206,10 @@ describe("startBattle", () => {
   it("initializes the real rival meters from the tier power", () => {
     const state = stateAtStage("pieza", 80);
     startBattle(state, createSequenceRng([0]));
-    // Pieza tier power 3: energy 70 + 3*2 = 76 of 100, hype at the opening 50.
-    expect(state.battle?.rivalEnergy).toBe(76);
+    const power = expectedRivalPower(state, 0);
+    expect(state.battle?.rivalEnergy).toBe(
+      Math.min(BattleConfig.rival.energyMax, BattleConfig.rival.energyBase + power * BattleConfig.rival.energyPerPower),
+    );
     expect(state.battle?.rivalEnergyMax).toBe(100);
     expect(state.battle?.rivalHype).toBe(50);
   });
@@ -196,9 +217,16 @@ describe("startBattle", () => {
   it("clamps rival energy at its max for overpowered rivals", () => {
     // The old fabricated HUD showed 70 + power*2 on a /100 bar, exceeding it.
     const state = stateAtStage("estrella", 80);
-    state.level = 60; // power = 3 + 5*2 + floor(60/3) = 33 -> raw energy 136
+    // High enough that the raw figure really does overflow the /100 bar, which is
+    // the whole point of the test. Pinning a level instead broke the moment the
+    // tuning changed, so it is derived from the config it is testing.
+    const perPower = BattleConfig.rival.energyPerPower;
+    state.level = Math.ceil(((BattleConfig.rival.energyMax - BattleConfig.rival.energyBase) / perPower) * 3) + 30;
+    for (const key of Object.keys(state.stats) as (keyof typeof state.stats)[]) state.stats[key] = 20;
     startBattle(state, createSequenceRng([0]));
-    expect(state.battle?.rivalPower).toBe(33);
+    const power = expectedRivalPower(state, 5);
+    expect(state.battle?.rivalPower).toBe(power);
+    expect(BattleConfig.rival.energyBase + power * perPower).toBeGreaterThan(BattleConfig.rival.energyMax);
     expect(state.battle?.rivalEnergy).toBe(100);
     expect(state.battle?.rivalEnergyMax).toBe(100);
   });
@@ -224,7 +252,7 @@ describe("startBattle", () => {
       expect(battle?.eventName).toBe(battleRivals[idx][0]);
       expect(battle?.rivalName).toBe(battleRivals[idx][1]);
       expect(battle?.rivalStyle).toBe(battleRivals[idx][2]);
-      expect(battle?.rivalPower).toBe(3 + idx * 2); // + floor(1/3) = 0
+      expect(battle?.rivalPower).toBe(expectedRivalPower(state, idx));
       expect(battle?.rewardCash).toBe(35 + idx * 85);
       expect(battle?.rewardFans).toBe(18 + idx * 95);
       expect(battle?.rewardRespect).toBe(10 + idx * 18);
@@ -236,8 +264,14 @@ describe("startBattle", () => {
   it("adds level/3 to rival power", () => {
     const state = stateAtStage("pieza", 80);
     state.level = 7;
+    const before = expectedRivalPower(state, 0);
     startBattle(state, createSequenceRng([0]));
-    expect(state.battle?.rivalPower).toBe(3 + 0 + 2); // floor(7/3)
+    expect(state.battle?.rivalPower).toBe(before);
+    // The level term is what this test is about: three levels buy the rival one.
+    const higher = stateAtStage("pieza", 80);
+    higher.level = 7 + BattleConfig.tier.rivalPowerLevelDivisor;
+    startBattle(higher, createSequenceRng([0]));
+    expect(higher.battle?.rivalPower).toBe(before + 1);
   });
 });
 
@@ -337,15 +371,16 @@ describe("resolveBattle", () => {
 
     // Round 1: "ataque" is barrio-best -> +12 roll bonus, forced win.
     // player = stats floor((2+1)*8/2)=12 + lvl 3 + prompt 12 + energy 4
-    //          + health 3 + momentum -1 + presence 0 + hype floor(50/8)=6 + roll 26 = 65
-    // rival  = power 3*8 + round 2 + resource 2 + roll 12 = 40
+    //          + health 3 + momentum -1 + presence 0 + hype floor(50/12)=4 + roll 30 = 67
+    // rival  = power 3*4 + round 2 + resource floor(2*0.6)=1 + hype floor(50/12)=4
+    //          + roll 8 = 27. Power 3 = base 1 + stage 0 + floor(1/2) + floor(1.95 * 1.43).
     resolveBattle(state, rng, resourceById("ataque"));
     expect(battle.results[0]).toEqual({
       round: 1,
       choice: "ataque",
       rivalChoice: "punchline",
-      player: 65,
-      rival: 40, // power 24 + round 2 + rival punchline floor(2*1.2)=2 + roll 12
+      player: 67,
+      rival: 27,
       note: "El publico reacciona a tu ronda.",
       tensionNotes: [],
       playerHypeDelta: 16, // baseHype 12 + stimulus 12/3
@@ -356,7 +391,7 @@ describe("resolveBattle", () => {
     expect(battle.playerScore).toBe(1);
     expect(battle.hype).toBe(66); // 50 + 16
     expect(battle.rivalHype).toBe(54); // 50 + 4
-    expect(battle.rivalEnergy).toBe(68); // 76 - 8 round drain
+    expect(battle.rivalEnergy).toBe(65); // opening 70 + power 3 = 73, - 8 round drain
     // The battle parks on the round-result beat: same round, same stimulus.
     expect(battle.pendingResult).toBe(battle.results[0]);
     expect(battle.round).toBe(1);
@@ -381,8 +416,8 @@ describe("resolveBattle", () => {
       round: 2,
       choice: "ataque",
       rivalChoice: "ataque", // .35 -> index 3, sets up round 3's counter
-      player: 36,
-      rival: 64, // power 24 + round 4 + rival ataque 2 + roll 34
+      player: 34,
+      rival: 51, // power 24 + round 4 + rival ataque 2 + roll 34
       note: "El rival conecto mas fuerte.",
       tensionNotes: ["Repites recurso: aburres al publico."],
       playerHypeDelta: -12, // lossDrop 7 + repetitionPenalty 5
@@ -393,7 +428,7 @@ describe("resolveBattle", () => {
     expect(battle.rivalScore).toBe(1);
     expect(battle.hype).toBe(54); // 66 - 12
     expect(battle.rivalHype).toBe(66); // 54 + 12
-    expect(battle.rivalEnergy).toBe(60);
+    expect(battle.rivalEnergy).toBe(57); // opening 73, two rounds of drain
 
     advanceBattleRound(state, rng);
     expect(battle.round).toBe(3);
@@ -411,8 +446,8 @@ describe("resolveBattle", () => {
       round: 3,
       choice: "respuesta",
       rivalChoice: "punchline",
-      player: 57,
-      rival: 44, // power 24 + round 6 + rival punchline 2 + roll 12
+      player: 59,
+      rival: 32, // power 12 + round 6 + resource 1 + rival hype 5 + roll 8 // power 24 + round 6 + rival punchline 2 + roll 12
       note: "El publico reacciona a tu ronda.",
       tensionNotes: ["Respondiste el ataque del rival."],
       playerHypeDelta: 16, // baseHype 10 + responseBonus 6
@@ -425,7 +460,7 @@ describe("resolveBattle", () => {
     expect(battle.pendingResult).toBe(battle.results[2]);
     expect(battle.hype).toBe(70); // 54 + 16
     expect(battle.rivalHype).toBe(70); // 66 + 4
-    expect(battle.rivalEnergy).toBe(52);
+    expect(battle.rivalEnergy).toBe(49); // opening 73, three rounds of drain
 
     advanceBattleRound(state, rng); // final round: consumes no draws
     expect(battle.pendingResult).toBeNull();
@@ -690,7 +725,7 @@ describe("expireBattleRound", () => {
       choice: null, // no card played
       rivalChoice: "ataque",
       player: 0,
-      rival: 40, // 24 + 2 + rival ataque 2 + 12
+      rival: 27,
       note: "El rival aprovecho tu silencio.",
       tensionNotes: ["Se acabo el tiempo: pasaste la ronda."],
       playerHypeDelta: -10, // timer.passHypePenalty
@@ -702,7 +737,7 @@ describe("expireBattleRound", () => {
     expect(battle.playerScore).toBe(0);
     expect(battle.hype).toBe(40); // 50 - 10
     expect(battle.rivalHype).toBe(62);
-    expect(battle.rivalEnergy).toBe(68); // the rival still performed
+    expect(battle.rivalEnergy).toBe(65); // the rival still performed: opening 73 - 8
     expect(battle.timeLeft).toBe(0);
 
     // The rival's Ataque was their recorded move, so rule (a) still applies
@@ -796,23 +831,28 @@ describe("difficulty", () => {
     expect(DifficultyConfig.levels.dificil.timerMultiplier).toBe(0.8);
   });
 
-  it("shifts rival power at every stage (pieza base 3, plaza base 5)", () => {
-    const expected: [Difficulty, number, number][] = [
-      // difficulty, pieza rivalPower, plaza rivalPower
-      ["facil", 2, 4],
-      ["normal", 3, 5],
-      ["dificil", 5, 7],
-    ];
-    for (const [difficulty, pieza, plaza] of expected) {
-      const inRoom = stateAtStage("pieza", 80);
-      inRoom.difficulty = difficulty;
-      startBattle(inRoom, createSequenceRng([0]));
-      expect(inRoom.battle?.rivalPower).toBe(pieza);
-
-      const inPlaza = stateAtStage("plaza", 80);
-      inPlaza.difficulty = difficulty;
-      startBattle(inPlaza, createSequenceRng([0]));
-      expect(inPlaza.battle?.rivalPower).toBe(plaza);
+  it("shifts rival power by the difficulty's own bonus, at every stage", () => {
+    // Derived, not pinned: the absolute numbers moved with the Fase 9 retune and
+    // the thing worth protecting is the SHIFT — that picking "dificil" costs
+    // exactly what DifficultyConfig says it costs, wherever you are on the ladder.
+    const difficulties: Difficulty[] = ["facil", "normal", "dificil"];
+    for (const stage of ["pieza", "plaza"] as StageId[]) {
+      const idx = stages.findIndex((entry) => entry.id === stage);
+      for (const difficulty of difficulties) {
+        const state = stateAtStage(stage, 80);
+        state.difficulty = difficulty;
+        startBattle(state, createSequenceRng([0]));
+        expect(state.battle?.rivalPower).toBe(expectedRivalPower(state, idx));
+      }
+      // And the ordering the player is promised when they choose.
+      const power = (difficulty: Difficulty): number => {
+        const state = stateAtStage(stage, 80);
+        state.difficulty = difficulty;
+        startBattle(state, createSequenceRng([0]));
+        return state.battle?.rivalPower ?? 0;
+      };
+      expect(power("facil")).toBeLessThan(power("normal"));
+      expect(power("normal")).toBeLessThan(power("dificil"));
     }
   });
 
@@ -955,5 +995,61 @@ describe("finishBattle", () => {
     expect(h.log).toEqual(["addXp:15", "applyRhythm:battle:-10", "advanceClock:1:Cypher de pieza"]);
     expect(state.battle).toBeNull();
     expect(state.mode).toBe("career");
+  });
+});
+
+// Fase 9 balance: these guard the SHAPE of the fight, not its numbers. Each one
+// is a defect that scripts/measure-battles.mjs actually found, and that reading
+// the code had not.
+describe("balance shape", () => {
+  it("rolls the same dice for both sides", () => {
+    // They were 7..26 for the player and 12..34 for the rival: a flat +6.5
+    // handicap hidden in the RNG, where no difficulty setting could see it. It was
+    // most of why a brand new MC won 8% of his first battles.
+    const roll = BattleConfig.roll;
+    expect(roll.playerRandomMin).toBe(roll.rivalRandomMin);
+    expect(roll.playerRandomMax).toBe(roll.rivalRandomMax);
+  });
+
+  it("lifts whoever the crowd is with, not only the player", () => {
+    // The hype term existed on one side, so winning round one raised your next
+    // roll and the measured margins came out as clean sweeps almost every time.
+    const state = stateAtStage("pieza", 86);
+    startBattle(state, createSequenceRng([0]));
+    const battle = state.battle;
+    if (!battle) throw new Error("battle missing");
+
+    const rollWith = (rivalHype: number): number => {
+      const fresh = stateAtStage("pieza", 86);
+      startBattle(fresh, createSequenceRng([0]));
+      if (!fresh.battle) throw new Error("battle missing");
+      fresh.battle.rivalHype = rivalHype;
+      resolveBattle(fresh, createSequenceRng([0, 0, 0]), resourceById("ataque"));
+      return fresh.battle.results[0].rival;
+    };
+    // A rival the crowd is behind rolls higher than one it is not.
+    expect(rollWith(100)).toBeGreaterThan(rollWith(0));
+  });
+
+  it("scales the rival with what the player has actually trained", () => {
+    // Without this the ladder ended in a formality: at regional and nacional the
+    // measured win rate was 100% for every policy, including deliberately playing
+    // the worst card in hand, because the player's stats had outgrown a rival who
+    // only tracked the stage.
+    const rookie = stateAtStage("pieza", 86);
+    const trained = stateAtStage("pieza", 86);
+    for (const key of Object.keys(trained.stats) as (keyof typeof trained.stats)[]) trained.stats[key] = 20;
+    startBattle(rookie, createSequenceRng([0]));
+    startBattle(trained, createSequenceRng([0]));
+    expect(trained.battle?.rivalPower).toBeGreaterThan(rookie.battle?.rivalPower ?? 0);
+  });
+
+  it("still lets training pay: the MC gains ground, just not all of it", () => {
+    // The rival must not track the player one-for-one either, or getting stronger
+    // would mean nothing at all.
+    const tier = BattleConfig.tier;
+    const perStatToRoll = tier.rivalPowerPerPlayerStat * BattleConfig.roll.rivalPowerWeight;
+    expect(perStatToRoll).toBeLessThan(BattleConfig.roll.statWeight);
+    expect(perStatToRoll).toBeGreaterThan(0);
   });
 });

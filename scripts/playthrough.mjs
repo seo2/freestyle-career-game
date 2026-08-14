@@ -209,6 +209,9 @@ async function run() {
   };
   report.final = {
     stage: finalState.player.stage,
+    // The trained stats, so the battle-balance profiles in
+    // scripts/measure-battles.mjs can be facts instead of guesses.
+    stats: finalState.player.stats,
     level: finalState.player.level,
     fans: finalState.player.fans,
     respect: finalState.player.respect,
