@@ -160,8 +160,12 @@ de no calzar con el estilo del mockup.
   ya reservado.
 - **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario);
   hoy escala el icono de la fila.
-- **Variantes del MC por aspecto y color de piel**: los selectores de Crear MC
-  cambian el estado, pero el sprite es el mismo.
+- **Variantes del MC por aspecto y color de piel**: RESUELTO en la segunda pasada
+  de Fase 10. `mc-idle.png` se corta en capas recoloreables
+  (`scripts/build-character-layers.mjs` → `public/assets/characters/layers/`) y
+  `src/ui/characterDraw.ts` las compone remapeando luminancia a rampas, así que la
+  piel, la tenida y el color de pelo cambian sobre el dibujo original. Lo que sigue
+  faltando es arte NUEVO por slot; ver "Slots del personaje" abajo.
 - **Fondo en formato retrato** para el marco de Crear MC.
 - **Arte por stat** (libros, foco, manos-corazón, cerebro) para Entrenamiento.
 - **"Cypher en la pieza"** como fondo de batalla temprana.
@@ -186,7 +190,7 @@ Phaser 4 no implementa para game objects (caía a NORMAL en silencio y tapaba la
 ciudad con cajas negras); ahora cada capa se croma por color a una textura canvas
 cacheada.
 
-- Variantes del MC (aspecto/color de piel del Crear MC) y poses (rapeando, con mic).
+- Poses del MC (rapeando, con mic) — hoy una sola pose idle recoloreada.
 - Rivales por arquetipo (agresivo, técnico, humorístico…) — hoy un solo rival.
 - Fondos por etapa: nacional, internacional, estrella, leyenda (reutilizan regional).
 - Fondo propio de "cypher en la pieza" para la batalla de etapa pieza (hoy usa el de plaza).
@@ -195,3 +199,50 @@ cacheada.
 - Paneles/botones 9-slice recortados del mockup (el kit los dibuja con rects).
 - Multitud para batallas; props de la pieza que evolucionan con el progreso.
 - Sprite sheet de animación (idle/rap) — hoy solo poses estáticas con tween.
+
+
+## Slots del personaje (paper doll, Fase 10 segunda pasada)
+
+El MC ya no es un PNG fijo: `scripts/build-character-layers.mjs` parte
+`mc-idle.png` en materiales y `src/ui/characterDraw.ts` los compone en una textura
+canvas cacheada, recoloreando cada capa por luminancia. Eso hace que los slots
+sean **arquitectura**, no arte: agregar una pieza es agregar un PNG y una entrada
+en `src/data/characterLayers.ts`.
+
+Lo que hoy tiene arte de verdad (11 capas, todas píxeles dibujados):
+
+| Slot | Piezas | De dónde salió |
+| --- | --- | --- |
+| Cabeza | gorra (cúpula + visera) / pelo | la gorra es del propio sprite; el pelo es el tupé de `rival-idle.png` escalado al cráneo del MC |
+| Cara | lentes oscuros (cristal + marco) / ojos abiertos | los lentes son del sprite; los ojos abiertos son del rival |
+| Color de piel | 5 rampas | recolorean la piel del sprite |
+| Color de pelo | 5 rampas | recolorean el pelo |
+| Torso | polera + estampado | del sprite, recoloreable por tenida |
+| Piernas | short | del sprite, recoloreable |
+| Pies | zapatillas | del sprite, recoloreable |
+
+**Pendiente: arte por slot.** Cada uno de estos necesita un PNG dibujado de
+101×240 alineado al sprite base. Ninguno se puede derivar sin que se note — se
+intentó y se descartó:
+
+- **Cortes de pelo (3–4)**: hoy hay UNO, trasplantado del rival. Es el eslabón más
+  débil de la cadena. Derivar cortes desde la cúpula de la gorra se probó y se leía
+  como gorro; generar formas se probó tres veces y se leía barato.
+- **Barba (candado, barba completa, bigote, chiva)**: se intentó derivar del propio
+  mentón del sprite retintado y salía una **máscara gris de borde recto**, no una
+  barba. Descartado.
+- **Aros**, **cadenas**, **reloj**, **pulseras**, **tatuajes**: piezas chicas pero
+  con brillo y sombra propios; a este tamaño un par de píxeles planos se ven
+  pegados encima.
+- **Hoodie** y **pantalón largo**: silueta distinta de la polera y el short, no un
+  recolor. El pantalón largo se podría estirar desde el short, pero el sprite tiene
+  las piernas dibujadas con su propio sombreado y el estirado se nota.
+- **Zapatos** (además de las zapatillas): otra silueta.
+- **Bust del HUD por look**: `mc-bust.png` sigue siendo plano, así que el retrato de
+  arriba a la izquierda no sigue al personaje. O se corta en capas igual que el
+  idle, o se genera recortando la cabeza de la textura compuesta.
+
+**Alternativa registrada por el owner (2026-08-14):** en vez de seguir estirando
+este sprite, definir un **estilo propio** (urbano, pixel art) y dibujar el set
+completo por slots. El pipeline no cambia: se reemplaza `mc-idle.png` por la base
+nueva, se vuelve a correr el script y el juego no se toca.

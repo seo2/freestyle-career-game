@@ -1,23 +1,13 @@
-// The MC is a stack of layers so that what the player picks and what the player
-// BUYS both show up on him. These tests pin that stack, because the alternative is
-// a screenshot — and a screenshot cannot say why a layer is missing.
+// The MC is a stack of slices cut out of his own sprite, so that what the player
+// picks and what the player BUYS both show up on him. These tests pin the stack,
+// because the alternative is a screenshot — and a screenshot cannot say why a
+// layer is missing.
 
 import { describe, expect, it } from "vitest";
 import { createNewState } from "../core/state";
 import { describeLook, layerIdsFor, lookOf } from "./characterDraw";
-import { outfits } from "../data/character";
-import {
-  ART_GRID,
-  TONE_CHARS,
-  beardArt,
-  bodyArt,
-  bottomArt,
-  faceArt,
-  hairArt,
-  shoeArt,
-  topArt,
-  wearableArt,
-} from "../data/characterArt";
+import { OUTLINE, eyeStyles, hairColors, headStyles, outfits, skinTones } from "../data/character";
+import { LAYER_SIZE, characterLayers, layerOrder } from "../data/characterLayers";
 import type { GameState } from "../core/types";
 
 function mc(items: string[] = []): GameState {
@@ -28,133 +18,163 @@ function mc(items: string[] = []): GameState {
 }
 
 describe("the layer stack", () => {
-  it("always has a body, a face and something on his feet", () => {
+  it("always draws a body, clothes and something on his feet", () => {
     const ids = layerIdsFor(lookOf(mc()));
-    expect(ids).toContain("body");
-    expect(ids).toContain("face");
-    // Bare feet never happen: the default shoes stand in until a pair is bought.
-    expect(ids.some((id) => id === "zapatos" || id === "zapatillas")).toBe(true);
+    for (const id of ["skin", "top", "bottom", "shoes"] as const) expect(ids).toContain(id);
   });
 
-  it("dresses him in the outfit his `look` names", () => {
-    for (const outfit of outfits) {
-      const state = mc();
-      state.look = outfit.id;
-      const ids = layerIdsFor(lookOf(state));
-      expect(ids).toContain(outfit.top);
-      expect(ids).toContain(outfit.bottom);
-    }
-  });
-
-  it("puts clothes OVER the body, not under it", () => {
+  it("puts clothes OVER the skin, not under them", () => {
     const ids = layerIdsFor(lookOf(mc()));
-    expect(ids.indexOf("body")).toBeLessThan(ids.indexOf("polera"));
+    expect(ids.indexOf("skin")).toBeLessThan(ids.indexOf("top"));
+    expect(ids.indexOf("top")).toBeLessThan(ids.indexOf("print"));
   });
 
-  it("draws the face LAST of the head, so no fringe and no cap brim buries the eyes", () => {
-    // This test used to assert the opposite, and it was wrong: with the face pushed
-    // before the hair, the hair drew on top of it — the exact thing the comment
+  it("draws the eyes LAST, so no fringe and no cap brim can bury them", () => {
+    // An earlier version of this test asserted the opposite and was wrong: with the
+    // face before the hair, the hair drew on top of it — the exact thing the comment
     // claimed to prevent. Painting order is the whole contract of a paper doll.
-    const fringe = mc();
-    fringe.hair = "tapado";
-    const ids = layerIdsFor(lookOf(fringe));
-    expect(ids.indexOf("face")).toBeGreaterThan(ids.indexOf("tapado"));
+    const bare = mc();
+    bare.hair = "suelto";
+    const ids = layerIdsFor(lookOf(bare));
+    expect(ids.indexOf("hair")).toBeLessThan(ids.indexOf("lens"));
 
-    const capped = layerIdsFor(lookOf(mc(["gorra"])));
-    expect(capped.indexOf("face")).toBeGreaterThan(capped.indexOf("gorra"));
+    const capped = layerIdsFor(lookOf(mc()));
+    expect(capped.indexOf("brim")).toBeLessThan(capped.indexOf("lens"));
   });
 });
 
-describe("what he owns is what he wears", () => {
-  it("puts on a cap once it is bought, and only then", () => {
-    expect(layerIdsFor(lookOf(mc()))).not.toContain("gorra");
-    expect(layerIdsFor(lookOf(mc(["gorra"])))).toContain("gorra");
+describe("the cap comes off", () => {
+  it("starts on, because the source sprite wears one", () => {
+    const ids = layerIdsFor(lookOf(mc()));
+    expect(ids).toContain("cap");
+    expect(ids).toContain("brim");
+    expect(ids).not.toContain("hair");
   });
 
-  it("hides the hair under the cap instead of drawing both", () => {
-    const bare = layerIdsFor(lookOf(mc()));
-    const capped = layerIdsFor(lookOf(mc(["gorra"])));
-    expect(bare).toContain("corto");
-    expect(capped).not.toContain("corto");
-    expect(describeLook(lookOf(mc(["gorra"])))).toContain("con gorra");
+  it("shows hair when it comes off, instead of a bald skull", () => {
+    // The whole reason a hair layer exists: the source sprite has no hair under its
+    // cap, so it was transplanted from the rival. Without it, taking the cap off
+    // left a head with nothing on it.
+    const bare = mc();
+    bare.hair = "suelto";
+    const ids = layerIdsFor(lookOf(bare));
+    expect(ids).toContain("hair");
+    expect(ids).not.toContain("cap");
+    expect(ids).not.toContain("brim");
   });
 
-  it("replaces the default shoes with the bought pair rather than stacking them", () => {
-    const ids = layerIdsFor(lookOf(mc(["zapatillas"])));
-    expect(ids).toContain("zapatillas");
-    expect(ids).not.toContain("zapatos");
-  });
-
-  it("wears a jacket over the top, and a mic and headphones over everything", () => {
-    const ids = layerIdsFor(lookOf(mc(["chaqueta", "audifonos", "microfono"])));
-    expect(ids.indexOf("polera")).toBeLessThan(ids.indexOf("chaqueta"));
-    expect(ids).toContain("audifonos");
-    expect(ids).toContain("microfono");
-  });
-
-  it("ignores items that are not something you can wear", () => {
-    // Buying a notebook or a beat must not change how he looks.
-    const plain = layerIdsFor(lookOf(mc()));
-    expect(layerIdsFor(lookOf(mc(["cuaderno", "beat-trap", "mesa"])))).toEqual(plain);
+  it("never draws hair and a cap at the same time", () => {
+    for (const style of headStyles) {
+      const state = mc();
+      state.hair = style.id;
+      const ids = layerIdsFor(lookOf(state));
+      expect(ids.includes("hair") && ids.includes("cap")).toBe(false);
+    }
   });
 });
 
-// The art is hand-authored pixel art in text, so it has exactly two failure modes
-// and both are invisible until something looks wrong on screen: a row one character
-// short, and a look-alike character typed by accident (a Cyrillic "о" for an "o").
-// Authoring the first version produced 113 of the former and 4 of the latter.
-describe("the art itself", () => {
-  const pieces = [
-    bodyArt,
-      faceArt,
-    ...hairArt,
-    ...beardArt,
-    ...topArt,
-    ...bottomArt,
-    ...Object.values(shoeArt),
-    ...Object.values(wearableArt),
-  ];
+describe("the shades come off and the face survives", () => {
+  it("keeps a pair of eyes either way", () => {
+    // The eyes are painted ON the lenses in the source sprite, so hiding the shades
+    // as one layer used to leave a blank face. Whichever way the toggle goes, some
+    // eye layer has to be in the stack.
+    for (const style of eyeStyles) {
+      const state = mc();
+      state.eyes = style.id;
+      const ids = layerIdsFor(lookOf(state));
+      expect(ids.includes("lens") || ids.includes("eyesOpen"), style.id).toBe(true);
+    }
+  });
 
-  it("gives every row exactly the grid's width", () => {
-    for (const piece of pieces) {
-      for (const [index, row] of piece.rows.entries()) {
-        expect(row.length, `${piece.id} fila ${index}`).toBe(ART_GRID.w);
+  it("swaps the shades for the open eyes rather than stacking them", () => {
+    const bare = mc();
+    bare.eyes = "descubierto";
+    const ids = layerIdsFor(lookOf(bare));
+    expect(ids).toContain("eyesOpen");
+    expect(ids).not.toContain("lens");
+    expect(ids).not.toContain("frame");
+  });
+});
+
+describe("what he wears, in words", () => {
+  it("names the fit and what is on his head and eyes", () => {
+    const capped = describeLook(lookOf(mc()));
+    expect(capped).toContain("Clasica");
+    expect(capped).toContain("con gorra");
+    expect(capped).toContain("lentes");
+  });
+
+  it("names the dye only when the cap is off, because otherwise nobody sees it", () => {
+    const bare = mc();
+    bare.hair = "suelto";
+    bare.hairColor = 3;
+    expect(describeLook(lookOf(bare))).toContain("rubio");
+    // Same dye, cap on: the readout talks about the cap instead of lying about hair.
+    const capped = mc();
+    capped.hairColor = 3;
+    expect(describeLook(lookOf(capped))).not.toContain("rubio");
+  });
+});
+
+// The layer metadata is generated by scripts/build-character-layers.mjs, and it has
+// two failure modes that are invisible until something looks wrong on screen: a
+// ramp that does not line up with its stops, and a stop list that is not sorted (in
+// which case the segment search picks the wrong pair and the recolour banding goes
+// backwards).
+describe("the layer metadata", () => {
+  it("covers every layer the stack can draw, exactly once", () => {
+    expect([...layerOrder].sort()).toEqual([...new Set(layerOrder)].sort());
+    for (const id of layerOrder) {
+      expect(characterLayers.filter((layer) => layer.id === id), id).toHaveLength(1);
+    }
+    expect(characterLayers).toHaveLength(layerOrder.length);
+  });
+
+  it("gives every layer as many ramp colours as it has stops", () => {
+    for (const layer of characterLayers) {
+      expect(layer.source.length, layer.id).toBe(layer.stops.length);
+      // Five: the shared outline plus a four-value garment ramp.
+      expect(layer.stops.length, layer.id).toBe(5);
+    }
+  });
+
+  it("keeps every stop list sorted and inside the luminance range", () => {
+    for (const layer of characterLayers) {
+      for (let i = 1; i < layer.stops.length; i += 1) {
+        expect(layer.stops[i], `${layer.id} stop ${i}`).toBeGreaterThanOrEqual(layer.stops[i - 1]);
       }
+      expect(layer.stops[0], layer.id).toBeGreaterThanOrEqual(0);
+      expect(layer.stops[layer.stops.length - 1], layer.id).toBeLessThanOrEqual(255);
     }
   });
 
-  it("uses only characters the legend defines", () => {
-    const legal = new Set([".", ...Object.keys(TONE_CHARS)]);
-    for (const piece of pieces) {
-      for (const [index, row] of piece.rows.entries()) {
-        const offenders = [...new Set(row.split(""))].filter((ch) => !legal.has(ch));
-        expect(offenders, `${piece.id} fila ${index}`).toEqual([]);
-      }
-    }
-  });
-
-  it("keeps every piece inside the grid", () => {
-    for (const piece of pieces) {
-      expect(piece.y + piece.rows.length, piece.id).toBeLessThanOrEqual(ART_GRID.h);
-      expect(piece.x, piece.id).toBeGreaterThanOrEqual(0);
-    }
-  });
-
-  it("outlines every piece that defines a silhouette", () => {
-    // Not every piece: a goatee or a moustache sits INSIDE an already-outlined
-    // head, and giving it its own outline makes it read as a sticker. The rule is
-    // about the shapes that own an edge against the background.
-    const silhouettes = [
-      bodyArt,
-          ...hairArt,
-      ...topArt,
-      ...bottomArt,
-      ...Object.values(shoeArt),
-      ...Object.values(wearableArt),
+  it("writes every colour as a six-digit hex, everywhere a ramp is stored", () => {
+    // A three-digit hex or a stray character parses to garbage in the recolour and
+    // shows up as a black patch, not as an error.
+    const hex = /^#[0-9a-f]{6}$/;
+    const ramps = [
+      [OUTLINE],
+      ...characterLayers.map((layer) => layer.source),
+      ...skinTones.map((tone) => tone.ramp),
+      ...hairColors.map((entry) => entry.ramp),
+      ...outfits.flatMap((fit) => [fit.top, fit.print, fit.bottom, fit.shoes, fit.cap]),
     ];
-    for (const piece of silhouettes) {
-      if (piece.rows.length === 0) continue;
-      expect(piece.rows.join("").includes("o"), String(piece.id)).toBe(true);
+    for (const ramp of ramps) {
+      for (const color of ramp) expect(color).toMatch(hex);
     }
+  });
+
+  it("keeps every garment ramp four values long, so it lines up with the stops", () => {
+    for (const tone of skinTones) expect(tone.ramp, tone.label).toHaveLength(4);
+    for (const entry of hairColors) expect(entry.ramp, entry.label).toHaveLength(4);
+    for (const fit of outfits) {
+      for (const ramp of [fit.top, fit.print, fit.bottom, fit.shoes, fit.cap]) {
+        expect(ramp, fit.label).toHaveLength(4);
+      }
+    }
+  });
+
+  it("composites at the source sprite's own size, so no layer drifts out of register", () => {
+    expect(LAYER_SIZE).toEqual({ w: 101, h: 240 });
   });
 });

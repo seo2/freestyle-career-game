@@ -26,11 +26,13 @@ export const NewGameConfig = {
     nickname: "Freestyler",
     look: 1,
     skin: 1,
-    // The look the MC starts with. The pieces themselves live in
-    // src/data/character.ts; these are just which one is on by default.
-    hair: "corto",
+    // The look the MC starts with. The art lives in
+    // public/assets/characters/layers/; these are just which slices are on.
+    // The source sprite's own look: cap on, shades on. A fresh MC IS the original
+    // render, and the barbershop is what takes the cap off.
+    hair: "gorra",
     hairColor: 1,
-    beard: "lampino",
+    eyes: "lentes",
     voice: 1,
     difficulty: "normal" as Difficulty,
     nameMaxLength: 16,
