@@ -24,7 +24,7 @@ import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
 import type { GameController } from "../managers/GameController";
 import { palette } from "../ui/palette";
-import { beardStyles, hairStyles } from "../data/character";
+import { eyeStyles, headStyles } from "../data/character";
 import { addHitZone, addRect } from "../ui/kit";
 import {
   CANVAS_H,
@@ -74,7 +74,7 @@ function pieceLabel(pieces: readonly { id: string; label: string }[], id: string
   return (pieces.find((piece) => piece.id === id) ?? pieces[0])?.label ?? "";
 }
 
-type RowId = "nombre" | "apodo" | "look" | "skin" | "hair" | "beard" | "voice" | "difficulty";
+type RowId = "nombre" | "apodo" | "look" | "skin" | "hair" | "eyes" | "voice" | "difficulty";
 
 interface RowDef {
   id: RowId;
@@ -88,8 +88,8 @@ const ROWS: readonly RowDef[] = [
   { id: "skin", label: "COLOR DE PIEL" },
   // The modular pieces (Fase 10). The barberia sells changes to these later, so
   // what the player picks here is a starting point, not a life sentence.
-  { id: "hair", label: "CORTE" },
-  { id: "beard", label: "BARBA" },
+  { id: "hair", label: "CABEZA" },
+  { id: "eyes", label: "MIRADA" },
   { id: "voice", label: "VOZ" },
   { id: "difficulty", label: "DIFICULTAD" },
 ];
@@ -264,12 +264,12 @@ export class CreateMcScene extends Phaser.Scene {
         this.addArrows(cy, accent, index, (delta) => controller.cycleSkin(delta));
         break;
       case "hair":
-        this.addValue(cy, pieceLabel(hairStyles, state.hair), palette.ink);
+        this.addValue(cy, pieceLabel(headStyles, state.hair), palette.ink);
         this.addArrows(cy, accent, index, (delta) => controller.cycleHair(delta));
         break;
-      case "beard":
-        this.addValue(cy, pieceLabel(beardStyles, state.beard), palette.ink);
-        this.addArrows(cy, accent, index, (delta) => controller.cycleBeard(delta));
+      case "eyes":
+        this.addValue(cy, pieceLabel(eyeStyles, state.eyes), palette.ink);
+        this.addArrows(cy, accent, index, (delta) => controller.cycleEyes(delta));
         break;
       case "voice":
         this.addValue(cy, optionLabel(state.voice), palette.ink);
@@ -365,8 +365,8 @@ export class CreateMcScene extends Phaser.Scene {
       case "hair":
         controller.cycleHair(delta);
         return;
-      case "beard":
-        controller.cycleBeard(delta);
+      case "eyes":
+        controller.cycleEyes(delta);
         return;
       case "voice":
         controller.cycleVoice(delta);

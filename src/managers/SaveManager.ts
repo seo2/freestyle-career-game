@@ -28,6 +28,7 @@ import { bondDefs } from "../data/bonds";
 import { emptyPlan } from "../systems/PlanSystem";
 import { DifficultyConfig } from "../data/config/DifficultyConfig";
 import { NewGameConfig } from "../data/config/NewGameConfig";
+import { eyeStyles, headStyles } from "../data/character";
 import { clamp } from "../utils/math";
 
 export const SAVE_KEY = "freestyle-career-save-v2";
@@ -182,6 +183,18 @@ function backfillItems(value: string[] | undefined): string[] {
   return [...new Set(value.filter((id): id is string => typeof id === "string"))];
 }
 
+// What is on his head. An unknown value is a cut from the first Fase 10 pass
+// ("corto", "afro", "trenzas"...), and picking one of those meant "no cap" — so
+// it becomes "suelto" unless the player had bought a gorra.
+function backfillHead(value: string | undefined, items: string[] | undefined): string {
+  if (headStyles.some((style) => style.id === value)) return value as string;
+  return Array.isArray(items) && items.includes("gorra") ? "gorra" : "suelto";
+}
+
+function backfillEyes(value: string | undefined): string {
+  return eyeStyles.some((style) => style.id === value) ? (value as string) : NewGameConfig.identity.eyes;
+}
+
 function backfillNickname(value: string | undefined): string {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.slice(0, NewGameConfig.identity.nicknameMaxLength) || NewGameConfig.identity.nickname;
@@ -239,6 +252,13 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         voice: backfillOption(saved.voice, NewGameConfig.identityOptions.voices, NewGameConfig.identity.voice),
         difficulty: backfillDifficulty(saved.difficulty),
         items: backfillItems(saved.items),
+        // Fase 10, second pass: the look used to name one of six invented haircuts
+        // and one of four beards, none of which had art. Now it names a slice of
+        // the sprite. A save from before carries a cut like "afro", which means the
+        // player chose to show hair, so it maps to "suelto" unless they had bought
+        // the cap. Its `beard` is dropped: no beard art exists (docs/ASSETS.md).
+        hair: backfillHead(saved.hair, saved.items),
+        eyes: backfillEyes(saved.eyes),
         // Fase 6: an older save has no week plan. It backfills empty (and the
         // opening snapshot is taken from the loaded resources) so the player
         // just starts planning from today instead of inheriting a fake week.

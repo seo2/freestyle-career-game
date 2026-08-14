@@ -5,7 +5,9 @@ export const BarberConfig = {
   // A cut costs about a shift and a half of work ($48 a shift), which puts it in
   // the same conversation as a shop item: worth it, never trivial.
   cutPrice: 70,
-  beardPrice: 35,
+  // A pair of shades, or putting them away. Cheapest of the three: it changes the
+  // most about how he reads and the least about him.
+  eyesPrice: 35,
   // Dye is the vain one, so it costs the most.
   colorPrice: 90,
   // Changing back to what you already have is free, and says so instead of

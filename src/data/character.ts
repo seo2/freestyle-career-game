@@ -1,447 +1,138 @@
-// The MC as a stack of layers (Fase 10).
+// The MC's palette: what each of his layers is coloured with (Fase 10).
 //
-// Why this is data and not a sprite: the owner asked for a character that is
-// genuinely customizable and MODULAR, so that clothes and accessories bought later
-// show up on him. That cannot come from the one flat 101x240 render the project
-// had — a paper doll needs its pieces separable, and there is no layered art in
-// reference/ to cut them from (its sprite folder is skies, walls and speakers).
+// The art itself lives in public/assets/characters/layers/ — slices of the
+// original sprite, cut by scripts/build-character-layers.mjs. This file holds the
+// COLOURS those slices get repainted with, and nothing else.
 //
-// So each piece is pixel data on a 24x56 grid — the same proportion as the old
-// render — drawn as rectangles by src/ui/characterDraw.ts. At the sizes the MC
-// appears (46 to 262 px tall) that reads as chunky pixel art, which is the game's
-// register anyway.
+// Why ramps and not single colours: the sprite is shaded, and shading is what
+// makes a round head look round. A layer is recoloured by remapping its own
+// luminance onto four values, so the drawing survives and only the hue moves
+// (src/ui/characterDraw.ts). One colour per garment would flatten him into a
+// cut-out, which is exactly how the three earlier procedural attempts read.
 //
-// This is built to be REPLACED, the same way the synthesized music is: swap a
-// piece's `rects` for a sprite key and nothing else in the chain changes.
+// Order inside a ramp is dark to light. The outline is shared and lives here too:
+// it belongs to the drawing, not to the shirt, and letting a garment's ramp reach
+// it is what put a red halo around the cap on the first attempt.
 
-export const GRID = { w: 24, h: 56 } as const;
+// Four values, dark to light. Not five: the fifth stop is the shared outline.
+export type Ramp = readonly [string, string, string, string];
 
-// Colour roles. A piece names a role, and the palette resolves it — that is what
-// lets one hairstyle work on five skin tones and one jacket in four colourways.
-export type ToneKey =
-  | "skin"
-  | "skinShade"
-  | "skinLight"
-  | "hair"
-  | "hairShade"
-  | "top"
-  | "topShade"
-  | "topLight"
-  | "bottom"
-  | "bottomShade"
-  | "shoe"
-  | "shoeShade"
-  | "metal"
-  | "lens"
-  | "line";
-
-export interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  tone: ToneKey;
-}
-
-export interface Piece {
-  id: string;
-  label: string;
-  rects: Rect[];
-}
+// Near-black with a hint of the night palette, so the figure is not cut out of
+// the screen. Every layer's darkest stop resolves to this.
+export const OUTLINE = "#050410";
 
 // --- skin ------------------------------------------------------------------
-// Sampled from the Crear MC mockup's swatch strip, which is where the player
-// picks them. Each tone carries its own shade so the shading stays in family
-// instead of going grey.
-// Each tone carries THREE values, not two. A single shade reads as a flat cut-out;
-// the highlight is what makes a round head look round, and the original render's
-// style depends on it.
-export const skinTones: { id: number; label: string; skin: string; skinShade: string; skinLight: string }[] = [
-  { id: 1, label: "Claro", skin: "#e0a97c", skinShade: "#b87f52", skinLight: "#f4cfa6" },
-  { id: 2, label: "Trigueno", skin: "#c98a58", skinShade: "#9c6639", skinLight: "#e3ab7d" },
-  { id: 3, label: "Moreno", skin: "#a2673d", skinShade: "#7a4a29", skinLight: "#bf855a" },
-  { id: 4, label: "Oscuro", skin: "#6c4025", skinShade: "#4c2a17", skinLight: "#8a583a" },
-  { id: 5, label: "Muy oscuro", skin: "#452a1a", skinShade: "#2c1a0f", skinLight: "#5e3d29" },
+// Sampled off the Crear MC mockup's swatch strip, which is where the player picks
+// them, then extended into four-value ramps against the sprite's own shading.
+// Tone 2 IS the source sprite's skin, so a default MC is the original render.
+export const skinTones: { id: number; label: string; ramp: Ramp }[] = [
+  { id: 1, label: "Claro", ramp: ["#3a1d10", "#9c6641", "#d29a69", "#f4d3b0"] },
+  { id: 2, label: "Trigueno", ramp: ["#180e16", "#7e441f", "#b26a36", "#f0d2b8"] },
+  { id: 3, label: "Moreno", ramp: ["#22110a", "#653517", "#93522a", "#c99764"] },
+  { id: 4, label: "Oscuro", ramp: ["#170b06", "#48250f", "#6d3c1d", "#9c6a42"] },
+  { id: 5, label: "Muy oscuro", ramp: ["#100704", "#301907", "#4d2a13", "#71472b"] },
 ];
 
-// --- the body: always drawn, never chosen ----------------------------------
-export const bodyPiece: Piece = {
-  id: "body",
-  label: "Cuerpo",
-  rects: [
-    // head
-    { x: 8, y: 4, w: 8, h: 8, tone: "skin" },
-    { x: 8, y: 10, w: 8, h: 2, tone: "skinShade" },
-    // ears
-    { x: 7, y: 7, w: 1, h: 2, tone: "skinShade" },
-    { x: 16, y: 7, w: 1, h: 2, tone: "skinShade" },
-    // neck
-    { x: 10, y: 12, w: 4, h: 2, tone: "skinShade" },
-    // torso (covered by a top, but there when the top is a vest)
-    { x: 8, y: 14, w: 8, h: 12, tone: "skin" },
-    // arms
-    { x: 5, y: 15, w: 3, h: 11, tone: "skin" },
-    { x: 16, y: 15, w: 3, h: 11, tone: "skin" },
-    // hands
-    { x: 5, y: 26, w: 3, h: 2, tone: "skinShade" },
-    { x: 16, y: 26, w: 3, h: 2, tone: "skinShade" },
-    // legs
-    { x: 9, y: 26, w: 3, h: 16, tone: "skin" },
-    { x: 12, y: 26, w: 3, h: 16, tone: "skin" },
-  ],
-};
-
-// The eyes sit above the hair in z-order so a fringe cannot bury them.
-export const facePiece: Piece = {
-  id: "face",
-  label: "Cara",
-  rects: [
-    // Brows first: without them the face reads blank whatever the eyes do.
-    { x: 9, y: 6, w: 2, h: 1, tone: "hairShade" },
-    { x: 13, y: 6, w: 2, h: 1, tone: "hairShade" },
-    { x: 9, y: 7, w: 2, h: 2, tone: "line" },
-    { x: 13, y: 7, w: 2, h: 2, tone: "line" },
-    // A single glint pixel in each eye. Two solid black squares read as a mask.
-    { x: 10, y: 7, w: 1, h: 1, tone: "metal" },
-    { x: 14, y: 7, w: 1, h: 1, tone: "metal" },
-    // Mouth.
-    { x: 11, y: 10, w: 3, h: 1, tone: "skinShade" },
-  ],
-};
-
-// --- hair: what the barbershop sells ---------------------------------------
-export const hairStyles: Piece[] = [
-  {
-    id: "rapado",
-    label: "Rapado",
-    rects: [
-      { x: 8, y: 3, w: 8, h: 2, tone: "hair" },
-      { x: 7, y: 4, w: 1, h: 3, tone: "hairShade" },
-      { x: 16, y: 4, w: 1, h: 3, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "corto",
-    label: "Corto",
-    rects: [
-      { x: 7, y: 2, w: 10, h: 3, tone: "hair" },
-      { x: 7, y: 5, w: 2, h: 2, tone: "hairShade" },
-      { x: 15, y: 5, w: 2, h: 2, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "afro",
-    label: "Afro",
-    rects: [
-      { x: 6, y: 0, w: 12, h: 5, tone: "hair" },
-      { x: 5, y: 2, w: 1, h: 4, tone: "hairShade" },
-      { x: 18, y: 2, w: 1, h: 4, tone: "hairShade" },
-      { x: 7, y: 5, w: 2, h: 2, tone: "hairShade" },
-      { x: 15, y: 5, w: 2, h: 2, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "trenzas",
-    label: "Trenzas",
-    rects: [
-      { x: 7, y: 2, w: 10, h: 3, tone: "hair" },
-      { x: 7, y: 5, w: 1, h: 8, tone: "hair" },
-      { x: 16, y: 5, w: 1, h: 8, tone: "hair" },
-      { x: 9, y: 3, w: 1, h: 2, tone: "hairShade" },
-      { x: 12, y: 3, w: 1, h: 2, tone: "hairShade" },
-      { x: 14, y: 3, w: 1, h: 2, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "mohicano",
-    label: "Mohicano",
-    rects: [
-      { x: 11, y: 0, w: 3, h: 5, tone: "hair" },
-      { x: 8, y: 3, w: 3, h: 2, tone: "hairShade" },
-      { x: 14, y: 3, w: 2, h: 2, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "tapado",
-    label: "Pelo largo",
-    rects: [
-      { x: 6, y: 1, w: 12, h: 4, tone: "hair" },
-      { x: 6, y: 5, w: 2, h: 9, tone: "hair" },
-      { x: 16, y: 5, w: 2, h: 9, tone: "hair" },
-      { x: 6, y: 12, w: 2, h: 2, tone: "hairShade" },
-      { x: 16, y: 12, w: 2, h: 2, tone: "hairShade" },
-    ],
-  },
+// --- hair ------------------------------------------------------------------
+// What the barbershop dyes. The hair layer is the rival's drawn quiff scaled to
+// the MC's skull, so these ramps repaint real hair rather than tint a shape.
+export const hairColors: { id: number; label: string; ramp: Ramp }[] = [
+  { id: 1, label: "Negro", ramp: ["#0b0910", "#1b1822", "#2b2634", "#4a4356"] },
+  { id: 2, label: "Castano", ramp: ["#34160d", "#4a1e0f", "#532614", "#a07559"] },
+  { id: 3, label: "Rubio", ramp: ["#3a2405", "#7d5510", "#b98a22", "#e6c45c"] },
+  { id: 4, label: "Platinado", ramp: ["#2c2f3c", "#6d7386", "#a8aebd", "#e4e8f2"] },
+  { id: 5, label: "Rojo", ramp: ["#2a0d07", "#66220f", "#9b3a1c", "#cf6a3c"] },
 ];
 
-// --- beards: the other half of the barbershop -----------------------------
-export const beardStyles: Piece[] = [
-  { id: "lampino", label: "Sin barba", rects: [] },
-  {
-    id: "candado",
-    label: "Candado",
-    rects: [
-      { x: 11, y: 11, w: 2, h: 2, tone: "hairShade" },
-      { x: 10, y: 10, w: 1, h: 1, tone: "hairShade" },
-      { x: 13, y: 10, w: 1, h: 1, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "barba",
-    label: "Barba",
-    rects: [
-      { x: 8, y: 9, w: 8, h: 4, tone: "hairShade" },
-      { x: 9, y: 13, w: 6, h: 1, tone: "hairShade" },
-      { x: 10, y: 8, w: 4, h: 1, tone: "hairShade" },
-    ],
-  },
-  {
-    id: "bigote",
-    label: "Bigote",
-    rects: [{ x: 10, y: 9, w: 4, h: 1, tone: "hairShade" }],
-  },
+// --- what is on his head ---------------------------------------------------
+// Two options, because there are two pieces of drawn art: the sprite's own cap and
+// the transplanted hair. Six invented haircuts on one dome is the fake variety the
+// owner rejected; more cuts are listed as pending in docs/ASSETS.md.
+export const headStyles: { id: string; label: string; capped: boolean }[] = [
+  { id: "gorra", label: "Con gorra", capped: true },
+  { id: "suelto", label: "Al aire", capped: false },
 ];
 
-// --- clothes: what the shop sells ------------------------------------------
-export const tops: Piece[] = [
-  {
-    id: "polera",
-    label: "Polera",
-    rects: [
-      { x: 8, y: 14, w: 8, h: 10, tone: "top" },
-      { x: 5, y: 15, w: 3, h: 4, tone: "top" },
-      { x: 16, y: 15, w: 3, h: 4, tone: "top" },
-      { x: 8, y: 22, w: 8, h: 2, tone: "topShade" },
-    ],
-  },
-  {
-    id: "polerontrivio",
-    label: "Poleron",
-    rects: [
-      { x: 7, y: 13, w: 10, h: 13, tone: "top" },
-      { x: 5, y: 15, w: 3, h: 11, tone: "top" },
-      { x: 16, y: 15, w: 3, h: 11, tone: "top" },
-      { x: 10, y: 13, w: 4, h: 2, tone: "topShade" },
-      { x: 7, y: 24, w: 10, h: 2, tone: "topShade" },
-    ],
-  },
-  {
-    id: "camisa",
-    label: "Camisa abierta",
-    rects: [
-      { x: 7, y: 14, w: 3, h: 12, tone: "top" },
-      { x: 14, y: 14, w: 3, h: 12, tone: "top" },
-      { x: 5, y: 15, w: 3, h: 11, tone: "top" },
-      { x: 16, y: 15, w: 3, h: 11, tone: "top" },
-      { x: 7, y: 24, w: 3, h: 2, tone: "topShade" },
-      { x: 14, y: 24, w: 3, h: 2, tone: "topShade" },
-    ],
-  },
-  {
-    id: "camiseta",
-    label: "Camiseta ancha",
-    rects: [
-      { x: 7, y: 14, w: 10, h: 13, tone: "top" },
-      { x: 5, y: 15, w: 2, h: 5, tone: "top" },
-      { x: 17, y: 15, w: 2, h: 5, tone: "top" },
-      { x: 7, y: 25, w: 10, h: 2, tone: "topShade" },
-      { x: 10, y: 16, w: 4, h: 4, tone: "topShade" },
-    ],
-  },
+// --- what is on his eyes ---------------------------------------------------
+// Also two, and also both drawn: the MC's shades, or the rival's open eyes fitted
+// to the MC's lens band. Hiding the shades used to leave a face with no eyes,
+// because the eyes are painted ON the lenses in the source sprite.
+export const eyeStyles: { id: string; label: string; shades: boolean }[] = [
+  { id: "lentes", label: "Lentes oscuros", shades: true },
+  { id: "descubierto", label: "A cara pelada", shades: false },
 ];
-
-export const bottoms: Piece[] = [
-  {
-    id: "jeans",
-    label: "Jeans",
-    // Widths chosen so the two legs MEET: at 3 wide starting at x8 and x13 they
-    // left a two-pixel gap where the body's skin showed through between them.
-    rects: [
-      { x: 8, y: 26, w: 8, h: 3, tone: "bottom" },
-      { x: 8, y: 29, w: 4, h: 13, tone: "bottom" },
-      { x: 12, y: 29, w: 4, h: 13, tone: "bottom" },
-      { x: 11, y: 29, w: 2, h: 13, tone: "bottomShade" },
-      { x: 8, y: 40, w: 4, h: 2, tone: "bottomShade" },
-      { x: 12, y: 40, w: 4, h: 2, tone: "bottomShade" },
-    ],
-  },
-  {
-    id: "buzo",
-    label: "Buzo",
-    rects: [
-      { x: 7, y: 26, w: 10, h: 4, tone: "bottom" },
-      { x: 7, y: 30, w: 5, h: 12, tone: "bottom" },
-      { x: 12, y: 30, w: 5, h: 12, tone: "bottom" },
-      { x: 11, y: 30, w: 2, h: 12, tone: "bottomShade" },
-      { x: 7, y: 38, w: 5, h: 2, tone: "bottomShade" },
-      { x: 12, y: 38, w: 5, h: 2, tone: "bottomShade" },
-    ],
-  },
-  {
-    id: "short",
-    label: "Short",
-    rects: [
-      { x: 8, y: 26, w: 8, h: 3, tone: "bottom" },
-      { x: 8, y: 29, w: 4, h: 6, tone: "bottom" },
-      { x: 12, y: 29, w: 4, h: 6, tone: "bottom" },
-      { x: 11, y: 29, w: 2, h: 6, tone: "bottomShade" },
-      { x: 8, y: 33, w: 4, h: 2, tone: "bottomShade" },
-      { x: 12, y: 33, w: 4, h: 2, tone: "bottomShade" },
-    ],
-  },
-];
-
-// --- accessories: what OWNING an item puts on him -------------------------
-// Keyed by the shop item id, so buying it is what equips it (src/data/items.ts).
-export const wearables: Record<string, Piece> = {
-  gorra: {
-    id: "gorra",
-    label: "Gorra",
-    rects: [
-      { x: 7, y: 2, w: 10, h: 3, tone: "top" },
-      { x: 7, y: 5, w: 10, h: 1, tone: "topShade" },
-      { x: 16, y: 4, w: 4, h: 2, tone: "top" },
-      { x: 11, y: 2, w: 2, h: 1, tone: "topShade" },
-    ],
-  },
-  chaqueta: {
-    id: "chaqueta",
-    label: "Chaqueta",
-    rects: [
-      { x: 6, y: 13, w: 12, h: 14, tone: "topShade" },
-      { x: 4, y: 15, w: 3, h: 12, tone: "topShade" },
-      { x: 17, y: 15, w: 3, h: 12, tone: "topShade" },
-      { x: 11, y: 14, w: 2, h: 12, tone: "top" },
-      { x: 6, y: 25, w: 12, h: 2, tone: "line" },
-    ],
-  },
-  zapatillas: {
-    id: "zapatillas",
-    label: "Zapatillas",
-    rects: [
-      { x: 7, y: 42, w: 5, h: 4, tone: "shoe" },
-      { x: 12, y: 42, w: 5, h: 4, tone: "shoe" },
-      { x: 7, y: 45, w: 5, h: 1, tone: "line" },
-      { x: 12, y: 45, w: 5, h: 1, tone: "line" },
-    ],
-  },
-  audifonos: {
-    id: "audifonos",
-    label: "Audifonos",
-    rects: [
-      { x: 6, y: 5, w: 2, h: 4, tone: "metal" },
-      { x: 16, y: 5, w: 2, h: 4, tone: "metal" },
-      { x: 8, y: 2, w: 8, h: 1, tone: "metal" },
-    ],
-  },
-  microfono: {
-    id: "microfono",
-    label: "Microfono",
-    rects: [
-      { x: 19, y: 20, w: 2, h: 5, tone: "metal" },
-      { x: 19, y: 18, w: 2, h: 2, tone: "line" },
-    ],
-  },
-};
-
-// Shoes are always on, so bare feet never happen; buying zapatillas replaces them.
-export const defaultShoes: Piece = {
-  id: "zapatos",
-  label: "Zapatos",
-  rects: [
-    { x: 8, y: 42, w: 4, h: 3, tone: "line" },
-    { x: 12, y: 42, w: 4, h: 3, tone: "line" },
-  ],
-};
 
 // --- colourways ------------------------------------------------------------
 // `look` picks one. The name matters: this is the MC's fit, not a slider.
-export const outfits: {
+export interface Outfit {
   id: number;
   label: string;
-  top: string;
-  bottom: string;
-  colors: {
-    top: string;
-    topShade: string;
-    topLight: string;
-    bottom: string;
-    bottomShade: string;
-    shoe: string;
-    shoeShade: string;
-  };
-}[] = [
+  top: Ramp;
+  print: Ramp;
+  bottom: Ramp;
+  shoes: Ramp;
+  cap: Ramp;
+}
+
+export const outfits: Outfit[] = [
   {
-    // The original render's fit: black tee with a white print, bright blue shorts,
-    // white sneakers. Keeping it as look 1 is what makes the modular MC read as the
-    // same character rather than a replacement.
+    // The source sprite's own fit, ramp for ramp: black tee with a white print,
+    // bright blue shorts, white sneakers, red cap. Keeping it as look 1 is what
+    // makes the modular MC read as the same character and not a replacement.
     id: 1,
     label: "Clasica",
-    top: "polera",
-    bottom: "short",
-    colors: {
-      top: "#1b1b20",
-      topShade: "#0e0e12",
-      topLight: "#f2f4fb",
-      bottom: "#1f7fd4",
-      bottomShade: "#155a99",
-      shoe: "#f2f4fb",
-      shoeShade: "#b9bfd0",
-    },
+    top: ["#06060b", "#0f0f10", "#161515", "#344358"],
+    print: ["#616060", "#a6a5a5", "#d7d7d7", "#fcfcfc"],
+    bottom: ["#02183f", "#003c93", "#005ecb", "#0074e3"],
+    shoes: ["#040409", "#1c1b24", "#949392", "#f5f5f4"],
+    cap: ["#2a0522", "#ac080b", "#d41719", "#f9e0df"],
   },
   {
     id: 2,
     label: "Poleron",
-    top: "polerontrivio",
-    bottom: "buzo",
-    colors: {
-      top: "#4a3f7a",
-      topShade: "#332b57",
-      topLight: "#b9a6f0",
-      bottom: "#2a2a33",
-      bottomShade: "#1c1c22",
-      shoe: "#c8ccd8",
-      shoeShade: "#8f95a6",
-    },
+    top: ["#1b1636", "#332b57", "#4a3f7a", "#8f7fd0"],
+    print: ["#5a4e2a", "#9a8746", "#cbb469", "#f0e0a8"],
+    bottom: ["#131318", "#22222a", "#33333d", "#5a5a68"],
+    shoes: ["#0f0f14", "#3a3a44", "#8f95a6", "#d8dbe8"],
+    cap: ["#141026", "#2a2350", "#4a3f7a", "#b9a6f0"],
   },
   {
     id: 3,
     label: "Camisa",
-    top: "camisa",
-    bottom: "jeans",
-    colors: {
-      top: "#8d3a3a",
-      topShade: "#6a2a2a",
-      topLight: "#e0b4a4",
-      bottom: "#2f3a5e",
-      bottomShade: "#212840",
-      shoe: "#2b2b33",
-      shoeShade: "#1a1a20",
-    },
+    top: ["#3a1414", "#6a2a2a", "#8d3a3a", "#c98070"],
+    print: ["#4a4438", "#8a8270", "#c4bda6", "#f2ecd8"],
+    bottom: ["#151a2c", "#212840", "#2f3a5e", "#54648f"],
+    shoes: ["#0c0c10", "#1a1a20", "#3a3a44", "#6e6e7c"],
+    cap: ["#1c1210", "#4a2a20", "#7a4636", "#c08a68"],
   },
   {
     id: 4,
     label: "Ancha",
-    top: "camiseta",
-    bottom: "short",
-    colors: {
-      top: "#2f6b52",
-      topShade: "#22503c",
-      topLight: "#a8e0c4",
-      bottom: "#d8dbe8",
-      bottomShade: "#a3a9bd",
-      shoe: "#e4e7f2",
-      shoeShade: "#aeb4c4",
-    },
+    top: ["#10382a", "#22503c", "#2f6b52", "#6fbf96"],
+    print: ["#3c5a4a", "#7aa08c", "#b4d8c4", "#eafaf0"],
+    bottom: ["#5c6070", "#8a90a4", "#b8bece", "#e8ebf4"],
+    shoes: ["#12120f", "#4a4326", "#8a7c40", "#e0d488"],
+    cap: ["#2c2a10", "#6a6420", "#a89a30", "#e8dc78"],
   },
 ];
 
-// Hair colour follows the skin tone by default, so nobody starts out looking
-// dyed; the barbershop is where that changes.
-export const hairColors: { id: number; label: string; hair: string; hairShade: string }[] = [
-  { id: 1, label: "Negro", hair: "#221c1c", hairShade: "#141010" },
-  { id: 2, label: "Castano", hair: "#4a2f1d", hairShade: "#301d11" },
-  { id: 3, label: "Rubio", hair: "#c9a24a", hairShade: "#9c7a2f" },
-  { id: 4, label: "Platinado", hair: "#d8dbe8", hairShade: "#9aa0b8" },
-  { id: 5, label: "Rojo", hair: "#8d3a2a", hairShade: "#6a271b" },
-];
+// The visor and the glasses do not follow the fit: the visor is black on every cap
+// the game draws, and glass is glass. Fixed ramps, so a green outfit cannot dye
+// them green.
+export const brimRamp: Ramp = ["#010000", "#060505", "#11100f", "#432713"];
+export const glassRamp: Ramp = ["#141210", "#565554", "#a3a3a2", "#efefef"];
+// Open eyes keep the colour they were drawn with: lash, iris, sclera, glint. Under
+// the glass ramp they came out grey, and a grey eye reads as a blind one.
+export const eyeRamp: Ramp = ["#101c14", "#36684a", "#c3c7c0", "#f9f7f5"];
+
+export function skinRamp(id: number): Ramp {
+  return (skinTones.find((tone) => tone.id === id) ?? skinTones[0]).ramp;
+}
+
+export function hairRamp(id: number): Ramp {
+  return (hairColors.find((entry) => entry.id === id) ?? hairColors[0]).ramp;
+}
+
+export function outfitOf(id: number): Outfit {
+  return outfits.find((entry) => entry.id === id) ?? outfits[0];
+}

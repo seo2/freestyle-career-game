@@ -21,8 +21,8 @@ import type { ViewCtx } from "./viewKit";
 const TITLE = { x: 28, y: 92, size: 26 } as const;
 const MIRROR = { x: 26, y: 124, w: 268, h: 354 } as const;
 const COLUMNS: { slot: BarberSlot; title: string; x: number; w: number }[] = [
-  { slot: "hair", title: "CORTE", x: 306, w: 208 },
-  { slot: "beard", title: "BARBA", x: 524, w: 190 },
+  { slot: "hair", title: "CABEZA", x: 306, w: 208 },
+  { slot: "eyes", title: "MIRADA", x: 524, w: 190 },
   { slot: "color", title: "COLOR", x: 724, w: 210 },
 ];
 const FOOTER = { x: 26, y: 486, w: 908, h: 40 } as const;
@@ -88,6 +88,9 @@ function chair(
   price.setX(Math.round(x + w - 10 - price.width));
   if (!offer.current && !offer.affordable) {
     line(ctx, x + 12, y + 27, "No te alcanza.", 9, palette.red, w - 20);
+  } else if (offer.hidden) {
+    // A dye under a cap is money for nothing, so the wall says so BEFORE the sale.
+    line(ctx, x + 12, y + 27, "Tapado por la gorra.", 9, palette.muted, w - 20);
   }
   if (canBuy) {
     addHitZone(ctx.scene, ctx.layer, x, y, w, 34, () => ctx.controller.buyLook(column.slot, offer.id));

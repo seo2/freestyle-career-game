@@ -433,9 +433,12 @@ export interface GameState {
   // The modular look (Fase 10). `look` and `skin` existed since Fase 4 but changed
   // nothing on screen; these are the pieces the barbershop sells, and the clothes
   // the player owns are read straight from `items`.
+  // `hair` is what is on his head ("gorra" | "suelto") and `eyes` what is on his
+  // eyes ("lentes" | "descubierto"). Both name a piece of drawn art, which is why
+  // there are two of each and not six: see src/data/character.ts.
   hair: string;
   hairColor: number;
-  beard: string;
+  eyes: string;
   // Music-career milestones already claimed (Fase 10), by id. Persisted: a disco is
   // something that survives, so it had better survive a reload.
   releases: string[];

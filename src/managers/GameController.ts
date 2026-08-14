@@ -28,7 +28,7 @@ import { spendActionTime } from "../systems/CalendarSystem";
 import { renderStateToText } from "./renderState";
 import type { AudioService } from "../services/AudioService";
 import type { SoundId } from "../data/sounds";
-import { beardStyles, hairColors, hairStyles } from "../data/character";
+import { eyeStyles, hairColors, headStyles } from "../data/character";
 import { buyLook as buyLookSys, type BarberSlot } from "../systems/BarberSystem";
 import { resolveDilemma as resolveDilemmaSys, rollDilemma } from "../systems/DilemmaSystem";
 import { closeEpilogue as closeEpilogueSys } from "../systems/EpilogueSystem";
@@ -624,12 +624,12 @@ export class GameController {
   // The modular pieces (Fase 10). Cycling by id keeps the data as the source of
   // truth: adding a hairstyle to src/data/character.ts needs no code here.
   cycleHair(delta: number): void {
-    this.state.hair = cycleId(hairStyles, this.state.hair, delta);
+    this.state.hair = cycleId(headStyles, this.state.hair, delta);
     eventBus.emit("STATE_CHANGED", undefined);
   }
 
-  cycleBeard(delta: number): void {
-    this.state.beard = cycleId(beardStyles, this.state.beard, delta);
+  cycleEyes(delta: number): void {
+    this.state.eyes = cycleId(eyeStyles, this.state.eyes, delta);
     eventBus.emit("STATE_CHANGED", undefined);
   }
 

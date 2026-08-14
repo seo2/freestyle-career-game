@@ -416,6 +416,33 @@ describe("SaveManager", () => {
     expect(loaded.rivalries[0].heat).toBe(RelationshipConfig.rivalry.max);
   });
 
+  // The look changed shape in the second Fase 10 pass: `hair` used to name one of
+  // six invented haircuts and `beard` one of four beards, none of which had art.
+  // Now `hair` names which slice of the sprite is on his head. A save from before
+  // must not land on a look that does not exist.
+  it("migrates a look from the invented-haircut era", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const old = createNewState("MC Viejo", 7) as unknown as Record<string, unknown>;
+    old.mode = "career";
+    old.hair = "afro";
+    old.beard = "candado";
+    delete old.eyes;
+    const normalized = manager.normalize(old as unknown as GameState);
+    // Picking a haircut meant "no cap", so the cap comes off.
+    expect(normalized.hair).toBe("suelto");
+    expect(normalized.eyes).toBe("lentes");
+  });
+
+  it("keeps the cap on for a save whose player had bought one", () => {
+    const manager = createSaveManager(createMemoryStorage());
+    const old = createNewState("MC Gorra", 8) as unknown as Record<string, unknown>;
+    old.mode = "career";
+    old.hair = "trenzas";
+    old.items = ["gorra", "cuaderno"];
+    const normalized = manager.normalize(old as unknown as GameState);
+    expect(normalized.hair).toBe("gorra");
+  });
+
   it("delete removes both the v2 and v1 saves", () => {
     const storage = createMemoryStorage();
     const manager = createSaveManager(storage);

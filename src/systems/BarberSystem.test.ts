@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { createNewState } from "../core/state";
 import { barberOffers, buyLook } from "./BarberSystem";
 import { BarberConfig } from "../data/config/BarberConfig";
-import { hairStyles } from "../data/character";
+import { eyeStyles, headStyles } from "../data/character";
 import type { GameState } from "../core/types";
 
 function career(cash = 500): GameState {
@@ -17,13 +17,13 @@ function career(cash = 500): GameState {
 }
 
 const otherCut = (state: GameState): string =>
-  (hairStyles.find((piece) => piece.id !== state.hair) ?? hairStyles[0]).id;
+  (headStyles.find((style) => style.id !== state.hair) ?? headStyles[0]).id;
 
 describe("what is on the wall", () => {
   it("offers every piece the data has, and marks the one being worn", () => {
     const state = career();
     const offers = barberOffers(state, "hair");
-    expect(offers).toHaveLength(hairStyles.length);
+    expect(offers).toHaveLength(headStyles.length);
     expect(offers.filter((offer) => offer.current)).toHaveLength(1);
     expect(offers.find((offer) => offer.current)?.id).toBe(state.hair);
   });
@@ -65,11 +65,12 @@ describe("buying a change", () => {
     expect(state.cash).toBe(500);
   });
 
-  it("sells beards and dye from their own price lists", () => {
+  it("sells the shades and the dye from their own price lists", () => {
     const state = career();
-    buyLook(state, "beard", "barba");
-    expect(state.beard).toBe("barba");
-    expect(state.cash).toBe(500 - BarberConfig.beardPrice);
+    const otherEyes = (eyeStyles.find((style) => style.id !== state.eyes) ?? eyeStyles[0]).id;
+    buyLook(state, "eyes", otherEyes);
+    expect(state.eyes).toBe(otherEyes);
+    expect(state.cash).toBe(500 - BarberConfig.eyesPrice);
 
     const cash = state.cash;
     buyLook(state, "color", "3");
@@ -77,9 +78,23 @@ describe("buying a change", () => {
     expect(state.cash).toBe(cash - BarberConfig.colorPrice);
   });
 
-  it("prices dye above a cut above a beard trim", () => {
-    // The vain one costs the most, and a trim is the cheap visit.
+  it("prices dye above a cut above a change of shades", () => {
+    // The vain one costs the most, and swapping the shades is the cheap visit.
     expect(BarberConfig.colorPrice).toBeGreaterThan(BarberConfig.cutPrice);
-    expect(BarberConfig.cutPrice).toBeGreaterThan(BarberConfig.beardPrice);
+    expect(BarberConfig.cutPrice).toBeGreaterThan(BarberConfig.eyesPrice);
+  });
+
+  it("warns that a dye under a cap is money for nothing, before and after the sale", () => {
+    // A shop that takes your money and shows you nothing is the one way this could
+    // feel like a scam, and the cap is on by default.
+    const capped = career();
+    expect(capped.hair).toBe("gorra");
+    expect(barberOffers(capped, "color").every((offer) => offer.hidden)).toBe(true);
+    expect(buyLook(capped, "color", "3")?.join(" ")).toContain("no se te ve el pelo");
+
+    const bare = career();
+    bare.hair = "suelto";
+    expect(barberOffers(bare, "color").some((offer) => offer.hidden)).toBe(false);
+    expect(buyLook(bare, "color", "3")?.join(" ")).not.toContain("no se te ve");
   });
 });

@@ -219,6 +219,12 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
       look: state.look,
       skin: state.skin,
       voice: state.voice,
+      // The modular look, in the text dump too: the MC is composited from slices of
+      // his sprite now, and "the cap came off" must be checkable without reading a
+      // PNG. Audio needed its own probe for the same reason.
+      hair: state.hair,
+      hairColor: state.hairColor,
+      eyes: state.eyes,
       difficulty: state.difficulty,
       stage: state.stage,
       level: state.level,

@@ -307,3 +307,83 @@ Original prompt: Quiero desarrollar un juego basado en la cultura del freestyle 
 - **Pendiente de decisión del owner** (`docs/GDD.md`): ¿las batallas deben ser estrictamente de fin de semana? Hoy la cita rige el plan y el nodo PLAZA del mapa sigue abierto cualquier día.
 - Assets pendientes con su hueco ya reservado en pantalla: ver `docs/ASSETS.md` (iconos de ítem, ilustraciones de trabajo, carrito, multitud de batalla, ciudad isométrica del mapa, variantes de aspecto/piel del MC).
 - Backlog absorbed into `docs/PLAN.md` fases 3–10: mockup-faithful screens (create-MC, shop tabs, calendar cards, battle choice cards), week-end summary, richer rival archetypes, stage-specific assets, true transparent sprite sheets beyond the logo, and Capacitor packaging.
+
+## Fase 10 — el MC cortado de su propio sprite (2026-08-14)
+
+Tres intentos de dibujar al MC proceduralmente (lista de rects 24×56, string-art
+32×72 a mano, perfiles generados 100×240) y el owner rechazó los tres: "sigue
+siendo muy básico, quiero que recrees dinamicamente el mismo estilo que tenemos en
+el sprite". Tenía razón y estaba resolviendo el problema equivocado: geometría no
+reproduce un dibujo. **El estilo correcto ya existía en `mc-idle.png`.**
+
+Así que en vez de imitarlo, se parte. `scripts/build-character-layers.mjs` corta el
+sprite en 11 capas de material y `src/ui/characterDraw.ts` las compone en una
+textura canvas cacheada por look, recoloreando cada capa al remapear su luminancia
+sobre una rampa de 4 valores. La modularidad son las capas (prenden/apagan) y las
+rampas (recolorean); el estilo es literalmente el mismo porque los píxeles son los
+mismos. Con la rampa fuente, el render es idéntico al original.
+
+**Lo que la medición encontró y la revisión no:**
+
+- El contorno del sprite es azul marino oscuro, no negro. Sin ese test se
+  clasificaba como "azul" y aterrizaba en la capa del short: **un fantasma del
+  cuerpo entero dentro de los pantalones**.
+- La piel y la gorra comparten "rojizo". Un test por matiz real las separa; sin eso
+  la cara entera se iba a la gorra.
+- Las bandas anatómicas se **midieron** con un histograma por fila (gorra 6–38,
+  visera 34–58, lentes 57–70, cara 71–95, hombros 96–102, polera 103–160 con
+  estampado 113–141, short 161–190, piernas 191–201, zapatillas 202–237), no se
+  adivinaron. Están escritas en el script porque el próximo no las puede re-derivar
+  mirando.
+- Los stops de rampa van en **percentiles** de luminancia, no en bins iguales: con
+  bins iguales el ancla más oscura de la gorra salía **rojo oscuro** (su sombra
+  supera en número a su contorno) y cada recolor le crecía un halo rojo.
+- Cuantizar a 4 colores planos **rompe el antialias**: el sprite es un render
+  resampleado con 7451 colores. Se guardan los píxeles originales y se interpola.
+- **No hay piel bajo los lentes ni bajo la visera.** Esa banda es toda cristal en el
+  original, y los píxeles que la visera sombreaba se fueron a la capa gorra. Al
+  sacar cualquiera de las dos quedaba un agujero transparente — el "espacio raro en
+  la frente" que reportó el owner. Se rellena por fila entre los extremos de la piel
+  misma, muestreando **carne y no contorno** (muestrear el vecino más cercano de
+  cualquier tipo metía el borde negro y dejaba una barra oscura detrás de los ojos).
+- **Los ojos están pintados SOBRE los cristales**, así que apagar los lentes como
+  una sola capa dejaba una cara sin ojos. El marco es el borde de la máscara: se
+  erosiona y lo que queda es el cristal con su ojo.
+- El pelo y los ojos abiertos **no existen** en el sprite (usa gorra y lentes). Se
+  trasplantan de `rival-idle.png`, el mismo dibujante en el mismo estilo, escalados
+  al ancho de cara del MC. Dos trampas: sus **cejas y el puente de la nariz** son
+  del mismo castaño que su pelo (se filtran quedándose con el componente conexo más
+  grande) y un recorte por caja arrastraba su sien como un manchón al lado del ojo
+  (se filtra por blobs de esclerótica).
+- Centrar el pelo en un x supuesto dejaba **cráneo asomando en una sien**; se mide
+  el centro real. Rellenar el flequillo extruyendo columnas hacia abajo pintaba
+  **vetas verticales** — mala técnica para arte sombreado, se descartó y se resolvió
+  ubicando el pelo dibujado más abajo y un poco más ancho.
+- Una **barba derivada** del mentón retintado se probó y se descartó: salía una
+  máscara gris de borde recto. Anotada como pendiente en vez de improvisada.
+
+**Producto:** la barbería vende lo que tiene arte de verdad — cabeza (gorra/pelo),
+mirada (lentes/a cara pelada) y color de pelo (5) — y **avisa antes de cobrar** que
+un tinte bajo la gorra no se ve. Los seis cortes inventados y las cuatro barbas de
+la primera pasada se fueron: ninguno tenía arte, y era exactamente la variedad
+falsa que el owner rechazó.
+
+`render_game_to_text()` ahora expone `hair`, `hairColor` y `eyes`, así que "se sacó
+la gorra" es verificable en texto y no solo en un PNG. Las trazas difieren **solo**
+en esos tres campos nuevos (se verificó campo por campo antes de aceptar el
+baseline): cero cambio de conducta. Migración de saves cubierta con test — un save
+con `hair: "afro"` pasa a `"suelto"`, y a `"gorra"` si el jugador había comprado
+una.
+
+Verificado: build + lint + 389 tests, `npm run traces` (baseline actualizado con
+explicación), `verify-save-migration.mjs`, y capturas en
+`output/web-game/personaje-final/` con la consola limpia.
+
+**Pendiente y decidido con el owner:** el slot system completo que pidió (accesorio
+de cabeza o pelo, cara con anteojos/aros/barba, torso con camiseta o hoodie,
+accesorios de brazo, cadenas, tatuajes, pantalón o short, zapatillas o zapatos) es
+**arquitectura ya montada** — agregar una pieza es un PNG más una entrada en
+`characterLayers.ts`. Lo que falta es arte por slot, listado en `docs/ASSETS.md`
+con lo que se intentó derivar y por qué no sirvió. El owner además dejó abierta la
+opción de definir un **estilo propio** y dibujar el set completo; el pipeline no
+cambia si se reemplaza el sprite base.

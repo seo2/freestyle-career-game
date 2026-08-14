@@ -2,6 +2,7 @@
 // Keys are what scenes reference; paths resolve against public/assets.
 
 import type { StageId } from "../core/types";
+import { layerOrder } from "../data/characterLayers";
 
 export const AssetRegistry = {
   scenes: {
@@ -120,11 +121,26 @@ export function battleChoiceIconKey(id: string): string | null {
   return battleChoiceIconKeys[id] ?? null;
 }
 
+// The MC's sprite, sliced into recolourable materials by
+// scripts/build-character-layers.mjs. Registered from the layer list rather than
+// spelled out here, so adding a slice to the segmentation cannot forget to load it.
+export function characterLayerKey(id: string): string {
+  return `mc-layer-${id}`;
+}
+
+function characterLayerEntries(): { key: string; path: string }[] {
+  return layerOrder.map((id) => ({
+    key: characterLayerKey(id),
+    path: `/assets/characters/layers/${id}.png`,
+  }));
+}
+
 export function allAssetEntries(): { key: string; path: string }[] {
   return [
     ...Object.values(AssetRegistry.scenes),
     ...Object.values(AssetRegistry.cover),
     ...Object.values(AssetRegistry.characters),
+    ...characterLayerEntries(),
     ...Object.values(AssetRegistry.icons),
   ];
 }
