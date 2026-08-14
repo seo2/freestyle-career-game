@@ -249,16 +249,20 @@ alguien cuyas mañas no viste.
   termina en puntos suspensivos, así que es un piso y no un techo — y los seis
   nuevos son del mismo mundo: Hambre, Envidia, Origen, Noche, Micro, Miedo.
 
-**Tensión registrada, decisión del owner.** El criterio de cierre de la Fase 7
-("al menos 3 dilemas antes de Plaza") ahora **choca con un ascenso rápido**. Al
-hacer las batallas ganables, un jugador con suerte asciende en **3 semanas**; con
-un dilema por semana y la primera semana en silencio, eso da un techo de **2**.
-Medí cuatro semillas: los arcos duran 3-10 semanas y los dilemas salen 2-4. Subí
-la probabilidad de 0,40 a 0,50 para levantar la cola baja y la medición lo
-**desmintió** (no cambió el techo), así que la revertí. No es un problema de
-probabilidad: es una pregunta de **reja**. Las salidas son subir el requisito de
-Plaza, permitir dilemas en la semana 1, o aceptar que quien gana todo ve menos
-historia. Es una decisión de diseño, no un ajuste.
+**Resuelto: la ventana de silencio se cuenta en días, no en semanas.** El criterio
+de la Fase 7 ("al menos 3 dilemas antes de Plaza") chocaba con un ascenso rápido:
+al hacer las batallas ganables, un jugador con suerte asciende en **3 semanas**, y
+con un dilema por semana y la primera en silencio el techo era **2** — por debajo
+del criterio del propio plan, y ninguna probabilidad levanta un techo (lo probé
+subiendo la tasa de 0,40 a 0,50 y la medición lo desmintió).
+
+La razón del silencio inicial era *"que el jugador entienda el loop antes de que le
+pidan jugarse algo"*, y eso toma **días**, no una semana entera de 21 bloques. Así
+que `quietDays: 4`: el primer dilema puede caer el día 5, cuando ya viste la pieza,
+el calendario y una batalla. No se tocó la reja de Plaza (su ritmo ya estaba
+medido) ni la intención original. Medido en cuatro semillas: **3, 4, 3 y 3
+dilemas** — el criterio se cumple en todas, con arcos de 4 a 9 semanas según cómo
+te vaya en las batallas.
 
 ### Costo de vivir: que la plata sea escasa (Fase 9, 2026-08-13)
 

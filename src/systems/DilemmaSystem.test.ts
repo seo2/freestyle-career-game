@@ -307,3 +307,33 @@ describe("identitySummary", () => {
     expect(summary[0]).toContain("+40");
   });
 });
+
+describe("the quiet opening is counted in days, not weeks", () => {
+  it("stays silent for the opening days, then opens up inside week 1", () => {
+    // The window exists so the player meets the room, the calendar and a battle
+    // before being asked to gamble something. That takes days. Counting it in
+    // WEEKS capped a three-week arc at two dilemmas, under the plan's own
+    // closing criterion — and no probability can lift a ceiling.
+    const quiet = DilemmaConfig.roll.quietDays;
+    const early = career();
+    early.week = 1;
+    early.day = quiet;
+    expect(rollDilemma(early, createSequenceRng([0, 0]))).toBeNull();
+
+    const open = career();
+    open.week = 1;
+    open.day = quiet + 1;
+    expect(rollDilemma(open, createSequenceRng([0, 0]))).not.toBeNull();
+  });
+
+  it("consumes the same two draws whether it is quiet or not", () => {
+    // The trace harness compares byte-identical runs, so the guard must not
+    // change the draw count.
+    const quietState = career();
+    quietState.week = 1;
+    quietState.day = 1;
+    const rng = createSequenceRng([0, 0, 0.77]);
+    rollDilemma(quietState, rng);
+    expect(rng.next()).toBeCloseTo(0.77, 10);
+  });
+});

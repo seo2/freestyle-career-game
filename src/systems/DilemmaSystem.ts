@@ -21,6 +21,7 @@ import type {
 } from "../core/types";
 import { dilemmas } from "../data/dilemmas";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
+import { PlanConfig } from "../data/config/PlanConfig";
 import { stages } from "../data/stages";
 import type { RandomSource } from "../services/RandomService";
 import { stageIndex } from "../core/derived";
@@ -58,6 +59,11 @@ export function dilemmaThisWeek(state: GameState): boolean {
   return state.decisions.filter((entry) => entry.week === state.week).length >= DilemmaConfig.roll.maxPerWeek;
 }
 
+// How far into the career we are, in days. Week 1 day 1 is day 1.
+function livedDays(state: GameState): number {
+  return (state.week - 1) * PlanConfig.week.days + state.day;
+}
+
 // Rolls for a dilemma after a lived day. Consumes exactly TWO RNG draws (the
 // chance and the pick) whatever the outcome, so the deterministic trace harness
 // cannot drift with the result. Returns the dilemma that landed, or null.
@@ -66,7 +72,9 @@ export function rollDilemma(state: GameState, rng: RandomSource): DilemmaDef | n
   const chance = rng.next();
   const pickIndex = pool.length > 0 ? rng.int(0, pool.length - 1) : 0;
   if (state.pendingDilemma) return null;
-  if (state.week <= DilemmaConfig.roll.quietWeeks) return null;
+  // Counted in days lived, not weeks: a quiet first WEEK capped a short arc at two
+  // dilemmas (see DilemmaConfig.roll.quietDays).
+  if (livedDays(state) <= DilemmaConfig.roll.quietDays) return null;
   if (dilemmaThisWeek(state)) return null;
   if (pool.length === 0) return null;
   if (chance > DilemmaConfig.roll.chancePerDay) return null;
