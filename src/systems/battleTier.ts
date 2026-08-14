@@ -8,6 +8,7 @@
 import type { BattleState, GameState } from "../core/types";
 import { stageIndex } from "../core/derived";
 import { crowdByStage, rivalRoster } from "../data/rivals";
+import { trainingStats } from "../data/stats";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
 import { rivalryEdge } from "./RelationshipSystem";
@@ -38,6 +39,10 @@ export function getBattleTier(state: GameState): BattleTier {
   // What this rival remembers about you (Fase 7). A grudge makes them stronger
   // and more aggressive, so the second time is not the first time.
   const grudge = rivalryEdge(state, profile.name);
+  // What the MC has actually trained. The rival scales with this, not only with
+  // the stage: measuring the old curve showed a nacional rival losing 100% of the
+  // time because the player's stats had left him behind three stages ago.
+  const trained = trainingStats.reduce((sum, key) => sum + state.stats[key], 0) / trainingStats.length;
   const tier = BattleConfig.tier;
   // Difficulty is the one mechanical choice of the Crear MC screen: it shifts
   // how strong every rival is (and, at payout time, how much a battle pays).
@@ -61,6 +66,7 @@ export function getBattleTier(state: GameState): BattleTier {
       tier.rivalPowerBase +
         idx * tier.rivalPowerPerStage +
         Math.floor(state.level / tier.rivalPowerLevelDivisor) +
+        Math.floor(trained * tier.rivalPowerPerPlayerStat) +
         difficulty.rivalPowerBonus +
         grudge.power,
     ),

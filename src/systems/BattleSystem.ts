@@ -223,6 +223,12 @@ function rollRival(battle: BattleState, rng: RandomSource, choice: BattleResourc
     battle.rivalPower * roll.rivalPowerWeight +
     battle.round * roll.roundWeight +
     rivalResourceBonus(battle, choice) +
+    // The crowd lifts whoever it is with — including the rival. This term only
+    // existed on the player's side, which made a battle a runaway: winning round
+    // one raised your hype, which raised your next roll, and the margins measured
+    // almost always came out at a clean sweep either way. The meter was already on
+    // screen for the rival; now it means the same thing for both of them.
+    Math.floor(battle.rivalHype / roll.hypeDivisor) +
     rng.int(roll.rivalRandomMin, roll.rivalRandomMax)
   );
 }

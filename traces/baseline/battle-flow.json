@@ -1743,7 +1743,7 @@
         "round": 1,
         "score": "0-0",
         "hype": 50,
-        "rivalEnergy": 76,
+        "rivalEnergy": 73,
         "rivalEnergyMax": 100,
         "rivalHype": 50,
         "stimulus": "Corona",
@@ -1945,11 +1945,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 1,
-        "score": "0-1",
-        "hype": 43,
-        "rivalEnergy": 68,
+        "score": "1-0",
+        "hype": 58,
+        "rivalEnergy": 65,
         "rivalEnergyMax": 100,
-        "rivalHype": 62,
+        "rivalHype": 54,
         "stimulus": "Corona",
         "prompt": "La corona esta en juego y todos lo saben.",
         "timerSeconds": 15,
@@ -1958,10 +1958,10 @@
           "choice": "defensa",
           "rivalChoice": "respuesta",
           "tensionNotes": [],
-          "playerHypeDelta": -7,
-          "playerVerdict": "DEBIL",
-          "rivalHypeDelta": 12,
-          "rivalVerdict": "BIEN"
+          "playerHypeDelta": 8,
+          "playerVerdict": "BIEN",
+          "rivalHypeDelta": 4,
+          "rivalVerdict": "DEBIL"
         },
         "results": [
           {
@@ -1969,10 +1969,10 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": false,
@@ -2169,11 +2169,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
-        "score": "0-1",
-        "hype": 43,
-        "rivalEnergy": 68,
+        "score": "1-0",
+        "hype": 58,
+        "rivalEnergy": 65,
         "rivalEnergyMax": 100,
-        "rivalHype": 62,
+        "rivalHype": 54,
         "stimulus": "Barrio",
         "prompt": "El estimulo apunta a tu barrio y tus calles.",
         "timerSeconds": 15,
@@ -2184,10 +2184,10 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": false,
@@ -2384,11 +2384,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
-        "score": "0-2",
-        "hype": 36,
-        "rivalEnergy": 60,
+        "score": "2-0",
+        "hype": 63,
+        "rivalEnergy": 57,
         "rivalEnergyMax": 100,
-        "rivalHype": 74,
+        "rivalHype": 58,
         "stimulus": "Barrio",
         "prompt": "El estimulo apunta a tu barrio y tus calles.",
         "timerSeconds": 15,
@@ -2397,10 +2397,10 @@
           "choice": "metrica",
           "rivalChoice": "ataque",
           "tensionNotes": [],
-          "playerHypeDelta": -7,
+          "playerHypeDelta": 5,
           "playerVerdict": "DEBIL",
-          "rivalHypeDelta": 12,
-          "rivalVerdict": "BIEN"
+          "rivalHypeDelta": 4,
+          "rivalVerdict": "DEBIL"
         },
         "results": [
           {
@@ -2408,20 +2408,20 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
+            "playerHypeDelta": 5,
             "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": false,
@@ -2618,11 +2618,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
-        "score": "0-2",
-        "hype": 36,
-        "rivalEnergy": 60,
+        "score": "2-0",
+        "hype": 63,
+        "rivalEnergy": 57,
         "rivalEnergyMax": 100,
-        "rivalHype": 74,
+        "rivalHype": 58,
         "stimulus": "Rival",
         "prompt": "Todo gira en torno a tu rival y su historial.",
         "timerSeconds": 15,
@@ -2633,20 +2633,20 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
+            "playerHypeDelta": 5,
             "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": false,
@@ -2843,11 +2843,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
-        "score": "0-3",
-        "hype": 29,
-        "rivalEnergy": 52,
+        "score": "2-1",
+        "hype": 56,
+        "rivalEnergy": 49,
         "rivalEnergyMax": 100,
-        "rivalHype": 86,
+        "rivalHype": 70,
         "stimulus": "Rival",
         "prompt": "Todo gira en torno a tu rival y su historial.",
         "timerSeconds": 15,
@@ -2867,20 +2867,20 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
+            "playerHypeDelta": 5,
             "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 3,
@@ -3087,11 +3087,11 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
-        "score": "0-3",
-        "hype": 29,
-        "rivalEnergy": 52,
+        "score": "2-1",
+        "hype": 56,
+        "rivalEnergy": 49,
         "rivalEnergyMax": 100,
-        "rivalHype": 86,
+        "rivalHype": 70,
         "stimulus": "Rival",
         "prompt": "Todo gira en torno a tu rival y su historial.",
         "timerSeconds": 15,
@@ -3102,20 +3102,20 @@
             "choice": "defensa",
             "rivalChoice": "respuesta",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 8,
+            "playerVerdict": "BIEN",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
             "choice": "metrica",
             "rivalChoice": "ataque",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
+            "playerHypeDelta": 5,
             "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           },
           {
             "round": 3,
@@ -3129,7 +3129,7 @@
           }
         ],
         "finished": true,
-        "result": "loss",
+        "result": "win",
         "hand": [
           {
             "key": "1",
@@ -3228,8 +3228,8 @@
             "day": 1,
             "planned": "battle",
             "ran": "battle",
-            "note": "Perdiste en Cypher de pieza (1 bloque): +$0, +3 fans, +2 respeto.",
-            "outcome": "loss"
+            "note": "Ganaste en Cypher de pieza (1 bloque): +$35, +18 fans, +10 respeto.",
+            "outcome": "win"
           }
         ],
         "opportunities": [
@@ -3260,14 +3260,14 @@
         "day": 1,
         "block": 1,
         "timeLabel": "Tarde",
-        "xp": 15,
+        "xp": 48,
         "xpNext": 70,
         "energy": 64,
         "health": 88,
-        "cash": 25,
-        "fans": 3,
-        "respect": 2,
-        "fame": 0,
+        "cash": 60,
+        "fans": 18,
+        "respect": 10,
+        "fame": 3,
         "songs": 0,
         "discProgress": 0,
         "upgrades": {
@@ -3276,8 +3276,8 @@
           "home": 0
         },
         "items": [],
-        "momentum": 36,
-        "momentumMood": "Frio",
+        "momentum": 64,
+        "momentumMood": "Activo",
         "lastActionId": "battle",
         "actionStreak": 1,
         "stats": {
@@ -3297,12 +3297,12 @@
         "to": "Tarde",
         "daysPassed": 0
       },
-      "lastEvent": "Perdiste en Cypher de pieza (1 bloque): +$0, +3 fans, +2 respeto. Impulso -6: Frio.",
+      "lastEvent": "Ganaste en Cypher de pieza (1 bloque): +$35, +18 fans, +10 respeto. Nico Cuaderno te tomo la matricula. Impulso +22: Activo.",
       "goals": [
         {
           "label": "Abrir Plaza",
-          "detail": "Nv 1/5 · Resp 2/45",
-          "value": 32,
+          "detail": "Nv 1/5 · Resp 10/45",
+          "value": 39,
           "max": 100
         },
         {
@@ -3312,7 +3312,13 @@
           "max": 80
         }
       ],
-      "recommendedItem": null,
+      "recommendedItem": {
+        "id": "cuaderno",
+        "label": "Cuaderno de rimas",
+        "category": "otros",
+        "price": 60,
+        "affordable": true
+      },
       "actions": [
         {
           "key": "1",
@@ -3431,10 +3437,10 @@
           {
             "name": "Nico Cuaderno",
             "faced": 1,
-            "won": 0,
-            "lost": 1,
-            "heat": 8,
-            "line": null
+            "won": 1,
+            "lost": 0,
+            "heat": 22,
+            "line": "Te tiene ganas."
           }
         ]
       }

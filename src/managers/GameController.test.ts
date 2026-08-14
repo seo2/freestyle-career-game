@@ -224,7 +224,7 @@ describe("GameController.renderGameToText", () => {
     // Cards on screen: real rival meters, no pending result yet.
     let battle = JSON.parse(controller.renderGameToText()).battle;
     expect(battle).not.toBeNull();
-    expect(battle.rivalEnergy).toBe(76); // pieza power 3: 70 + 3*2
+    expect(battle.rivalEnergy).toBe(73); // pieza power 3: 70 + 3*2
     expect(battle.rivalEnergyMax).toBe(100);
     expect(battle.rivalHype).toBe(50);
     expect(battle.pendingResult).toBeNull();
@@ -251,7 +251,7 @@ describe("GameController.renderGameToText", () => {
     expect(verdictWords).toContain(battle.pendingResult.rivalVerdict);
     expect(battle.hype).toBe(50 + battle.pendingResult.playerHypeDelta);
     expect(battle.rivalHype).toBe(50 + battle.pendingResult.rivalHypeDelta);
-    expect(battle.rivalEnergy).toBe(68); // 76 - round drain 8
+    expect(battle.rivalEnergy).toBe(65); // 76 - round drain 8
     expect(battle.results).toHaveLength(1);
     expect(battle.results[0]).toEqual(battle.pendingResult);
 

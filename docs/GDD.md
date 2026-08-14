@@ -228,6 +228,56 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Balance de batalla (Fase 9, 2026-08-13)
+
+Medido con `node scripts/measure-battles.mjs`, que juega miles de batallas con las
+reglas reales y tres políticas: **naive** (siempre la primera carta), **greedy**
+(la de mejor hype previsto) y **worst** (la peor, a propósito).
+
+**Lo que estaba roto.** La curva era un serrucho que terminaba en trámite: un MC
+nuevo ganaba **8%** de su primera batalla, y en regional y nacional ganaba **100%
+con cualquier política**, incluso jugando la peor carta. O sea la habilidad no
+existía. Tres causas:
+
+1. **Dificultad escondida en los dados.** El azar del jugador era 7..26 (media
+   16,5) y el del rival 12..34 (media 23): un **+6,5 fijo** contra el jugador que
+   ninguna perilla de dificultad podía ver. Ahora los dos dados son idénticos y la
+   dificultad vive **solo** en `rivalPower`.
+2. **El hype se realimentaba solo para el jugador.** Ganar una ronda subía tu
+   hype, que subía tu tirada siguiente; el rival tenía medidor en pantalla pero no
+   lo usaba. Por eso los márgenes medidos eran casi siempre barridas de 3-0. Ahora
+   el público levanta **a quien lo tiene**, y vale hasta +8 en vez de +12.
+3. **El rival crecía con la etapa; el jugador, con sus stats.** Al llegar a Plaza
+   el MC ya tiene stats promedio **11,7** (no 6, como supuse durante tres pasadas
+   de ajuste antes de medirlo). El rival ahora sigue lo que el jugador **entrenó**,
+   casi 1:1.
+
+**El principio de diseño que salió de ahí:** el premio de entrenar **no** es
+ganarle más fácil al mismo rival, sino **poder subir de etapa**. La ventaja del
+jugador tiene que venir de la preparación (energía, salud, momentum, el estímulo)
+y de elegir bien la carta.
+
+**La curva resultante** (evidencia en `output/web-game/fase9-balance/`):
+
+| perfil | naive | greedy | worst |
+|---|---|---|---|
+| pieza semana 1 | 82% | 96% | 64% |
+| pieza semana 3 | 73% | 97% | 33% |
+| plaza | 48% | 85% | 14% |
+| plaza, cansado | 16% | 19% | 5% |
+| regional | 54% | 80% | 16% |
+| nacional | 46% | 82% | 49% |
+
+La primera etapa es indulgente a propósito (estás aprendiendo), desde Plaza el
+jugador distraído queda en una moneda al aire, y **entre jugar bien y jugar mal
+hay 30-70 puntos en cada etapa**. Pelear cansado se castiga fuerte, que es lo que
+hace que descansar sea una decisión.
+
+**Anotado, no resuelto:** en nacional la política *worst* gana más que *naive*. El
+preview de la carta dice cuánto **hype** paga, no qué tan probable es ganar la
+ronda, así que "la peor carta" por hype no es la peor por tirada. Es una honestidad
+pendiente de la UI, no un defecto del balance.
+
 ### Relaciones y rivalidades (Fase 7, 2026-08-13)
 
 Las relaciones existen para que **la semana sea más difícil de planificar**, no
