@@ -124,20 +124,75 @@ masks["frame"] = [p for p in masks["shades"] if (p[0], p[1]) in rim]
 masks["lens"] = [p for p in masks["shades"] if (p[0], p[1]) not in rim]
 del masks["shades"]
 
-# The head's skin has two holes, and both only show once something is taken off:
+# The head's skin has THREE holes, and every one of them only shows once something
+# comes off. Measured per row, not guessed:
 #
-#   * Under the shades there is no skin at all — that whole band is glass in the
-#     source — so hiding them left a transparent stripe across the face.
+#   * Rows 57-70 are entirely glass in the source, so hiding the shades left a
+#     transparent stripe across the face.
 #   * Under the visor, the pixels the brim SHADED went to the cap layer, so taking
-#     the cap off left a dark gap between the hairline and the eyebrows. That is
-#     the "espacio raro en la frente".
+#     the cap off left a gap between the hairline and the eyebrows.
+#   * Above row 48 there is no head AT ALL — the whole crown was cap. Taking the cap
+#     off exposed background where a skull should be, and no hair placement can hide
+#     that, because the transplanted quiff only reaches x 63..85 at the brow.
 #
-# Both are the same fix: across the head's rows, fill every gap that lies between
-# the skin's own leftmost and rightmost pixel on that row, sampling the nearest
-# skin pixel in the row. Inside the silhouette by construction, so it cannot spill
-# past the head, and the tones are the sprite's own.
+# So: give him a skull, then close every gap inside it. Both sample the sprite's own
+# tones; nothing here invents a colour.
 skin_at = {(p[0], p[1]): (p[2], p[3]) for p in masks["skin"]}
-patch = []
+
+# The skull, as an ellipse fitted to the forehead the sprite DOES draw: at row 48 the
+# skin spans 38px, and an ellipse centred on the face's midline through that width
+# closes at row 40. Not a guess — the numbers come from the per-row spans.
+brow_row = 48
+brow = sorted(x for (x, ry) in skin_at if ry == brow_row)
+face_cx = (lx0 + lx1) / 2
+skull_cy = 58.0
+skull_ry = 18.0
+half = max(1.0, (brow[-1] - brow[0]) / 2)
+skull_rx = half / max(0.1, (1.0 - ((brow_row - skull_cy) / skull_ry) ** 2) ** 0.5)
+crown = []
+for y in range(int(skull_cy - skull_ry), brow_row + 1):
+    dy = (y - skull_cy) / skull_ry
+    if abs(dy) > 1.0: continue
+    reach = max(1.0, skull_rx * (1.0 - dy*dy) ** 0.5)
+    for x in range(int(face_cx - reach), int(face_cx + reach) + 1):
+        if (x, y) in skin_at: continue
+        # Nearest real skin pixel anywhere, so the crown inherits the forehead's
+        # shading instead of a flat fill.
+        near = min(skin_at, key=lambda p: (p[0]-x)**2 + (p[1]-y)**2)
+        src = skin_at[near]
+        edge = (x - face_cx)**2 / reach**2 + dy*dy
+        # Its own outline at the rim, or the head reads as a sticker with no edge.
+        crown.append([x, y, src[0] if edge < 0.86 else (10, 7, 12), 255])
+for p in crown:
+    skin_at[(p[0], p[1])] = (p[2], p[3])
+
+patch = list(crown)
+
+# The shades' band gets filled VERTICALLY, blending the forehead above into the
+# cheek below. Filling it sideways like the rest was wrong in a way that showed: in
+# those rows the only real skin is the ears, so the whole band came out one flat
+# ear-coloured block with a hard seam where the lens ended.
+band = sorted({p[1] for p in masks["frame"] + masks["lens"]})
+if band:
+    b0, b1 = band[0], band[-1]
+    for x in range(W):
+        # FLESH anchors, not the nearest pixel: the row right above the band is the
+        # EYEBROW, and anchoring there made the whole socket interpolate out of a
+        # dark line — a brown bar across the face.
+        above = [y for (cx, y) in skin_at
+                 if cx == x and y < b0 and lum(skin_at[(cx, y)][0]) > 60]
+        below = [y for (cx, y) in skin_at
+                 if cx == x and y > b1 and lum(skin_at[(cx, y)][0]) > 60]
+        if not above or not below: continue
+        top = skin_at[(x, max(above))][0]
+        bot = skin_at[(x, min(below))][0]
+        for y in range(b0, b1 + 1):
+            if (x, y) in skin_at: continue
+            t = (y - b0 + 1) / (b1 - b0 + 2)
+            patch.append([x, y, tuple(round(top[k] + (bot[k]-top[k])*t) for k in range(3)), 255])
+    for p in patch:
+        skin_at[(p[0], p[1])] = (p[2], p[3])
+
 for y in range(40, 100):
     row = sorted(x for (x, ry) in skin_at if ry == y)
     if len(row) < 2: continue
@@ -244,9 +299,18 @@ hair_bottom = max(y for _, y in hair)
 hair_cx = (min(x for x, _ in hair) + max(x for x, _ in hair)) / 2
 # Bottom at 55: the shades start at 57, so the fringe lands ON the brow without
 # hanging into the eyes. Nothing is synthesized — every pixel here was drawn.
-masks["hair"] = [[x, y, c[:3], c[3]]
-                 for (x, y), c in _dict(
-                     place(hair, hair_cx, 48.0, hair_bottom, 55, xscale=0.88)).items()]
+placed = _dict(place(hair, hair_cx, 48.0, hair_bottom, 55, xscale=0.88))
+# The rival's quiff sweeps up to one side, so at the brow it only reaches x 63..85 —
+# one temple covered and the other bare. Union it with its own MIRROR: the low edge
+# is then low on BOTH sides, which is a fringe. Every pixel is still drawn, just used
+# twice; extruding columns to close the gap was tried and painted vertical streaks.
+mirror_axis = 2 * 48.0
+sym = dict(placed)
+for (x, y), c in placed.items():
+    mx = round(mirror_axis - x)
+    if 0 <= mx < W and (mx, y) not in sym:
+        sym[(mx, y)] = c
+masks["hair"] = [[x, y, c[:3], c[3]] for (x, y), c in sym.items()]
 
 # Open eyes. Two earlier cuts failed for reasons worth writing down: including the
 # rival's eyebrows put a second pair of brows on a face that already has its own,
@@ -274,10 +338,10 @@ for seed in sclera:
 blobs.sort(key=len, reverse=True)
 eyes = {}
 for blob in blobs[:2]:
-    bx0 = max(0, min(x for x, _ in blob) - 2)
-    bx1 = min(RW-1, max(x for x, _ in blob) + 2)
+    bx0 = max(0, min(x for x, _ in blob) - 1)
+    bx1 = min(RW-1, max(x for x, _ in blob) + 1)
     by0 = max(0, min(y for _, y in blob) - 2)
-    by1 = min(RH-1, max(y for _, y in blob) + 2)
+    by1 = min(RH-1, max(y for _, y in blob) + 1)
     for y in range(by0, by1+1):
         for x in range(bx0, bx1+1):
             r, g, b, a = rp[x, y]
@@ -285,7 +349,9 @@ for blob in blobs[:2]:
             L, sv, h = lum((r, g, b)), sat(r, g, b), hue(r, g, b)
             # White of the eye, green iris, dark lash. Nothing warm: warm here is
             # his skin or his hair, and both belong to other layers.
-            if (L > 170 and sv < 0.25) or (70 <= h <= 200 and sv > 0.2) or (L < 40 and sv < 0.4):
+            # Tight: sclera, iris, lash. The looser cut brought the rival's own eye
+            # shadow along and it read as a translucent box around each eye.
+            if (L > 170 and sv < 0.25) or (70 <= h <= 200 and sv > 0.2) or (L < 26 and sv < 0.3):
                 eyes[(x, y)] = (r, g, b, a)
 exs = [k[0] for k in eyes]
 eyes_bottom = max(y for _, y in eyes)
@@ -319,8 +385,22 @@ for name, pixels in sorted(masks.items()):
                   "ramp": ["#%02x%02x%02x" % c for c in ramp],
                   "pixels": len(pixels)}
 
+# The head has to be a solid head. This broke twice — once under the shades, once
+# under the visor — and both times it was invisible until something came off in the
+# game. Fail the build instead of shipping a face with a hole in it.
+# Up to row 95 only: at the shoulders the tee sits BETWEEN the neck and the arms,
+# so a gap there is the drawing, not a hole.
+head_skin = {(p[0], p[1]) for p in masks["skin"] if p[1] <= 95}
+gaps = []
+for y in range(40, 96):
+    row = sorted(x for (x, ry) in head_skin if ry == y)
+    if len(row) < 2: continue
+    missing = [x for x in range(row[0], row[-1] + 1) if (x, y) not in head_skin]
+    if missing: gaps.append((y, len(missing)))
+HOLES = gaps
+
 covered = sum(len(m) for k, m in masks.items() if k not in ("hair", "eyesOpen"))
-meta["_source"] = {"width": W, "height": H, "scale": SCALE, "measured": MEASURED, "patched": PATCHED,
+meta["_source"] = {"width": W, "height": H, "scale": SCALE, "measured": MEASURED, "patched": PATCHED, "holes": HOLES,
                    "covered": covered, "total": total, "lens": [lx0, lx1]}
 print(json.dumps(meta, indent=1, sort_keys=True))
 `;
@@ -351,7 +431,12 @@ if (src.covered - src.patched !== src.total) {
   process.exit(1);
 }
 console.log(`fuente ${src.width}x${src.height}  escala rival ${src.scale} (medida ${src.measured})  lentes x ${src.lens.join("..")}`);
-console.log(`cobertura ${src.covered - src.patched}/${src.total} OK  (+${src.patched}px de piel bajo los lentes)`);
+if (src.holes.length > 0) {
+  console.error("FALLO: la cabeza queda con agujeros (fila, px):", JSON.stringify(src.holes));
+  console.error("Se ven al sacar la gorra o los lentes. Revisar el relleno de piel.");
+  process.exit(1);
+}
+console.log(`cobertura ${src.covered - src.patched}/${src.total} OK  (+${src.patched}px de piel sintetizada, cabeza sin agujeros)`);
 for (const [name, m] of Object.entries(meta)) {
   console.log(`  ${name.padEnd(9)} ${String(m.pixels).padStart(5)}px  ${m.ramp.join(" ")}`);
 }

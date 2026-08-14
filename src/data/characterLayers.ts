@@ -66,14 +66,14 @@ export const characterLayers: readonly CharacterLayer[] = [
   {
     id: "skin",
     role: "skin",
-    stops: [0, 9.2, 80.3, 115.5, 255],
-    source: ["#010104", "#1d1016", "#79431f", "#b26935", "#f0d2b8"],
+    stops: [0, 9.3, 82, 115.6, 255],
+    source: ["#020104", "#1a0f14", "#7b441f", "#b26935", "#f0d2b8"],
   },
   {
     id: "hair",
     role: "hair",
-    stops: [0, 32.9, 38.9, 40.4, 153.4],
-    source: ["#070304", "#37170c", "#4a1e0f", "#522311", "#9e6d4f"],
+    stops: [0, 30.4, 38.8, 40.5, 153.4],
+    source: ["#060204", "#34150c", "#4a1e0f", "#532311", "#9f6d4f"],
   },
   {
     id: "top",
@@ -128,8 +128,8 @@ export const characterLayers: readonly CharacterLayer[] = [
     // Its own role, not "glass": under the glass ramp the open eyes came out grey,
     // and an eye is not a lens.
     role: "eye",
-    stops: [0, 11.4, 80.7, 206.2, 255],
-    source: ["#000100", "#101c14", "#36684a", "#c3c7c0", "#f9f7f5"],
+    stops: [0, 14.2, 98.1, 216.7, 255],
+    source: ["#010100", "#0e1f15", "#376a4c", "#c8cac4", "#f9f8f6"],
   },
 ];
 
