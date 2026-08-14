@@ -20,6 +20,7 @@ import type {
   IdentityAxis,
 } from "../core/types";
 import { dilemmas } from "../data/dilemmas";
+import { identityDrift } from "../data/identityDrift";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import { PlanConfig } from "../data/config/PlanConfig";
 import { stages } from "../data/stages";
@@ -84,6 +85,41 @@ export function rollDilemma(state: GameState, rng: RandomSource): DilemmaDef | n
   return dilemma;
 }
 
+// What you DID this block, not what you answered. Called by ActionsSystem after
+// every action that actually ran.
+//
+// Until Fase 10 the axes moved only when a dilemma was answered, which meant a
+// player who recorded a hundred songs and never battled had the same identity as
+// one who battled every weekend — the destiny came from three answers while the
+// weeks counted for nothing. The nudges are small next to a dilemma's 6-22, so a
+// choice under pressure still weighs more than one afternoon; across a career the
+// sum outweighs them, which is exactly the intent.
+//
+// Returns the axes that actually moved, so a caller can say so if it wants to.
+export function driftFromAction(state: GameState, actionId: string): Partial<Record<IdentityAxis, number>> {
+  const drift = identityDrift[actionId];
+  if (!drift) return {};
+  const { driftCap } = DilemmaConfig.axes;
+  const applied: Partial<Record<IdentityAxis, number>> = {};
+  for (const [axis, delta] of Object.entries(drift) as [IdentityAxis, number][]) {
+    const current = state.axes[axis];
+    // Two brakes, and both were needed. Diminishing returns make each further
+    // afternoon count less, and the cap stops the weeks from taking an axis all the
+    // way out: without it, twenty weeks of one activity pinned every axis to ±97,
+    // where a dilemma's ±15 does nothing and the game's headline decisions become
+    // decoration.
+    const damped = delta * (1 - Math.abs(current) / driftCap);
+    // Already past what a life alone can buy? Then only decisions move you.
+    if (Math.abs(current) >= driftCap && Math.sign(damped) === Math.sign(current)) continue;
+    moveAxis(state.axes, axis, damped);
+    applied[axis] = damped;
+  }
+  // Choosing the crew (or yourself) with your time counts the same as choosing it
+  // in a dilemma: the bond feels it.
+  applyAxisPull(state, applied);
+  return applied;
+}
+
 // Moves an axis, clamped. Exported because the identity readout and the tests
 // both need the same bounds the system uses.
 export function moveAxis(axes: IdentityAxes, axis: IdentityAxis, delta: number): void {
@@ -93,7 +129,9 @@ export function moveAxis(axes: IdentityAxes, axis: IdentityAxis, delta: number):
 // Which way an axis leans, in words. Below the threshold it says so instead of
 // inventing a label for an MC who has not leaned anywhere yet.
 export function axisLean(axes: IdentityAxes, axis: IdentityAxis): { label: string; value: number } {
-  const value = axes[axis];
+  // Rounded for reading. The stored value keeps its fraction so that a damped
+  // nudge of 0.4 still accumulates instead of rounding away to nothing.
+  const value = Math.round(axes[axis]);
   const labels = DilemmaConfig.axes.labels[axis];
   if (Math.abs(value) < DilemmaConfig.axes.leanThreshold) return { label: "Sin definir", value };
   return { label: value > 0 ? labels.high : labels.low, value };

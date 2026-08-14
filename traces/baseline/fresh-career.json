@@ -528,7 +528,7 @@
         "axes": {
           "undergroundComercial": 0,
           "batalleroMusico": 0,
-          "soloCrew": 0,
+          "soloCrew": -1,
           "autenticoPolemico": 0
         },
         "leaning": [],
@@ -696,7 +696,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -895,7 +895,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -1080,7 +1080,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -1294,7 +1294,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -1493,7 +1493,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -1721,7 +1721,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -1935,7 +1935,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2162,7 +2162,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2395,7 +2395,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2627,8 +2627,8 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "undergroundComercial": 2,
+          "batalleroMusico": -1,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2860,7 +2860,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -3089,7 +3089,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -3318,7 +3318,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -3547,7 +3547,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -3776,7 +3776,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -4011,7 +4011,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0
@@ -4246,7 +4246,7 @@
       "cypher": null,
       "identity": {
         "axes": {
-          "undergroundComercial": 0,
+          "undergroundComercial": 2,
           "batalleroMusico": 0,
           "soloCrew": 0,
           "autenticoPolemico": 0

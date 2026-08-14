@@ -528,7 +528,7 @@
         "axes": {
           "undergroundComercial": 0,
           "batalleroMusico": 0,
-          "soloCrew": 0,
+          "soloCrew": -1,
           "autenticoPolemico": 0
         },
         "leaning": [],
@@ -754,7 +754,7 @@
         "axes": {
           "undergroundComercial": 0,
           "batalleroMusico": 0,
-          "soloCrew": 0,
+          "soloCrew": -1,
           "autenticoPolemico": 0
         },
         "leaning": [],
@@ -893,7 +893,7 @@
         "axes": {
           "undergroundComercial": 0,
           "batalleroMusico": 0,
-          "soloCrew": 0,
+          "soloCrew": -1,
           "autenticoPolemico": 0
         },
         "leaning": [],
@@ -1113,7 +1113,7 @@
         "axes": {
           "undergroundComercial": 0,
           "batalleroMusico": 0,
-          "soloCrew": 0,
+          "soloCrew": -1,
           "autenticoPolemico": 0
         },
         "leaning": [],

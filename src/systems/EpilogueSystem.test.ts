@@ -122,16 +122,38 @@ describe("mismo origen, destinos distintos", () => {
   });
 
   it("names the destiny the player leaned into hardest, not the first one listed", () => {
-    // Both "productor" (musico >= 30) and "estrella" (comercial >= 35) hold here,
-    // and productor is listed first — but +52 comercial is the stronger signal.
-    const state = career();
-    state.axes = axes({ undergroundComercial: 52, batalleroMusico: 30 });
-    expect(destinyFor(state)?.label).toBe("Estrella");
+    // Both "mentor" (crew >= 35) and "polemico" (polemico >= 40) hold here, and
+    // mentor is listed first — but it also happens to be the stronger lean, so the
+    // second case is the one that proves the rule.
+    const mentor = career();
+    mentor.axes = axes({ soloCrew: 80, autenticoPolemico: 45 });
+    expect(destinyFor(mentor)?.label).toBe("Mentor");
 
-    // ...and the other way round, from the same catalogue.
-    const producer = career();
-    producer.axes = axes({ undergroundComercial: 36, batalleroMusico: 90 });
-    expect(destinyFor(producer)?.label).toBe("Productor");
+    const loud = career();
+    loud.axes = axes({ soloCrew: 40, autenticoPolemico: 95 });
+    expect(destinyFor(loud)?.label).toBe("Nombre polemico");
+  });
+
+  it("forks the music side: the same studio hours read differently pointed in or out", () => {
+    // Owner request (2026-08-13): some routes should lead to being a famous rap
+    // artist, not necessarily a freestyler. So "musician" is not one destiny — it
+    // depends which way it is aimed.
+    const underground = career();
+    underground.axes = axes({ batalleroMusico: 60, undergroundComercial: -30 });
+    expect(destinyFor(underground)?.label).toBe("Productor");
+
+    const outward = career();
+    outward.axes = axes({ batalleroMusico: 60, undergroundComercial: 30 });
+    expect(destinyFor(outward)?.label).toBe("Artista de discos");
+  });
+
+  it("gives the pure battler a destiny without needing a dilemma to have fired", () => {
+    // "Campeon" used to also demand autenticoPolemico >= 15, and no ACTION moves
+    // that axis — so the most battle-hardened MC in the game came out with no
+    // destiny at all (measured with scripts/measure-routes.mjs).
+    const battler = career();
+    battler.axes = axes({ batalleroMusico: -55 });
+    expect(destinyFor(battler)?.label).toBe("Campeon de batallas");
   });
 
   it("gives no destiny to an MC who has not leaned far enough", () => {

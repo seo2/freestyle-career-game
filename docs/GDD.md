@@ -228,6 +228,56 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Tu vida te define, no solo tus respuestas (Fase 10, 2026-08-13)
+
+Pedido del owner: *"quisiera que el juego permitiera, según las decisiones del
+usuario, no solo ser un batallero sino que tal vez algunos caminos lo llevaran a ser
+un artista famoso en el rap, no necesariamente en el freestyle."*
+
+**Lo que faltaba no era el destino: era el camino.** El eje batallero↔músico ya
+existía y los destinos "Productor" y "Estrella" ya estaban en el catálogo. Pero al
+medirlo (`scripts/measure-routes.mjs`) apareció el problema real: **lo único que
+movía los ejes de identidad eran los dilemas.** Un jugador que grababa 101 temas y
+nunca batallaba terminaba con **exactamente la misma identidad** que uno que batalló
+todos los sábados. El destino lo decidían tres respuestas, y cómo vivías 21 bloques
+por semana no contaba para nada.
+
+- **Ahora cada acción mueve los ejes** (`identityDrift` + `driftFromAction`).
+  Batallar tira a batallero; grabar y escribir, a músico; postear, a comercial; el
+  cypher, a la crew. Los pesos son chicos al lado de un dilema (que mueve 6-22),
+  porque una decisión bajo presión debe pesar más que una tarde — pero a lo largo de
+  una carrera la suma los supera, y eso es exactamente la intención.
+- **Con dos frenos, y los dos hicieron falta.** Rendimientos decrecientes (cada
+  tarde extra cuenta menos) **y un techo de 70**: sin el techo, veinte semanas de una
+  actividad clavaban todos los ejes en ±97, y ahí un dilema de ±15 no hace nada —
+  las decisiones grandes del juego se volvían decoración. Las últimas 30 unidades
+  solo se ganan decidiendo.
+- **La rama musical se bifurca**, que es el corazón del pedido. Las mismas horas de
+  estudio se leen distinto según hacia dónde apunten: **Productor** (músico, pero
+  underground) y **Artista de discos** (músico apuntado hacia afuera: *"ya no te
+  presentan como freestyler, te presentan por tus temas"*). **Estrella** queda para
+  la fama por encima de todo, por el camino que sea.
+- **El batallero puro por fin tiene destino.** "Campeón de batallas" exigía además
+  ser polémico, y ninguna acción mueve ese eje: el MC más batallero del juego salía
+  **sin destino**. Ahora depende solo de la tarima.
+- **Grabar construye una obra** (`releases`): sencillo → EP → disco → gira → sello
+  propio, cada uno con su línea y su fama. Antes `state.songs` solo desbloqueaba
+  shows; una ruta medida llegó a **101 temas** y el juego nunca mencionó ninguno. El
+  epílogo ahora también la nombra: *"Dejaste algo grabado: un disco."*
+
+**Medido, tres rutas de 20 semanas jugando bien** (`output/web-game/fase10-rutas/`):
+
+| ruta | se lee como | destino | obra |
+|---|---|---|---|
+| batallero | Batallero (−70) | Campeón de batallas | nada grabado |
+| músico | Comercial (+54), Músico (+69) | **Artista de discos** | sencillo → EP → disco → gira → sello |
+| mixto | Batallero (−70) | Campeón de batallas | un sencillo |
+
+**Abierto, anotado:** grabar sigue siendo spameable — la ruta medida hizo 101 temas.
+Los hitos le dan forma, pero falta que un tema cueste más que plata (tiempo de
+estudio, calidad, rendimientos decrecientes por tema). Es tuning con medición, no
+un sistema nuevo.
+
 ### Contenido de batalla: tres rivales por etapa y 16 estimulos (Fase 9, 2026-08-13)
 
 Con **un** rival por etapa, la segunda batalla de una etapa era idéntica a la

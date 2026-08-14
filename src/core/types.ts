@@ -427,6 +427,9 @@ export interface GameState {
   // the grudge, which is what makes a rival the same person twice.
   bonds: Record<BondId, BondState>;
   rivalries: RivalryState[];
+  // Music-career milestones already claimed (Fase 10), by id. Persisted: a disco is
+  // something that survives, so it had better survive a reload.
+  releases: string[];
   // Audio (Fase 8). In the save because the plan's closing criterion is that the
   // volume survives a reload — a player who turned the sound off did so on
   // purpose, and asking them again every launch is a bug.

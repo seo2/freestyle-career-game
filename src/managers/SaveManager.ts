@@ -264,6 +264,13 @@ export function createSaveManager(storage: StorageLike): SaveManagerApi {
         bonds: backfillBonds(saved.bonds),
         rivalries: backfillRivalries(saved.rivalries),
         audio: backfillAudio(saved.audio),
+        // A save from before Fase 10 has no releases; it also has songs, so the
+        // milestones it already earned are re-claimed on the next recording rather
+        // than granted retroactively — inventing a disco nobody released would be
+        // worse than a late one.
+        releases: Array.isArray(saved.releases)
+          ? saved.releases.filter((id): id is string => typeof id === "string")
+          : [],
         // A dilemma waiting for an answer is not persisted: reloading mid-choice
         // should not trap the player on a screen with no context.
         pendingDilemma: null,

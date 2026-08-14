@@ -78,6 +78,7 @@ export function createNewState(name = "MC Barrio", seed: number = Date.now() >>>
       crew: { affinity: bondStart("crew"), fedWeek: 0 },
     },
     rivalries: [],
+    releases: [],
     // Sound on, at a volume that is not the loudest thing the game can do.
     audio: { volume: AudioConfig.volume.start, sfxOn: true, musicOn: true },
   };

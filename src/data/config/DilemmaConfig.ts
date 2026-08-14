@@ -42,6 +42,16 @@ export const DilemmaConfig = {
     // Below this absolute value an axis reads as "sin definir": the MC has not
     // leaned anywhere yet, and saying so is more honest than a fake label.
     leanThreshold: 12,
+    // How far the WAY YOU SPEND YOUR WEEKS can push an axis on its own (Fase 10).
+    // Beyond this only dilemmas move it.
+    //
+    // The number matters more than it looks. Without a ceiling, twenty weeks of
+    // one activity pinned every axis to ±97 — measured — and at that point a
+    // dilemma's ±15 does nothing at all, which would quietly turn the game's
+    // headline decisions into decoration. At 70 a life of one thing reads
+    // unmistakably, and the last stretch still belongs to what you chose under
+    // pressure.
+    driftCap: 70,
   },
   log: {
     // The career's memory is the point, but a save should not grow forever.

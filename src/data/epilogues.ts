@@ -90,19 +90,33 @@ export const destinyAttractors: DestinyAttractor[] = [
     id: "campeon",
     label: "Campeon de batallas",
     line: "Vas camino a campeon: la tarima es tu casa y se sabe.",
-    needs: { batalleroMusico: -30, autenticoPolemico: 15 },
+    // Only the tarima. It used to also demand autenticoPolemico >= 15, and since
+    // no ACTION moves that axis, the most battle-hardened MC in the game came out
+    // with no destiny at all — measured with scripts/measure-routes.mjs.
+    needs: { batalleroMusico: -35 },
   },
   {
     id: "productor",
     label: "Productor",
-    line: "Vas camino a productor: cada vez menos rondas, cada vez mas temas.",
-    needs: { batalleroMusico: 30 },
+    line: "Vas camino a productor: cada vez menos rondas, cada vez mas temas, y el sonido es tuyo.",
+    // The music side forks (owner request, 2026-08-13: "que algunos caminos lo
+    // lleven a ser un artista famoso en el rap, no necesariamente en el
+    // freestyle"). A producer records and stays underground.
+    needs: { batalleroMusico: 32, undergroundComercial: -12 },
+  },
+  {
+    id: "artista",
+    label: "Artista de discos",
+    line: "Vas camino a artista: ya no te presentan como freestyler, te presentan por tus temas.",
+    // ...and this is the famous rapper: the same studio hours, pointed outward.
+    needs: { batalleroMusico: 32, undergroundComercial: 20 },
   },
   {
     id: "estrella-pop",
     label: "Estrella",
     line: "Vas camino a estrella: te escuchan lugares que nunca pisaste.",
-    needs: { undergroundComercial: 35 },
+    // Fame above everything, whichever way you got it.
+    needs: { undergroundComercial: 45 },
   },
   {
     id: "mentor",
