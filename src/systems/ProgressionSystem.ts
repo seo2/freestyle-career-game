@@ -5,6 +5,7 @@
 import type { CareerGoal, GameState, StageDef, StatKey } from "../core/types";
 import { maxEnergy, momentumMood, recordCost, stageIndex } from "../core/derived";
 import { ActionsConfig } from "../data/config/ActionsConfig";
+import { pendingRelease } from "./ReleaseSystem";
 import { ProgressionConfig } from "../data/config/ProgressionConfig";
 import { stages } from "../data/stages";
 import { statLabels } from "../data/stats";
@@ -106,7 +107,18 @@ export function getCareerGoals(state: GameState): CareerGoal[] {
     });
   }
 
-  if (state.discProgress < ActionsConfig.record.songProgressRequired) {
+  // The music road's own next step (Fase 10). Shown once the MC has actually put
+  // something out, because before that the goal is simply to finish a song.
+  const pending = state.songs > 0 ? pendingRelease(state) : null;
+  if (pending) {
+    goals.push({
+      label: pending.release.label,
+      detail: `${state.songs}/${pending.release.songs} temas`,
+      value: state.songs,
+      max: pending.release.songs,
+      color: ProgressionConfig.goalColors.firstSong,
+    });
+  } else if (state.discProgress < ActionsConfig.record.songProgressRequired) {
     goals.push({
       label: "Primer tema",
       detail: `${state.discProgress}% escrito`,

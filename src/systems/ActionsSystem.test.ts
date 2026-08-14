@@ -341,14 +341,22 @@ describe("record", () => {
     const result = executeAction(state, createSequenceRng([0.0]), "record");
     expect(result).toEqual({
       type: "event",
-      parts: ["Grabaste la cancion #1: +33 fans.", "Impulso +18: Activo."],
+      parts: [
+        "Grabaste la cancion #1: +33 fans.",
+        // The first song IS a milestone (Fase 10): recording used to be a counter
+        // nobody acknowledged, and a measured route reached 101 songs in silence.
+        "Primer sencillo: Subiste tu primer tema. Ya no eres solo el que improvisa.",
+        "+40 fans, +8 de fama.",
+        "Impulso +18: Activo.",
+      ],
       fx: { label: "Grabar", fromBlock: 0, toBlock: 1, blocks: 1, daysPassed: 0 },
     });
     expect(state.cash).toBe(65); // 100 - recordCost 35
     expect(state.discProgress).toBe(0);
     expect(state.songs).toBe(1);
-    expect(state.fans).toBe(33); // 25 + flow 2*3 + carisma 1*2 + int(0,18) -> 0
-    expect(state.fame).toBe(8);
+    expect(state.releases).toEqual(["sencillo"]);
+    expect(state.fans).toBe(73); // 33 from the song + 40 from the release
+    expect(state.fame).toBe(16); // 8 from the song + 8 from the release
     expect(state.respect).toBe(8);
     expect(state.xp).toBe(46);
     expect(state.energy).toBe(70);

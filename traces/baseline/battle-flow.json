@@ -1795,7 +1795,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2019,7 +2019,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2234,7 +2234,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2468,7 +2468,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2693,7 +2693,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -2937,7 +2937,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -3172,7 +3172,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },
@@ -3406,7 +3406,7 @@
       "identity": {
         "axes": {
           "undergroundComercial": 0,
-          "batalleroMusico": 0,
+          "batalleroMusico": -2,
           "soloCrew": 0,
           "autenticoPolemico": 0
         },

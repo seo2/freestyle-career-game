@@ -124,7 +124,12 @@ Implementar cada vista contra su mockup (ver `docs/PANTALLAS.md`): 1 Menú, 2 Cr
 - **Falta de esta fase:** el playtesting con checklist contra el filtro de 3 preguntas de la Bible.
 - **Hecho (2026-08-13): resuelta la tensión del criterio de dilemas.** La ventana de silencio inicial se cuenta en **días** (`quietDays: 4`) y no en semanas: su razón era que el jugador entienda el loop antes de decidir algo grande, y eso toma días. Sin tocar la reja de Plaza, las cuatro semillas medidas dan **3, 4, 3 y 3 dilemas** con arcos de 4-9 semanas. Ver `docs/GDD.md` › "Contenido de batalla".
 
-### Fase 10 — Empaquetado
+### Fase 10 — Rutas de carrera y empaquetado
+
+- **Hecho (2026-08-13): tu vida te define, no solo tus respuestas.** Pedido del owner: que algunos caminos lleven a ser artista famoso del rap y no necesariamente batallero. Al medirlo apareció que **lo único que movía los ejes de identidad eran los dilemas** — grabar 101 temas dejaba la misma identidad que batallar todos los sábados. Ahora cada acción mueve los ejes (con rendimientos decrecientes y techo de 70, para que los dilemas sigan pesando), la rama musical se **bifurca** en Productor (underground) y **Artista de discos** (hacia afuera), el batallero puro por fin tiene destino, y grabar construye una obra: sencillo → EP → disco → gira → sello. Medido en tres rutas de 20 semanas. Decisiones en `docs/GDD.md` › "Tu vida te define". Evidencia: `output/web-game/fase10-rutas/`.
+- **Falta:** que grabar cueste más que plata (la ruta medida hizo 101 temas), y el empaquetado de abajo.
+
+### Empaquetado
 
 - Auditoría PWA (ya hay manifest + service worker). **Decisión pendiente de beta:** Capacitor (móvil) vs. Steam (escritorio) — el MVP web debe correr bien en ambos contextos.
 - **Criterio de cierre:** build instalable corriendo el MVP en la plataforma elegida.

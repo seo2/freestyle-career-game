@@ -11,6 +11,8 @@ import type { RandomSource } from "../services/RandomService";
 import { clamp } from "../utils/math";
 import { advanceClock, formatDuration, spendActionTime } from "./CalendarSystem";
 import { feedBonds, restHealthBonus } from "./RelationshipSystem";
+import { driftFromAction } from "./DilemmaSystem";
+import { claimRelease } from "./ReleaseSystem";
 import { addStat, addXp, applyRhythm, rhythmPreview } from "./ProgressionSystem";
 import { battleDurationBlocks, battleEnergyCost, battleLabel, startBattle } from "./BattleSystem";
 import { burnoutReason, isBurntOut } from "./OpportunitySystem";
@@ -144,11 +146,14 @@ export function executeAction(state: GameState, rng: RandomSource, actionId: str
   if (!action || action.disabledReason) return { type: "none" };
 
   const outcome = dispatchAction(state, rng, actionId);
-  // Showing up is what a bond counts (Fase 7). Done here, once, so no action can
-  // forget to do it — and only for actions that actually ran.
   if (outcome.type !== "none") {
+    // Showing up is what a bond counts (Fase 7). Done here, once, so no action can
+    // forget to do it — and only for actions that actually ran.
     const bondMessages = feedBonds(state, actionId);
     if (bondMessages.length > 0 && outcome.type === "event") outcome.parts.push(...bondMessages);
+    // And what you spend the block on is who you are becoming (Fase 10). Same
+    // reason it lives here: one place, no action can forget.
+    driftFromAction(state, actionId);
   }
   return outcome;
 }
@@ -275,6 +280,8 @@ function runRecord(state: GameState, rng: RandomSource): ActionResult {
   state.cash -= recordCost(state);
   state.discProgress = 0;
   state.songs += 1;
+  // A song can complete a milestone (Fase 10): sencillo, EP, disco, gira, sello.
+  const releaseMessages = claimRelease(state);
   const fanGain =
     cfg.fansBase +
     state.stats.flow * cfg.fansPerFlow +
@@ -292,6 +299,7 @@ function runRecord(state: GameState, rng: RandomSource): ActionResult {
     type: "event",
     parts: [
       `Grabaste la cancion #${state.songs}: +${fanGain} fans.`,
+      ...releaseMessages,
       ...rhythmMessages,
       ...levelMessages,
       ...clock.messages,

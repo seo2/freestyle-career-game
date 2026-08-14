@@ -168,7 +168,9 @@ timeFx: (TimeAdvance & { elapsed: number; duration: number }) | null,
   // Identity (Fase 7): who this MC is becoming, the pending decision and the
   // career's memory. The axes are the shape of the run, so the harness sees them.
   const identity = {
-    axes: state.axes,
+    // Rounded: the axes carry fractions so that a damped drift of 0.4 still
+    // accumulates, but a trace full of 15 decimals is unreadable.
+    axes: Object.fromEntries(Object.entries(state.axes).map(([k, v]) => [k, Math.round(v)])),
     leaning: identitySummary(state),
     pendingDilemma: state.pendingDilemma,
     // The chapter waiting to be read, and the destiny the axes point at: the

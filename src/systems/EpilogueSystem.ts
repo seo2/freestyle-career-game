@@ -14,6 +14,7 @@ import type { DecisionRecord, GameState, IdentityAxis, StageId } from "../core/t
 import { axisChapterLines, destinyAttractors, stageChapters, undecidedLine } from "../data/epilogues";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import { stages } from "../data/stages";
+import { releaseTitle } from "./ReleaseSystem";
 
 const AXES: IdentityAxis[] = ["undergroundComercial", "batalleroMusico", "soloCrew", "autenticoPolemico"];
 
@@ -90,6 +91,15 @@ export function buildEpilogue(state: GameState, stage: StageId): Epilogue | null
       }),
       { won: 0, lost: 0 },
     );
+  // A recording career gets named too (Fase 10). Without this an MC who put out a
+  // disco read exactly like one who never entered a studio, because the chapter was
+  // composed from the axes alone.
+  const work = releaseTitle(state);
+  if (work) {
+    chapterLines.unshift(
+      `Dejaste algo grabado: ${work.toLowerCase()}. Eso queda cuando el ruido se apaga.`,
+    );
+  }
   return {
     stage,
     title: chapter.title,
