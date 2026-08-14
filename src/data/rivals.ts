@@ -29,7 +29,20 @@ export const rivalArchetypes: Record<RivalArchetype, { label: string; bias: Part
 // the battles already used; the archetype matches each style, and flow /
 // punchline are the rival's own stats (they feed their roll when they play a
 // resource that leans on them).
+// Three rivals per stage, not one. With a single opponent per stage the second
+// battle of a stage was identical to the first: same name, same archetype, same
+// reads. Three means a stage has faces, and — because rivalries persist — the one
+// you humiliated last week can be the one waiting for you.
+//
+// Each stage mixes archetypes on purpose, so learning to read an "agresivo" pays
+// off against a different agresivo later, and every stage has at least one
+// opponent whose habits you have not seen.
+//
+// flow/punchline climb with the stage (their sum runs roughly 5 -> 20 across the
+// ladder) with variation inside a stage, so the same night can be harder or
+// easier depending on who turns up.
 export const rivalRoster: RivalProfile[] = [
+  // --- Pieza: gente del barrio, todavia sin oficio -------------------------
   {
     stage: "pieza",
     eventName: "Cypher de pieza",
@@ -41,6 +54,28 @@ export const rivalRoster: RivalProfile[] = [
     personality: { agresividad: 2, humor: 4, metrica: 3, frecuenciaDeRiesgo: 5 },
   },
   {
+    stage: "pieza",
+    eventName: "Cypher de pieza",
+    name: "Tuti",
+    style: "puro chiste y cero filtro",
+    archetype: "humoristico",
+    flow: 2,
+    punchline: 3,
+    personality: { agresividad: 3, humor: 8, metrica: 1, frecuenciaDeRiesgo: 6 },
+  },
+  {
+    stage: "pieza",
+    eventName: "Cypher de pieza",
+    name: "El Primo",
+    style: "el que rapea desde antes que tu",
+    archetype: "veteranisimo",
+    flow: 4,
+    punchline: 2,
+    personality: { agresividad: 4, humor: 3, metrica: 5, frecuenciaDeRiesgo: 2 },
+  },
+
+  // --- Plaza: ya hay publico y hay que ganarselo ---------------------------
+  {
     stage: "plaza",
     eventName: "Plaza del barrio",
     name: "La Sombra",
@@ -51,6 +86,28 @@ export const rivalRoster: RivalProfile[] = [
     personality: { agresividad: 8, humor: 2, metrica: 3, frecuenciaDeRiesgo: 6 },
   },
   {
+    stage: "plaza",
+    eventName: "Plaza del barrio",
+    name: "Yeri Cruda",
+    style: "cuenta historias que duelen",
+    archetype: "callejero",
+    flow: 6,
+    punchline: 4,
+    personality: { agresividad: 5, humor: 4, metrica: 4, frecuenciaDeRiesgo: 4 },
+  },
+  {
+    stage: "plaza",
+    eventName: "Plaza del barrio",
+    name: "Dos Tiempos",
+    style: "se le nota el metronomo",
+    archetype: "tecnico",
+    flow: 5,
+    punchline: 4,
+    personality: { agresividad: 3, humor: 2, metrica: 8, frecuenciaDeRiesgo: 3 },
+  },
+
+  // --- Regional: oficio de verdad -----------------------------------------
+  {
     stage: "regional",
     eventName: "Regional Sur",
     name: "Killa Metro",
@@ -58,49 +115,158 @@ export const rivalRoster: RivalProfile[] = [
     archetype: "tecnico",
     flow: 7,
     punchline: 5,
-    personality: { agresividad: 3, humor: 1, metrica: 9, frecuenciaDeRiesgo: 3 },
+    personality: { agresividad: 4, humor: 2, metrica: 9, frecuenciaDeRiesgo: 3 },
+  },
+  {
+    stage: "regional",
+    eventName: "Regional Sur",
+    name: "Clip",
+    style: "vive de los cortes que se hacen virales",
+    archetype: "viral",
+    flow: 5,
+    punchline: 8,
+    personality: { agresividad: 6, humor: 6, metrica: 3, frecuenciaDeRiesgo: 8 },
+  },
+  {
+    stage: "regional",
+    eventName: "Regional Sur",
+    name: "Don Cassette",
+    style: "veinte anios arriba de la tarima",
+    archetype: "veteranisimo",
+    flow: 6,
+    punchline: 6,
+    personality: { agresividad: 5, humor: 4, metrica: 7, frecuenciaDeRiesgo: 2 },
+  },
+
+  // --- Nacional: camaras, contratos y gente que decide por ti --------------
+  {
+    stage: "nacional",
+    eventName: "Liga Nacional",
+    name: "Rima Royal",
+    style: "campeon defensor",
+    archetype: "campeon",
+    flow: 8,
+    punchline: 8,
+    personality: { agresividad: 6, humor: 4, metrica: 7, frecuenciaDeRiesgo: 5 },
   },
   {
     stage: "nacional",
-    eventName: "Final Nacional",
-    name: "Rima Royal",
-    style: "completo y mediatico",
+    eventName: "Liga Nacional",
+    name: "Bruta",
+    style: "entra a matar en la primera",
+    archetype: "agresivo",
+    flow: 7,
+    punchline: 9,
+    personality: { agresividad: 9, humor: 2, metrica: 4, frecuenciaDeRiesgo: 7 },
+  },
+  {
+    stage: "nacional",
+    eventName: "Liga Nacional",
+    name: "Santo",
+    style: "el publico lo quiere antes de que abra la boca",
     archetype: "viral",
-    flow: 8,
-    punchline: 8,
-    personality: { agresividad: 5, humor: 6, metrica: 5, frecuenciaDeRiesgo: 5 },
+    flow: 9,
+    punchline: 7,
+    personality: { agresividad: 4, humor: 7, metrica: 5, frecuenciaDeRiesgo: 7 },
+  },
+
+  // --- Internacional: otro idioma, mismo oficio ----------------------------
+  {
+    stage: "internacional",
+    eventName: "Circuito Mundial",
+    name: "Nova X",
+    style: "estilo internacional",
+    archetype: "viral",
+    flow: 9,
+    punchline: 7,
+    personality: { agresividad: 5, humor: 6, metrica: 6, frecuenciaDeRiesgo: 7 },
   },
   {
     stage: "internacional",
-    eventName: "Mundial Underground",
-    name: "Nova X",
-    style: "veloz e impredecible",
-    archetype: "humoristico",
+    eventName: "Circuito Mundial",
+    name: "Kaiser",
+    style: "estructura de relojero",
+    archetype: "tecnico",
+    flow: 8,
+    punchline: 8,
+    personality: { agresividad: 5, humor: 3, metrica: 9, frecuenciaDeRiesgo: 4 },
+  },
+  {
+    stage: "internacional",
+    eventName: "Circuito Mundial",
+    name: "Mala Fama",
+    style: "viene precedido por lo que dicen de el",
+    archetype: "agresivo",
+    flow: 7,
+    punchline: 9,
+    personality: { agresividad: 9, humor: 3, metrica: 5, frecuenciaDeRiesgo: 8 },
+  },
+
+  // --- Estrella: festivales, giras y egos ---------------------------------
+  {
+    stage: "estrella",
+    eventName: "Festival",
+    name: "Icono",
+    style: "estrella global",
+    archetype: "campeon",
     flow: 9,
-    punchline: 7,
-    personality: { agresividad: 4, humor: 8, metrica: 6, frecuenciaDeRiesgo: 9 },
+    punchline: 9,
+    personality: { agresividad: 6, humor: 5, metrica: 8, frecuenciaDeRiesgo: 6 },
   },
   {
     stage: "estrella",
-    eventName: "Festival Leyenda",
-    name: "Icono",
-    style: "leyenda con publico propio",
-    archetype: "veteranisimo",
-    flow: 9,
-    punchline: 9,
-    personality: { agresividad: 5, humor: 5, metrica: 8, frecuenciaDeRiesgo: 3 },
+    eventName: "Festival",
+    name: "Vitrina",
+    style: "mas marca que MC, y aun asi gana",
+    archetype: "viral",
+    flow: 8,
+    punchline: 10,
+    personality: { agresividad: 5, humor: 8, metrica: 5, frecuenciaDeRiesgo: 8 },
   },
   {
+    stage: "estrella",
+    eventName: "Festival",
+    name: "La Maestra",
+    style: "le ensenio a media escena",
+    archetype: "veteranisimo",
+    flow: 10,
+    punchline: 8,
+    personality: { agresividad: 5, humor: 5, metrica: 9, frecuenciaDeRiesgo: 3 },
+  },
+
+  // --- Leyenda: los que ya no tienen nada que probar ----------------------
+  {
     stage: "leyenda",
-    eventName: "Arena de Leyendas",
+    eventName: "Leyendas",
     name: "Fenix",
-    style: "campeon mundial defendiendo su corona",
+    style: "leyenda viva",
     archetype: "campeon",
     flow: 10,
     punchline: 10,
-    personality: { agresividad: 7, humor: 6, metrica: 9, frecuenciaDeRiesgo: 6 },
+    personality: { agresividad: 7, humor: 5, metrica: 8, frecuenciaDeRiesgo: 6 },
+  },
+  {
+    stage: "leyenda",
+    eventName: "Leyendas",
+    name: "El Ultimo",
+    style: "no pierde desde antes que nacieras",
+    archetype: "veteranisimo",
+    flow: 10,
+    punchline: 9,
+    personality: { agresividad: 6, humor: 4, metrica: 10, frecuenciaDeRiesgo: 4 },
+  },
+  {
+    stage: "leyenda",
+    eventName: "Leyendas",
+    name: "Cronica",
+    style: "cada ronda suya es un cuento que ya sabias",
+    archetype: "callejero",
+    flow: 9,
+    punchline: 10,
+    personality: { agresividad: 6, humor: 6, metrica: 7, frecuenciaDeRiesgo: 5 },
   },
 ];
+
 
 // What each event's crowd rewards and what leaves it cold (Bible: "publico /
 // jueces que valoran distinto segun el evento"). `loves` multiplies the hype a

@@ -161,12 +161,13 @@ export function chooseRivalMove(battle: BattleState, rng: RandomSource): BattleR
 }
 
 // Returns false (no mutation, no RNG consumed) when too tired to enter.
-// RNG draws: 1 stimulus pick + hand.size hand draws, in that order.
+// RNG draws: 1 rival pick + 1 stimulus pick + hand.size hand draws, in that order.
 export function startBattle(state: GameState, rng: RandomSource): boolean {
   const cost = battleEnergyCost(state);
   if (state.energy < cost) return false;
   state.energy = clamp(state.energy - cost, 0, maxEnergy(state));
-  const tier = getBattleTier(state);
+  // Draw order (the trace harness depends on it): rival pick, stimulus, hand.
+  const tier = getBattleTier(state, rng);
   const rival = BattleConfig.rival;
   const prompt = pickStimulus(rng);
   const hand = dealHand(rng, null);

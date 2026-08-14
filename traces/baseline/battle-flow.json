@@ -1721,16 +1721,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -1746,8 +1746,8 @@
         "rivalEnergy": 73,
         "rivalEnergyMax": 100,
         "rivalHype": 50,
-        "stimulus": "Corona",
-        "prompt": "La corona esta en juego y todos lo saben.",
+        "stimulus": "Rival",
+        "prompt": "Todo gira en torno a tu rival y su historial.",
         "timerSeconds": 15,
         "pendingResult": null,
         "results": [],
@@ -1756,38 +1756,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "defensa",
-            "label": "Defensa",
-            "boosted": false,
-            "projectedHype": 8
-          },
-          {
-            "key": "2",
             "id": "ataque",
             "label": "Ataque",
             "boosted": true,
             "projectedHype": 16
           },
           {
-            "key": "3",
+            "key": "2",
             "id": "dobletempo",
             "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
+          },
+          {
+            "key": "3",
+            "id": "respuesta",
+            "label": "Respuesta",
             "boosted": true,
-            "projectedHype": 15
+            "projectedHype": 14
           },
           {
             "key": "4",
-            "id": "respuesta",
-            "label": "Respuesta",
-            "boosted": false,
-            "projectedHype": 10
-          },
-          {
-            "key": "5",
             "id": "storytelling",
             "label": "Storytelling",
             "boosted": false,
             "projectedHype": 9
+          },
+          {
+            "key": "5",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 5
           }
         ]
       },
@@ -1925,16 +1925,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -1946,31 +1946,31 @@
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 1,
         "score": "1-0",
-        "hype": 58,
+        "hype": 66,
         "rivalEnergy": 65,
         "rivalEnergyMax": 100,
         "rivalHype": 54,
-        "stimulus": "Corona",
-        "prompt": "La corona esta en juego y todos lo saben.",
+        "stimulus": "Rival",
+        "prompt": "Todo gira en torno a tu rival y su historial.",
         "timerSeconds": 15,
         "pendingResult": {
           "round": 1,
-          "choice": "defensa",
-          "rivalChoice": "respuesta",
+          "choice": "ataque",
+          "rivalChoice": "humor",
           "tensionNotes": [],
-          "playerHypeDelta": 8,
-          "playerVerdict": "BIEN",
+          "playerHypeDelta": 16,
+          "playerVerdict": "¡BUENISIMO!",
           "rivalHypeDelta": 4,
           "rivalVerdict": "DEBIL"
         },
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           }
@@ -1980,38 +1980,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "defensa",
-            "label": "Defensa",
-            "boosted": false,
-            "projectedHype": 3
-          },
-          {
-            "key": "2",
             "id": "ataque",
             "label": "Ataque",
             "boosted": true,
-            "projectedHype": 16
+            "projectedHype": 11
+          },
+          {
+            "key": "2",
+            "id": "dobletempo",
+            "label": "Doble Tempo",
+            "boosted": false,
+            "projectedHype": 11
           },
           {
             "key": "3",
-            "id": "dobletempo",
-            "label": "Doble Tempo",
+            "id": "respuesta",
+            "label": "Respuesta",
             "boosted": true,
-            "projectedHype": 15
+            "projectedHype": 14
           },
           {
             "key": "4",
-            "id": "respuesta",
-            "label": "Respuesta",
-            "boosted": false,
-            "projectedHype": 10
-          },
-          {
-            "key": "5",
             "id": "storytelling",
             "label": "Storytelling",
             "boosted": false,
             "projectedHype": 9
+          },
+          {
+            "key": "5",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 5
           }
         ]
       },
@@ -2149,16 +2149,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -2170,7 +2170,7 @@
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
         "score": "1-0",
-        "hype": 58,
+        "hype": 66,
         "rivalEnergy": 65,
         "rivalEnergyMax": 100,
         "rivalHype": 54,
@@ -2181,11 +2181,11 @@
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           }
@@ -2195,38 +2195,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "punchline",
-            "label": "Punchline",
-            "boosted": false,
-            "projectedHype": 15
-          },
-          {
-            "key": "2",
             "id": "metrica",
             "label": "Metrica",
             "boosted": false,
             "projectedHype": 5
           },
           {
+            "key": "2",
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": false,
+            "projectedHype": 10
+          },
+          {
             "key": "3",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": true,
-            "projectedHype": 13
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 10
           },
           {
             "key": "4",
-            "id": "ataque",
-            "label": "Ataque",
-            "boosted": true,
-            "projectedHype": 16
+            "id": "punchline",
+            "label": "Punchline",
+            "boosted": false,
+            "projectedHype": 15
           },
           {
             "key": "5",
-            "id": "flow",
-            "label": "Flow",
-            "boosted": false,
-            "projectedHype": 9
+            "id": "ataque",
+            "label": "Ataque",
+            "boosted": true,
+            "projectedHype": 11
           }
         ]
       },
@@ -2364,16 +2364,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -2385,7 +2385,7 @@
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 2,
         "score": "2-0",
-        "hype": 63,
+        "hype": 76,
         "rivalEnergy": 57,
         "rivalEnergyMax": 100,
         "rivalHype": 58,
@@ -2394,32 +2394,32 @@
         "timerSeconds": 15,
         "pendingResult": {
           "round": 2,
-          "choice": "metrica",
-          "rivalChoice": "ataque",
+          "choice": "respuesta",
+          "rivalChoice": "dobletempo",
           "tensionNotes": [],
-          "playerHypeDelta": 5,
-          "playerVerdict": "DEBIL",
+          "playerHypeDelta": 10,
+          "playerVerdict": "BIEN",
           "rivalHypeDelta": 4,
           "rivalVerdict": "DEBIL"
         },
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "respuesta",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": 5,
-            "playerVerdict": "DEBIL",
+            "playerHypeDelta": 10,
+            "playerVerdict": "BIEN",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           }
@@ -2429,38 +2429,38 @@
         "hand": [
           {
             "key": "1",
+            "id": "metrica",
+            "label": "Metrica",
+            "boosted": false,
+            "projectedHype": 5
+          },
+          {
+            "key": "2",
+            "id": "respuesta",
+            "label": "Respuesta",
+            "boosted": false,
+            "projectedHype": 5
+          },
+          {
+            "key": "3",
+            "id": "humor",
+            "label": "Humor",
+            "boosted": false,
+            "projectedHype": 10
+          },
+          {
+            "key": "4",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
             "projectedHype": 15
           },
           {
-            "key": "2",
-            "id": "metrica",
-            "label": "Metrica",
-            "boosted": false,
-            "projectedHype": 2
-          },
-          {
-            "key": "3",
-            "id": "storytelling",
-            "label": "Storytelling",
-            "boosted": true,
-            "projectedHype": 13
-          },
-          {
-            "key": "4",
+            "key": "5",
             "id": "ataque",
             "label": "Ataque",
             "boosted": true,
             "projectedHype": 16
-          },
-          {
-            "key": "5",
-            "id": "flow",
-            "label": "Flow",
-            "boosted": false,
-            "projectedHype": 9
           }
         ]
       },
@@ -2598,16 +2598,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -2619,32 +2619,32 @@
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
         "score": "2-0",
-        "hype": 63,
+        "hype": 76,
         "rivalEnergy": 57,
         "rivalEnergyMax": 100,
         "rivalHype": 58,
-        "stimulus": "Rival",
-        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "stimulus": "Trabajo",
+        "prompt": "Hablan de trabajo, oficio y sacrificio.",
         "timerSeconds": 15,
         "pendingResult": null,
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "respuesta",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": 5,
-            "playerVerdict": "DEBIL",
+            "playerHypeDelta": 10,
+            "playerVerdict": "BIEN",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           }
@@ -2654,38 +2654,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "metrica",
-            "label": "Metrica",
-            "boosted": false,
-            "projectedHype": 2
-          },
-          {
-            "key": "2",
             "id": "dobletempo",
             "label": "Doble Tempo",
             "boosted": false,
             "projectedHype": 11
           },
           {
-            "key": "3",
+            "key": "2",
             "id": "storytelling",
             "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 9
+            "boosted": true,
+            "projectedHype": 13
           },
           {
-            "key": "4",
+            "key": "3",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
             "projectedHype": 15
           },
           {
+            "key": "4",
+            "id": "improvisacion",
+            "label": "Improvisacion",
+            "boosted": false,
+            "projectedHype": 13
+          },
+          {
             "key": "5",
-            "id": "respuesta",
-            "label": "Respuesta",
+            "id": "defensa",
+            "label": "Defensa",
             "boosted": true,
-            "projectedHype": 20
+            "projectedHype": 12
           }
         ]
       },
@@ -2823,16 +2823,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -2843,54 +2843,54 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
-        "score": "2-1",
-        "hype": 56,
+        "score": "3-0",
+        "hype": 91,
         "rivalEnergy": 49,
         "rivalEnergyMax": 100,
-        "rivalHype": 70,
-        "stimulus": "Rival",
-        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "rivalHype": 62,
+        "stimulus": "Trabajo",
+        "prompt": "Hablan de trabajo, oficio y sacrificio.",
         "timerSeconds": 15,
         "pendingResult": {
           "round": 3,
-          "choice": "storytelling",
-          "rivalChoice": "metrica",
+          "choice": "punchline",
+          "rivalChoice": "dobletempo",
           "tensionNotes": [],
-          "playerHypeDelta": -7,
-          "playerVerdict": "DEBIL",
-          "rivalHypeDelta": 12,
-          "rivalVerdict": "BIEN"
+          "playerHypeDelta": 15,
+          "playerVerdict": "¡BUENISIMO!",
+          "rivalHypeDelta": 4,
+          "rivalVerdict": "DEBIL"
         },
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "respuesta",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": 5,
-            "playerVerdict": "DEBIL",
+            "playerHypeDelta": 10,
+            "playerVerdict": "BIEN",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 3,
-            "choice": "storytelling",
-            "rivalChoice": "metrica",
+            "choice": "punchline",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 15,
+            "playerVerdict": "¡BUENISIMO!",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": false,
@@ -2898,38 +2898,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "metrica",
-            "label": "Metrica",
-            "boosted": false,
-            "projectedHype": 5
-          },
-          {
-            "key": "2",
             "id": "dobletempo",
             "label": "Doble Tempo",
             "boosted": false,
             "projectedHype": 11
           },
           {
-            "key": "3",
+            "key": "2",
             "id": "storytelling",
             "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 4
+            "boosted": true,
+            "projectedHype": 13
           },
           {
-            "key": "4",
+            "key": "3",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
-            "projectedHype": 15
+            "projectedHype": 10
+          },
+          {
+            "key": "4",
+            "id": "improvisacion",
+            "label": "Improvisacion",
+            "boosted": false,
+            "projectedHype": 13
           },
           {
             "key": "5",
-            "id": "respuesta",
-            "label": "Respuesta",
+            "id": "defensa",
+            "label": "Defensa",
             "boosted": true,
-            "projectedHype": 14
+            "projectedHype": 12
           }
         ]
       },
@@ -3067,16 +3067,16 @@
       "actions": [],
       "battle": {
         "event": "Cypher de pieza",
-        "rival": "Nico Cuaderno",
-        "rivalStyle": "nervioso pero creativo",
-        "rivalArchetype": "callejero",
-        "rivalFlow": 3,
-        "rivalPunchline": 2,
+        "rival": "Tuti",
+        "rivalStyle": "puro chiste y cero filtro",
+        "rivalArchetype": "humoristico",
+        "rivalFlow": 2,
+        "rivalPunchline": 3,
         "rivalPersonality": {
-          "agresividad": 2,
-          "humor": 4,
-          "metrica": 3,
-          "frecuenciaDeRiesgo": 5
+          "agresividad": 3,
+          "humor": 8,
+          "metrica": 1,
+          "frecuenciaDeRiesgo": 6
         },
         "crowdLoves": [
           "improvisacion",
@@ -3087,45 +3087,45 @@
         ],
         "crowdLine": "Cuatro amigos en la pieza: quieren chispa, no tecnica.",
         "round": 3,
-        "score": "2-1",
-        "hype": 56,
+        "score": "3-0",
+        "hype": 91,
         "rivalEnergy": 49,
         "rivalEnergyMax": 100,
-        "rivalHype": 70,
-        "stimulus": "Rival",
-        "prompt": "Todo gira en torno a tu rival y su historial.",
+        "rivalHype": 62,
+        "stimulus": "Trabajo",
+        "prompt": "Hablan de trabajo, oficio y sacrificio.",
         "timerSeconds": 15,
         "pendingResult": null,
         "results": [
           {
             "round": 1,
-            "choice": "defensa",
-            "rivalChoice": "respuesta",
+            "choice": "ataque",
+            "rivalChoice": "humor",
             "tensionNotes": [],
-            "playerHypeDelta": 8,
-            "playerVerdict": "BIEN",
+            "playerHypeDelta": 16,
+            "playerVerdict": "¡BUENISIMO!",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 2,
-            "choice": "metrica",
-            "rivalChoice": "ataque",
+            "choice": "respuesta",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": 5,
-            "playerVerdict": "DEBIL",
+            "playerHypeDelta": 10,
+            "playerVerdict": "BIEN",
             "rivalHypeDelta": 4,
             "rivalVerdict": "DEBIL"
           },
           {
             "round": 3,
-            "choice": "storytelling",
-            "rivalChoice": "metrica",
+            "choice": "punchline",
+            "rivalChoice": "dobletempo",
             "tensionNotes": [],
-            "playerHypeDelta": -7,
-            "playerVerdict": "DEBIL",
-            "rivalHypeDelta": 12,
-            "rivalVerdict": "BIEN"
+            "playerHypeDelta": 15,
+            "playerVerdict": "¡BUENISIMO!",
+            "rivalHypeDelta": 4,
+            "rivalVerdict": "DEBIL"
           }
         ],
         "finished": true,
@@ -3133,38 +3133,38 @@
         "hand": [
           {
             "key": "1",
-            "id": "metrica",
-            "label": "Metrica",
-            "boosted": false,
-            "projectedHype": 5
-          },
-          {
-            "key": "2",
             "id": "dobletempo",
             "label": "Doble Tempo",
             "boosted": false,
             "projectedHype": 11
           },
           {
-            "key": "3",
+            "key": "2",
             "id": "storytelling",
             "label": "Storytelling",
-            "boosted": false,
-            "projectedHype": 4
+            "boosted": true,
+            "projectedHype": 13
           },
           {
-            "key": "4",
+            "key": "3",
             "id": "punchline",
             "label": "Punchline",
             "boosted": false,
-            "projectedHype": 15
+            "projectedHype": 10
+          },
+          {
+            "key": "4",
+            "id": "improvisacion",
+            "label": "Improvisacion",
+            "boosted": false,
+            "projectedHype": 13
           },
           {
             "key": "5",
-            "id": "respuesta",
-            "label": "Respuesta",
+            "id": "defensa",
+            "label": "Defensa",
             "boosted": true,
-            "projectedHype": 14
+            "projectedHype": 12
           }
         ]
       },
@@ -3297,7 +3297,7 @@
         "to": "Tarde",
         "daysPassed": 0
       },
-      "lastEvent": "Ganaste en Cypher de pieza (1 bloque): +$35, +18 fans, +10 respeto. Nico Cuaderno te tomo la matricula. Impulso +22: Activo.",
+      "lastEvent": "Ganaste en Cypher de pieza (1 bloque): +$35, +18 fans, +10 respeto. Tuti no va a olvidar esto. Impulso +22: Activo.",
       "goals": [
         {
           "label": "Abrir Plaza",
@@ -3435,11 +3435,11 @@
         "summary": "Nadie cerca, nadie lejos.",
         "rivalries": [
           {
-            "name": "Nico Cuaderno",
+            "name": "Tuti",
             "faced": 1,
             "won": 1,
             "lost": 0,
-            "heat": 22,
+            "heat": 38,
             "line": "Te tiene ganas."
           }
         ]
