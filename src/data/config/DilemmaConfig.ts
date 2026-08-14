@@ -8,6 +8,12 @@ export const DilemmaConfig = {
     // at 0.40 a seven-day week lands one about 96% of the time. It was 0.28, and
     // a measured run to Plaza (scripts/playthrough.mjs) found only 2 dilemmas
     // where docs/PLAN.md asks for at least 3.
+    // 0.40 stays. It was raised to 0.50 to lift the low tail of "dilemmas per
+    // arc", and measuring four seeds DISPROVED that: the count is not limited by
+    // the rate, it is limited by how many weeks the arc lasts. With one dilemma a
+    // week and week 1 quiet, a three-week arc can only ever deliver two, and since
+    // Fase 9 made battles winnable a lucky player promotes in three weeks. That is
+    // a gate question, not a probability question — recorded in docs/GDD.md.
     chancePerDay: 0.4,
     // Never two in the same week: the point is that a decision is an event.
     maxPerWeek: 1,

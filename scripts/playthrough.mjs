@@ -25,7 +25,10 @@ const flag = (name, fallback) => {
 const MAX_WEEKS = Number(flag("weeks", 40));
 const TARGET = flag("target", "plaza");
 const SHOTS = flag("shots", "");
-const FIXED_NOW = 1754000000000;
+// The career's seed comes from Date.now, which the harness freezes — so changing
+// this changes the run. Exposed because "3 dilemmas" from ONE seed is luck, not a
+// rate, and the plan's closing criterion is about the rate.
+const FIXED_NOW = Number(flag("seed", 1754000000000));
 
 // What the player plans on each weekday. A reasonable-but-not-optimal plan:
 // train early in the week, work when the wallet is thin, keep the Saturday

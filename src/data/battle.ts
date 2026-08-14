@@ -154,7 +154,43 @@ export const battleStimuli: BattleStimulus[] = [
     label: "Cultura",
     text: "La cultura manda: conocimiento y raices.",
     best: ["metrica", "improvisacion"],
+  },  {
+    id: "hambre",
+    label: "Hambre",
+    text: "El estimulo es el hambre: lo que se aguanta para llegar.",
+    best: ["storytelling", "ataque"],
   },
+  {
+    id: "envidia",
+    label: "Envidia",
+    text: "El estimulo es la envidia de los que se quedaron mirando.",
+    best: ["punchline", "respuesta"],
+  },
+  {
+    id: "origen",
+    label: "Origen",
+    text: "El estimulo es de donde vienes y quien te hizo.",
+    best: ["storytelling", "flow"],
+  },
+  {
+    id: "noche",
+    label: "Noche",
+    text: "El estimulo es la noche: lo que pasa cuando se apagan las luces.",
+    best: ["improvisacion", "humor"],
+  },
+  {
+    id: "micro",
+    label: "Micro",
+    text: "El estimulo es el micro mismo: el fierro que te dieron.",
+    best: ["metrica", "dobletempo"],
+  },
+  {
+    id: "miedo",
+    label: "Miedo",
+    text: "El estimulo es el miedo: el que muestras y el que escondes.",
+    best: ["defensa", "improvisacion"],
+  },
+
 ];
 
 // [eventName, rivalName, rivalStyle] per stage index.

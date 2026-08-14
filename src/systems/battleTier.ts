@@ -5,13 +5,15 @@
 // Two reasons: the file was at its size limit, and the grudge a rival carries
 // (RelationshipSystem) belongs to who they are, not to how a round resolves.
 
-import type { BattleState, GameState } from "../core/types";
+import type { BattleState, GameState, RivalProfile } from "../core/types";
 import { stageIndex } from "../core/derived";
 import { crowdByStage, rivalRoster } from "../data/rivals";
+import { stages } from "../data/stages";
 import { trainingStats } from "../data/stats";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { DifficultyConfig, difficultyRules } from "../data/config/DifficultyConfig";
-import { rivalryEdge } from "./RelationshipSystem";
+import { rivalryEdge, rivalryWith } from "./RelationshipSystem";
+import type { RandomSource } from "../services/RandomService";
 
 export type BattleTier = Omit<
   BattleState,
@@ -32,9 +34,35 @@ export type BattleTier = Omit<
   | "result"
 >;
 
-export function getBattleTier(state: GameState): BattleTier {
+// Who turns up tonight. Every stage has three rivals, and the pick is WEIGHTED BY
+// GRUDGE: someone you beat badly is more likely to be waiting than someone with no
+// history with you. That is what makes the rivalry ledger a thing that happens to
+// you rather than a table you can read.
+//
+// Consumes exactly ONE draw whatever the outcome, so the trace harness stays
+// deterministic (the same rule the rest of the systems follow).
+export function pickRival(state: GameState, rng: RandomSource): RivalProfile {
+  const stage = stages[stageIndex(state)]?.id ?? "pieza";
+  const pool = rivalRoster.filter((entry) => entry.stage === stage);
+  const roll = rng.next();
+  if (pool.length === 0) return rivalRoster[0];
+  const cfg = BattleConfig.rivalPick;
+  const weights = pool.map((entry) => {
+    const heat = rivalryWith(state, entry.name)?.heat ?? 0;
+    return cfg.baseWeight + heat * cfg.heatWeight;
+  });
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  let cursor = roll * total;
+  for (let i = 0; i < pool.length; i += 1) {
+    cursor -= weights[i];
+    if (cursor < 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
+export function getBattleTier(state: GameState, rng: RandomSource): BattleTier {
   const idx = stageIndex(state);
-  const profile = rivalRoster[idx] ?? rivalRoster[0];
+  const profile = pickRival(state, rng);
   const crowd = crowdByStage[profile.stage];
   // What this rival remembers about you (Fase 7). A grudge makes them stronger
   // and more aggressive, so the second time is not the first time.

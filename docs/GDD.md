@@ -228,6 +228,38 @@ Aquí el principio rector deja de ser una intención y pasa a ser código.
   sorteo consume una cantidad fija de draws para no correr el arnés.
 - Números en `src/data/config/DilemmaConfig.ts`, contenido en `src/data/dilemmas.ts`.
 
+### Contenido de batalla: tres rivales por etapa y 16 estimulos (Fase 9, 2026-08-13)
+
+Con **un** rival por etapa, la segunda batalla de una etapa era idéntica a la
+primera: mismo nombre, mismo arquetipo, mismas lecturas. Ahora hay **tres por
+etapa, 21 en total**, y cada etapa **mezcla arquetipos** a propósito — así aprender
+a leer a un "agresivo" sirve contra otro agresivo más adelante, y siempre hay
+alguien cuyas mañas no viste.
+
+- **Quién aparece se sortea con peso por rencor.** Un rival al que humillaste es
+  más probable que te esté esperando que un desconocido: a rencor máximo es ~3×
+  más probable, y **nunca** deja fuera a los otros. Eso convierte el registro de
+  rivalidades en algo que te pasa, no en una tabla que consultas. Consume
+  exactamente **una** tirada de RNG, como todo el resto (el arnés lo exige).
+- **Efecto medido en el arco real:** de una rivalidad por arco a **dos**, y la del
+  historial reaparece — "Tuti 3-1, rencor 90: Te odia. Vino a cobrar." Y **la curva
+  de dificultad no se movió** (las tasas quedan dentro del ruido), que era el
+  objetivo: agregar contenido no debe re-balancear el juego.
+- **16 estímulos** (eran 10). Los 10 de la Bible siguen ahí y en orden — su lista
+  termina en puntos suspensivos, así que es un piso y no un techo — y los seis
+  nuevos son del mismo mundo: Hambre, Envidia, Origen, Noche, Micro, Miedo.
+
+**Tensión registrada, decisión del owner.** El criterio de cierre de la Fase 7
+("al menos 3 dilemas antes de Plaza") ahora **choca con un ascenso rápido**. Al
+hacer las batallas ganables, un jugador con suerte asciende en **3 semanas**; con
+un dilema por semana y la primera semana en silencio, eso da un techo de **2**.
+Medí cuatro semillas: los arcos duran 3-10 semanas y los dilemas salen 2-4. Subí
+la probabilidad de 0,40 a 0,50 para levantar la cola baja y la medición lo
+**desmintió** (no cambió el techo), así que la revertí. No es un problema de
+probabilidad: es una pregunta de **reja**. Las salidas son subir el requisito de
+Plaza, permitir dilemas en la semana 1, o aceptar que quien gana todo ve menos
+historia. Es una decisión de diseño, no un ajuste.
+
 ### Costo de vivir: que la plata sea escasa (Fase 9, 2026-08-13)
 
 Medido con `node scripts/measure-economy.mjs`. La Bible pide que **"el dinero

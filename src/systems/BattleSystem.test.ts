@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createNewState } from "../core/state";
 import { createSequenceRng, createStateRng } from "../services/RandomService";
-import { battleResources, battleStimuli, battleRivals, resourceById } from "../data/battle";
+import { battleResources, battleStimuli, resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { crowdByStage, rivalArchetypes, rivalRoster } from "../data/rivals";
 import { stages } from "../data/stages";
@@ -152,19 +152,14 @@ describe("battle data", () => {
     expect(resourceById("metrica").baseHype).toBe(8);
   });
 
-  it("carries the Bible's 10 stimuli, each with a best-resource list", () => {
-    expect(battleStimuli.map((stimulus) => stimulus.id)).toEqual([
-      "barrio",
-      "familia",
-      "escuela",
-      "dinero",
-      "corona",
-      "respeto",
-      "tiempo",
-      "rival",
-      "trabajo",
-      "cultura",
-    ]);
+  it("carries the Bible's 10 stimuli and the ones Fase 9 added, each with a best-resource list", () => {
+    // The Bible's list ends in an ellipsis, so it is a floor and not a ceiling.
+    // These ten must all be there; the rest are content added on top.
+    const bible = ["barrio", "familia", "escuela", "dinero", "corona", "respeto", "tiempo", "rival", "trabajo", "cultura"];
+    const ids = battleStimuli.map((stimulus) => stimulus.id);
+    expect(ids.slice(0, bible.length)).toEqual(bible);
+    expect(ids.length).toBeGreaterThan(bible.length);
+    expect(new Set(ids).size).toBe(ids.length);
     const resourceIds = new Set(battleResources.map((resource) => resource.id));
     for (const stimulus of battleStimuli) {
       expect(stimulus.best.length).toBeGreaterThan(0);
@@ -233,10 +228,11 @@ describe("startBattle", () => {
 
   it("picks the opening stimulus with rng.int(0, stimuli-1) and deals 5 distinct cards", () => {
     const state = stateAtStage("pieza", 80);
-    // Every draw 0.5: stimulus index 5 (respeto); the hand draws walk a
-    // shrinking pool (10/9/8/7/6), picking index floor(0.5*size) each time.
+    // Every draw 0.5: the first goes to the rival pick (Fase 9 gave each stage
+    // three rivals), then the stimulus, then the hand draws walking a shrinking
+    // pool (10/9/8/7/6) and picking index floor(0.5*size) each time.
     expect(startBattle(state, createSequenceRng([0.5]))).toBe(true);
-    expect(state.battle?.prompt).toBe(battleStimuli[5]);
+    expect(state.battle?.prompt).toBe(battleStimuli[Math.floor(0.5 * battleStimuli.length)]);
     expect(state.battle?.hand).toEqual(["metrica", "defensa", "dobletempo", "ataque", "respuesta"]);
     expect(new Set(state.battle?.hand).size).toBe(5);
   });
@@ -249,9 +245,13 @@ describe("startBattle", () => {
       expect(startBattle(state, createSequenceRng([0]))).toBe(true);
       expect(state.energy).toBe(80 - cost);
       const battle = state.battle;
-      expect(battle?.eventName).toBe(battleRivals[idx][0]);
-      expect(battle?.rivalName).toBe(battleRivals[idx][1]);
-      expect(battle?.rivalStyle).toBe(battleRivals[idx][2]);
+      // With three rivals per stage the test is no longer "which one", it is
+      // "one of this stage's". Who turns up is weighted by grudge and covered by
+      // the pickRival tests.
+      const pool = rivalRoster.filter((rival) => rival.stage === stage);
+      expect(pool.map((rival) => rival.name)).toContain(battle?.rivalName);
+      expect(pool.map((rival) => rival.eventName)).toContain(battle?.eventName);
+      expect(pool.map((rival) => rival.style)).toContain(battle?.rivalStyle);
       expect(battle?.rivalPower).toBe(expectedRivalPower(state, idx));
       expect(battle?.rewardCash).toBe(35 + idx * 85);
       expect(battle?.rewardFans).toBe(18 + idx * 95);
@@ -349,16 +349,18 @@ describe("resolveBattle", () => {
   it("plays a full win-loss-win match with exact rolls, hype, tension rules and verdicts", () => {
     const state = stateAtStage("pieza", 86); // fresh-state stats, momentum 42, health 88
     // Draw script (see the RNG order note at the top of this file):
-    //   start:  [0 x6]                 -> barrio, hand [punchline,flow,humor,ataque,defensa]
+    //   start:  [0 x7]                 -> rival Nico Cuaderno (first of the pieza
+    //                                     pool), barrio, hand
+    //                                     [punchline,flow,humor,ataque,defensa]
     //   r1:     [0, .99, 0]            -> rival move punchline, player 26, rival 12
-    //   adv:    [.95, 0 x5]            -> cultura, same zero-deal hand
+    //   adv:    [.58, 0 x5]            -> cultura, same zero-deal hand
     //   r2:     [.35, 0, .99]          -> rival move ataque, player 7, rival 34
     //   adv:    [0 x6]                 -> barrio, zero-deal hand + rule (a) respuesta
     //   r3:     [0, .99, 0]            -> rival move punchline, player 26, rival 12
     const rng = createSequenceRng([
-      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0,
       0, 0.99, 0,
-      0.95, 0, 0, 0, 0, 0,
+      0.58, 0, 0, 0, 0, 0,
       0.35, 0, 0.99,
       0, 0, 0, 0, 0, 0,
       0, 0.99, 0,
@@ -397,10 +399,10 @@ describe("resolveBattle", () => {
     expect(battle.round).toBe(1);
     expect(battle.finished).toBe(false);
 
-    advanceBattleRound(state, rng); // stimulus .95 -> cultura, zero-deal hand
+    advanceBattleRound(state, rng); // stimulus .58 -> cultura, zero-deal hand
     expect(battle.pendingResult).toBeNull();
     expect(battle.round).toBe(2);
-    expect(battle.prompt).toBe(battleStimuli[9]); // cultura (best: metrica/improvisacion)
+    expect(battle.prompt).toBe(battleStimuli[Math.floor(0.58 * battleStimuli.length)]);
     expect(battle.hand).toEqual(ZERO_HAND);
     expect(battle.timeLeft).toBe(15); // timer re-armed
     // Rule (b): the hand is NOT guaranteed to fit the stimulus — cultura's
@@ -475,7 +477,7 @@ describe("resolveBattle", () => {
     const state = stateAtStage("pieza", 86);
     // start | r1 punchline win | adv (barrio again, zero hand) | r2 punchline win
     const rng = createSequenceRng([
-      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0,
       0, 0.99, 0,
       0, 0, 0, 0, 0, 0,
       0, 0.99, 0,
@@ -567,14 +569,23 @@ describe("resolveBattle", () => {
 // archetype decide which resource they reach for, the resource they perform
 // feeds their roll, and each event's crowd rewards different resources.
 describe("AI rivals", () => {
-  it("covers the 7 archetypes of the Bible, one rival per stage", () => {
+  it("covers the 7 archetypes of the Bible, with several rivals per stage", () => {
     expect(Object.keys(rivalArchetypes).sort()).toEqual(
       ["agresivo", "campeon", "humoristico", "callejero", "tecnico", "veteranisimo", "viral"].sort(),
     );
-    expect(rivalRoster).toHaveLength(stages.length);
-    expect(rivalRoster.map((rival) => rival.stage)).toEqual(stages.map((stage) => stage.id));
+    // Every stage has faces, not a face: with one rival per stage the second
+    // battle of a stage was identical to the first.
+    for (const stage of stages) {
+      const pool = rivalRoster.filter((rival) => rival.stage === stage.id);
+      expect(pool.length).toBeGreaterThanOrEqual(2);
+      // And they are not the same opponent wearing three names.
+      expect(new Set(pool.map((rival) => rival.archetype)).size).toBeGreaterThan(1);
+    }
     // Every archetype is actually reachable in a career, none is dead data.
     expect(new Set(rivalRoster.map((rival) => rival.archetype)).size).toBe(Object.keys(rivalArchetypes).length);
+    // Names are unique: the rivalry ledger is keyed by name.
+    const names = rivalRoster.map((rival) => rival.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it("weights every resource above zero, so a legible rival can still surprise", () => {
@@ -648,7 +659,8 @@ describe("AI rivals", () => {
     // rival's own flow/punchline must move the number.
     const rollWith = (rivalMoveDraw: number): number => {
       const state = stateAtStage("plaza", 90);
-      const rng = createSequenceRng([0, 0, 0, 0, 0, 0, rivalMoveDraw, 0, 0]);
+      // Seven leading draws: rival pick, stimulus, five cards (Fase 9 added the pick).
+      const rng = createSequenceRng([0, 0, 0, 0, 0, 0, 0, rivalMoveDraw, 0, 0]);
       startBattle(state, rng);
       const battle = state.battle;
       if (!battle) throw new Error("battle missing");

@@ -78,6 +78,15 @@ export const BattleConfig = {
       timeout: "Se acabo el tiempo: pasaste la ronda.",
     },
   },
+  // Which of a stage's rivals turns up (BattleSystem/battleTier.pickRival).
+  rivalPick: {
+    // Everyone in the stage is possible; nobody is ever locked out.
+    baseWeight: 10,
+    // What a grudge buys them. At full heat (100) a rival is 3x as likely as a
+    // stranger, so the one you humiliated keeps showing up without ever being the
+    // only one you can meet.
+    heatWeight: 0.2,
+  },
   tier: {
     // Measured, not guessed (scripts/measure-battles.mjs). The old curve was a
     // sawtooth that ended in a formality: 8% wins in week 1, then 100% at regional
