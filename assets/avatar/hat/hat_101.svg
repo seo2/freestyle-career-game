@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 800" fill="none">
+  <title>Bucket estampado</title>
+  <g data-layer="hat">
+    <path d="M172 96C172 60 208 36 250 36s78 24 78 60v18H172Z" fill="var(--fabric-primary)" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M136 100h228l-24 44H160Z" fill="var(--fabric-primary)" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="176" y="74" width="148" height="16" rx="8" fill="var(--fabric-secondary)"/>
+  </g>
+</svg>

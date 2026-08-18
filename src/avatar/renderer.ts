@@ -145,7 +145,7 @@ export function renderAvatar(config: AvatarConfig, registry: Registry): RenderRe
     svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS.w} ${CANVAS.h}" fill="none" role="img">
 <defs>
   <clipPath id="dim-${uid}"><rect x="${LIGHT.shadeFromX}" y="0" width="${CANVAS.w - LIGHT.shadeFromX}" height="${CANVAS.h}"/></clipPath>
-  <filter id="dark-${uid}"><feColorMatrix type="matrix" values=".70 0 0 0 0  0 .70 0 0 0  0 0 .76 0 0  0 0 0 1 0"/></filter>
+  <filter id="dark-${uid}"><feColorMatrix type="matrix" values=".64 0 0 0 0  0 .64 0 0 0  0 0 .70 0 0  0 0 0 1 0"/></filter>
   <g id="fig-${uid}">${bodyMarkup}</g>
 </defs>
 <ellipse cx="${ANCHORS.centerX}" cy="${ANCHORS.sole + 8}" rx="132" ry="20" fill="#000" opacity="0.24"/>

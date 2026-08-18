@@ -11,24 +11,33 @@
 import { SKIN_TONES } from "../palettes";
 import type { ItemMeta } from "../types";
 
-const NAMES = [
-  "Muy claro",
-  "Claro",
-  "Trigueno",
-  "Medio",
-  "Moreno",
-  "Oscuro",
-  "Muy oscuro",
-  "Palido",
+// Ids written out, not built with `skin_0${i + 1}`. §30 says ids are immutable, and
+// a generated id does not exist as text anywhere — which broke the pipeline's
+// cross-reference check: a rule pointing at skin_01 was reported as dangling because
+// the id could not be found in the source. A test guards this now.
+const TONES = [
+  { id: "skin_01", name: "Muy claro" },
+  { id: "skin_02", name: "Claro" },
+  { id: "skin_03", name: "Trigueno" },
+  { id: "skin_04", name: "Medio" },
+  { id: "skin_05", name: "Moreno" },
+  { id: "skin_06", name: "Oscuro" },
+  { id: "skin_07", name: "Muy oscuro" },
+  { id: "skin_08", name: "Palido" },
 ] as const;
 
-export const skinTonesMeta: readonly ItemMeta[] = SKIN_TONES.map((_, i) => ({
-  id: `skin_0${i + 1}`,
-  name: NAMES[i],
+export const skinTonesMeta: readonly ItemMeta[] = TONES.map((tone) => ({
+  id: tone.id,
+  name: tone.name,
   category: "skin" as const,
   rarity: "common" as const,
   colors: ["skin_primary" as const],
 }));
+
+// The palette has to have a value for every tone, or a legal id renders nothing.
+if (TONES.length !== SKIN_TONES.length) {
+  throw new Error(`tonos de piel: ${TONES.length} ids contra ${SKIN_TONES.length} colores`);
+}
 
 // `skin_03` → 2. Unknown ids fall back to the middle of the palette rather than
 // throwing: a save that references a retired tone should still open.

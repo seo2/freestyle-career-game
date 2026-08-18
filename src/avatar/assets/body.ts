@@ -8,6 +8,7 @@
 
 import type { Asset, DrawContext } from "../asset";
 import { ellipse, headShape, limb, path, rect, line } from "./kit";
+import { arm, hand, leg, torsoPath } from "./geometry";
 import type { ItemMeta } from "../types";
 
 const bodyMeta = (id: string, name: string, unlockLevel?: number): ItemMeta => ({
@@ -23,39 +24,33 @@ const bodyMeta = (id: string, name: string, unlockLevel?: number): ItemMeta => (
 // separate figure drawings would be six things to keep in sync.
 function drawBody(ctx: DrawContext): Record<string, string> {
   const { body: b, colors: c, cx, y } = ctx;
-  const halfShoulder = b.shoulderW / 2;
-  const halfWaist = b.waistW / 2;
-  const armW = Math.round(b.legW * 0.72);
-  const legGap = 10;
 
-  // Legs and feet, one shape each so a trouser leg can cover exactly one.
-  const legTop = y.hip - 12;
-  const legH = y.ankle - legTop;
+  // Every limb comes from ./geometry, never re-derived here. A sleeve asks the same
+  // module, which is what stops it landing beside the arm instead of on it.
+  const legL = leg(ctx, -1);
+  const legR = leg(ctx, 1);
   const legs =
-    limb(cx - legGap / 2 - b.legW, legTop, b.legW, legH, c.skin) +
-    limb(cx + legGap / 2, legTop, b.legW, legH, c.skin);
+    limb(legL.x, legL.y, legL.w, legL.h, c.skin) + limb(legR.x, legR.y, legR.w, legR.h, c.skin);
+  // Feet point outward, so the figure stands instead of balancing on two posts.
   const feet =
-    rect(cx - legGap / 2 - b.legW - 6, y.ankle - 8, b.legW + 18, 40, 14, c.skin) +
-    rect(cx + legGap / 2 - 12, y.ankle - 8, b.legW + 18, 40, 14, c.skin);
+    rect(legL.x - 12, y.ankle - 6, legL.w + 18, 42, 16, c.skin) +
+    rect(legR.x - 6, y.ankle - 6, legR.w + 18, 42, 16, c.skin);
 
-  // Torso: shoulders out to the waist, tapering. The taper is what distinguishes
-  // an athletic build from a heavy one once both wear the same shirt.
-  const torso = path(
-    `M${cx - halfShoulder} ${y.shoulders + 26}` +
-      `C${cx - halfShoulder} ${y.shoulders - 4} ${cx - halfShoulder + 26} ${y.chin + 8} ${cx} ${y.chin + 8}` +
-      `C${cx + halfShoulder - 26} ${y.chin + 8} ${cx + halfShoulder} ${y.shoulders - 4} ${cx + halfShoulder} ${y.shoulders + 26}` +
-      `L${cx + halfWaist} ${y.hip}C${cx + halfWaist} ${y.hip + 16} ${cx - halfWaist} ${y.hip + 16} ${cx - halfWaist} ${y.hip}Z`,
-    c.skin,
-  );
+  const torso = path(torsoPath(ctx, 0, 0), c.skin);
 
+  const armL = arm(ctx, -1);
+  const armR = arm(ctx, 1);
   const arms =
-    limb(cx - halfShoulder - armW + 8, y.shoulders + 8, armW, y.waist - y.shoulders + 40, c.skin) +
-    limb(cx + halfShoulder - 8, y.shoulders + 8, armW, y.waist - y.shoulders + 40, c.skin);
+    limb(armL.x, armL.y, armL.w, armL.h, c.skin) + limb(armR.x, armR.y, armR.w, armR.h, c.skin);
+  const handL = hand(ctx, -1);
+  const handR = hand(ctx, 1);
   const hands =
-    ellipse(cx - halfShoulder - armW / 2 + 8, y.waist + 52, armW * 0.62, armW * 0.66, c.skin) +
-    ellipse(cx + halfShoulder + armW / 2 - 8, y.waist + 52, armW * 0.62, armW * 0.66, c.skin);
+    ellipse(handL.cx, handL.cy, handL.r, handL.r * 1.06, c.skin) +
+    ellipse(handR.cx, handR.cy, handR.r, handR.r * 1.06, c.skin);
 
-  const neck = rect(cx - 26, y.chin - 16, 52, 40, 14, c.skin);
+  // A neck you can see. At 40px tall behind the chin the head read as sitting
+  // directly on the shoulders.
+  const neck = rect(cx - 28, y.chin - 20, 56, 46, 16, c.skin);
   const ears =
     ellipse(cx - b.headW / 2 - 2, y.eyes + 12, 16, 22, c.skin) +
     ellipse(cx + b.headW / 2 + 2, y.eyes + 12, 16, 22, c.skin);

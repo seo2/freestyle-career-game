@@ -10,7 +10,11 @@
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\"",
-    "traces": "node scripts/compare-traces.mjs"
+    "traces": "node scripts/compare-traces.mjs",
+    "avatar:template": "node scripts/build-avatar-template.mjs",
+    "avatar:assets": "node scripts/build-avatar-assets.mjs",
+    "avatar:previews": "node scripts/build-avatar-previews.mjs",
+    "avatar": "npm run avatar:template && npm run avatar:assets"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
