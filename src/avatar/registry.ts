@@ -17,6 +17,10 @@ import {
   tattooAssets,
 } from "./assets/accessories";
 import { skinTonesMeta } from "./assets/skin";
+// Illustrator-authored pieces, imported from assets/avatar/ by
+// scripts/build-avatar-assets.mjs. Empty until there is art in that folder, so the
+// import always resolves and the game never depends on the pipeline having run.
+import { generatedAssets } from "./assets/generated";
 import type { Asset } from "./asset";
 import type { AssetId, Category, ItemMeta } from "./types";
 
@@ -39,6 +43,7 @@ const ALL: readonly Asset[] = [
   ...tattooAssets,
   ...piercingAssets,
   ...propAssets,
+  ...generatedAssets,
 ];
 
 const byId = new Map<AssetId, Asset>();

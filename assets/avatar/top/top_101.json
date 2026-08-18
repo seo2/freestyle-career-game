@@ -1,0 +1,12 @@
+{
+  "id": "top_101",
+  "name": "Buzo oversize",
+  "category": "top",
+  "rarity": "uncommon",
+  "price": 21000,
+  "currency": "cash",
+  "colors": ["fabric_primary", "fabric_secondary"],
+  "layers": { "top": true },
+  "style": { "street": 9, "sport": 5, "originality": 6 },
+  "rules": {}
+}

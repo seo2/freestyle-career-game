@@ -1,0 +1,36 @@
+{
+  "_comment": "Fuente unica de la plantilla maestra. La leen src/avatar/canvas.ts Y los scripts del pipeline, para que la plantilla que abre el ilustrador en Figma no pueda desviarse de lo que compone el renderer. Si esto cambia, se regenera la plantilla y se re-valida todo el arte.",
+  "canvas": { "w": 500, "h": 800 },
+  "figure": { "top": 60, "height": 680, "note": "85% de 800, dentro del 80-90% que pide el spec §7" },
+  "distribution": { "head": 0.2, "torso": 0.3, "legs": 0.4, "shoes": 0.1 },
+  "anchors": {
+    "crown": 60,
+    "hairline": 86,
+    "brow": 126,
+    "eyes": 140,
+    "nose": 164,
+    "mouth": 182,
+    "chin": 196,
+    "shoulders": 220,
+    "chest": 270,
+    "waist": 360,
+    "hip": 400,
+    "knee": 536,
+    "ankle": 672,
+    "sole": 740
+  },
+  "centerX": 250,
+  "light": { "shadeFromX": 286, "note": "La luz viene de la izquierda. Un solo limite para todo el cuerpo." },
+  "defaultBody": "body_03",
+  "tokens": [
+    "skin_primary",
+    "skin_shadow",
+    "hair_primary",
+    "hair_secondary",
+    "fabric_primary",
+    "fabric_secondary",
+    "metal_primary",
+    "accent_primary",
+    "ink"
+  ]
+}

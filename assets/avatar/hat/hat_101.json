@@ -1,0 +1,12 @@
+{
+  "id": "hat_101",
+  "name": "Bucket estampado",
+  "category": "hat",
+  "rarity": "rare",
+  "price": 15000,
+  "currency": "cash",
+  "colors": ["fabric_primary", "fabric_secondary"],
+  "layers": { "hat": true },
+  "style": { "street": 8, "originality": 8 },
+  "rules": { "incompatible": ["hair_004", "hair_005"] }
+}
