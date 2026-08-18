@@ -413,3 +413,68 @@ legítimamente entre el cuello y los brazos). Es lo que se rompió dos veces y s
 se veía al sacarse algo en el juego.
 
 Trazas idénticas al baseline: cero cambio de conducta.
+
+## Fase 11 — sistema de avatar vectorial (2026-08-18)
+
+El owner entregó dos documentos: un handoff de 48 páginas (**AVATAR DESIGN SYSTEM**,
+hecho con ChatGPT y escrito explícitamente para pasárselo a implementación) y una
+pantalla de Claude Design (**Creador de Avatar**). Se implementaron los dos. Donde
+difieren manda el spec, cuya Regla de Oro (§79) es que el creador es un **cliente**
+del sistema y no el sistema: por eso no hay ni un `if (item.id === ...)` en
+`src/avatar/`.
+
+Antes de esto se probaron y descartaron dos caminos, y vale registrar por qué:
+
+- **Avataaars tal cual.** Licencia verificada en el archivo del paquete: el diseño de
+  Pablo Stanley es "Free for personal and commercial use" y el código MIT, así que se
+  podía usar. Pero sus componentes son `base, body, clothing, clothingGraphic,
+  accessories, eyebrows, eyes, facialHair, mouth, nose, top` — **no hay piernas,
+  pantalón ni zapatos**, y el viewBox es 280×280 cuadrado. Se le pegaron piernas y se
+  cae: sus hombros abarcan el ancho completo, así que cualquier pierna razonable queda
+  de palito, y el torso termina en un corte horizontal que deja costura.
+- **Vector propio dibujado a mano en canvas.** Funcionaba, pero se encontraron dos
+  defectos que conviene no repetir: el sombreado como rectángulo negro recortado al
+  lado derecho **del lienzo** pinta también el fondo (hay que redibujar la figura
+  oscurecida, con `<use>` + `feColorMatrix`), y con los hombros más angostos que la
+  cabeza la figura se lee como un chupete.
+
+Lo implementado, con las decisiones del spec que costaron algo:
+
+- **27 capas en orden fijo** (§28). El orden en que el jugador equipa nunca decide el
+  z-order: el renderer recolecta y **después** ordena. Hay test.
+- **El pelo pinta en dos capas**, `back_hair` (03) y `front_hair` (21). Es lo único
+  que permite que un afro quede detrás de los hombros y su nacimiento igual tape la
+  frente.
+- **El cuerpo base está completo debajo de la ropa.** La lección cara de la Fase 10:
+  cuando la base tiene agujeros, sacarse una prenda los destapa. Hay un test que
+  desnuda el avatar entero y exige que siga habiendo una persona.
+- **La piel es un valor y no un dibujo** (§10), y sale de `appearance.skin` en vez de
+  la bolsa de colores, porque el tono es parte de quién ES el personaje. Ese detalle
+  tenía un bug real: el swatch de piel escribía en el lugar equivocado y la elección
+  no hacía nada.
+- **El sistema no evalúa progresión** (§70): `statusOf` recibe `satisfied(unlock)` y
+  pregunta. Por eso una zapatilla con nivel **no se vende a ningún precio**, que es la
+  regla que el diseño pone por escrito en la tienda.
+- **El parecido nunca se cobra** (§3): hay un test que recorre cuerpo, piel, rostro,
+  ojos, cejas, nariz y boca y falla si alguno tiene precio.
+- **El aleatorio va con semilla.** Lint atrapó mi `Math.random` — el proyecto lo
+  prohíbe para que las corridas sean reproducibles. Terminó siendo una mejora: la
+  generación se movió al sistema (`generate.ts`) donde §56 la necesita igual para los
+  NPCs, con test de que nunca equipa algo bloqueado (60 semillas).
+- **Una tienda no vende un físico.** Un tipo de cuerpo con nivel aparecía bajo
+  "TIENDA / DROPS"; ahora la tienda lista solo equipo y las recompensas de apariencia
+  se muestran en el creador con su badge de nivel.
+
+Verificado: build (dos entradas, `index.html` y `avatar.html`) + lint + **419 tests**
+(30 nuevos, que son los criterios de §77/§78 escritos como código) + `npm run traces`
+**idéntico al baseline** — esto es aditivo y el juego quedó intacto. Capturas en
+`output/web-game/creador-avatar/`, consola limpia.
+
+**Lo que falta y se nota: el arte.** §61 dice literalmente "no gastes tiempo
+produciendo cientos de assets antes de que el renderer esté probado", así que las
+piezas son formas planas escritas a mano. Las piernas se leen como una sola masa con
+pantalón oscuro, los brazos quedan rígidos con manos redondas en la cadera, el pase
+de sombra casi no se ve y las zapatillas son losas. El camino está en el spec
+(§64/§65): concepto → vector en Figma → validación contra el template → metadata →
+import. Como cada asset es una función que devuelve SVG, cambiar una pieza a mano por
+un archivo exportado toca `assets/` y nada más.
