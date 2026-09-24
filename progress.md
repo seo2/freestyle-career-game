@@ -527,3 +527,29 @@ consola limpia. El idle del MC no se puede probar en PNG: está cubierto por su 
 
 Siguiente: C (progreso con tiers y celebración en vez de barras sobre 99), D (batalla
 espectáculo), E (gancho inicial).
+
+## 2026-09-24 — Fase 12 (D): la batalla como espectáculo
+
+- **Público en primer plano**, cortado del mockup de batalla (`scripts/build-battle-crowd.mjs`:
+  parcha el "COSTO ENERGÍA" pintado con filas vecinas, difumina el borde superior y escala
+  a 0,8 porque a escala de mockup se leía como piedritas). En juego se parte en 12 franjas
+  que saltan con `crowdBounce`: casi quietas con la sala fría y saltando con hype alto.
+  En un golpe grande saltan todas a la vez, y al ganar la batalla no paran.
+- **Los MC actúan**: quien gana la ronda se lanza 30 px hacia el centro y el otro retrocede
+  (`lunge`). El cabeceo pasó de tween (congelado en el arnés) a `idlePose` por delta de frame.
+- **Veredicto con impacto**: la calificación entra como timbrazo (2,4× → 1×) y el hype
+  cuenta desde 0 (`countUp`). `BattleDraw` devuelve esos textos (`VerdictStamp`) para
+  que la escena los anime.
+- **El público grita** (`src/data/crowdShouts.ts`): vítores con ≥12 de hype, abucheos con
+  −6 o menos, y cánticos de victoria. La elección es determinista (ronda y slot, sin RNG)
+  y los gritos salen de la gente, bajo los paneles.
+- El espectáculo vive en `src/scenes/battleSpectacle.ts` (regla de 500 líneas); las curvas
+  en `src/ui/battleFeel.ts` con 7 tests.
+
+Verificado: build + lint + 477 tests + trazas idénticas. Capturas de una batalla completa
+en `output/web-game/batalla-espectaculo/` (+ `compare-ronda.png` contra el mockup),
+consola limpia. Brecha que queda contra el mockup: el público **de fondo** detrás de la
+reja, anotado en `docs/ASSETS.md` como arte pendiente.
+
+Pendiente acordado con el owner: **C** (tiers de progreso) y la **pieza que evoluciona**
+con compras y logros (mockup `06_34_34 (5)` como meta), después **E** (gancho inicial).

@@ -16,18 +16,21 @@
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
-import { AssetRegistry, battleBackdropKey, battleChoiceIconKey } from "../game/AssetRegistry";
+import { battleBackdropKey, battleChoiceIconKey } from "../game/AssetRegistry";
 import { hex, palette } from "../ui/palette";
 import { addHitZone, addRect, addSpriteImage, addText } from "../ui/kit";
 import { resourceById } from "../data/battle";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { EasedValue, Pulse, Shake } from "../ui/fx";
+import { countUp } from "../ui/battleFeel";
+import { BattleSpectacle } from "./battleSpectacle";
 import { rivalArchetypes } from "../data/rivals";
 import { rivalryLine } from "../systems/RelationshipSystem";
 import { battleEnergyCost, battleRoundSeconds, projectedHypeGain } from "../systems/BattleSystem";
 import { maxEnergy } from "../core/derived";
 import type { BattleResource, BattleState, GameState } from "../core/types";
 import { BattleDraw, FRAME, FRAME_DIM, HYPE_ORANGE, LABEL_CYAN } from "./battleDraw";
+import type { VerdictStamp } from "./battleDraw";
 
 const W = 960;
 const H = 540;
@@ -56,12 +59,11 @@ const TIMER_CX = 483;
 // Below this fraction of time left the fill turns red.
 const TIMER_ALERT_FRACTION = 0.25;
 
-// Performers: mockup scale and anchors (MC ~186px tall, feet clear of both the
-// card dock and the result panels).
-const PERFORMER_SCALE = 0.8;
-const PERFORMER_FEET_Y = 262;
-const MC_X = 150;
-const RIVAL_X = 812;
+// The verdict lands like a stamp (grade drops in from 2.4x) while the hype it
+// earned counts up from zero; the count runs a little longer than the stamp.
+const STAMP_MS = 260;
+const STAMP_FROM = 2.4;
+const COUNT_MS = 620;
 
 // The stimulus box keeps its size but rides higher on the result screen, where
 // the RESULTADO block takes over the middle of the canvas (both mockups).
@@ -112,6 +114,12 @@ export class BattleScene extends Phaser.Scene {
   // verdict (kick the shake) without re-firing on every unrelated redraw.
   private lastSeenRound = 0;
   private lastSeenResults = 0;
+  private lastSeenFinished = false;
+  // Performers, crowd and shouts (Fase 12 D).
+  private spectacle!: BattleSpectacle;
+  private verdict: VerdictStamp | null = null;
+  private stamp = new Pulse(STAMP_MS);
+  private count = new Pulse(COUNT_MS);
 
   constructor() {
     super("Battle");
@@ -122,8 +130,8 @@ export class BattleScene extends Phaser.Scene {
     this.buildBackdrop();
     // Both performers stand on the same ground plane of the plaza backdrop,
     // clear of the props on the terrace and of the card dock below.
-    this.addPerformer(MC_X, PERFORMER_FEET_Y, "mc");
-    this.addPerformer(RIVAL_X, PERFORMER_FEET_Y, "rival");
+    this.spectacle = new BattleSpectacle(this);
+    this.spectacle.buildPerformers();
 
     // Warm light over the scene that follows the hype (added before the UI
     // layer so it tints the stage, never the text).
@@ -131,7 +139,10 @@ export class BattleScene extends Phaser.Scene {
     // built with fillAlpha 0 multiplies any later setAlpha to nothing, which is
     // exactly how this effect was invisible the first time.
     this.stageGlow = this.add.rectangle(W / 2, H / 2, W, H, hex("#ff8a2b"), 1).setAlpha(0);
+    // The crowd stands in front of the stage light and behind the UI.
+    this.spectacle.buildCrowd();
     this.layer = this.add.container(0, 0);
+    this.spectacle.raiseShouts();
     this.draw = new BattleDraw(this, this.layer);
     const subs = [
       eventBus.on("STATE_CHANGED", () => this.redraw()),
@@ -184,7 +195,21 @@ export class BattleScene extends Phaser.Scene {
       this.stageGlow.setAlpha(warmth * GLOW_MAX_ALPHA + flash * ROAR_MAX_ALPHA);
     }
 
+    this.spectacle.update(delta, player);
     if (settling) this.redraw();
+    this.animateVerdict(delta);
+  }
+
+  // Stamp the grade in and count the hype up. Reapplied every frame from the
+  // pulses, so a redraw mid-animation (the HUD settling) picks up where it was.
+  private animateVerdict(delta: number): void {
+    const stamp = this.stamp.advance(delta);
+    const count = this.count.advance(delta);
+    if (!this.verdict) return;
+    this.verdict.grade.setScale(1 + (STAMP_FROM - 1) * (1 - stamp));
+    this.verdict.grade.setAlpha(Math.min(1, 0.25 + stamp));
+    this.verdict.amount.setText(this.draw.signedValue(countUp(this.verdict.value, this.count.elapsedFraction)));
+    this.verdict.amount.setScale(count < 1 ? 1.12 : 1);
   }
 
   // Reads the battle for the two moments worth feeling: a new round (deal the
@@ -201,6 +226,9 @@ export class BattleScene extends Phaser.Scene {
       this.lastSeenResults = battle.results.length;
       const last = battle.results[battle.results.length - 1];
       if (last) {
+        this.spectacle.onRound(last);
+        this.stamp.restart();
+        this.count.restart();
         // Losing the round hits harder than winning it: the shake is the
         // punchline landing on you, scaled by how much hype moved.
         const swing = Math.abs(last.playerHypeDelta);
@@ -213,6 +241,7 @@ export class BattleScene extends Phaser.Scene {
 
   private redraw(): void {
     this.layer.removeAll(true);
+    this.verdict = null;
     this.timerFill = null;
     this.cardLayer = null;
     const { controller, input } = gameContext();
@@ -222,9 +251,15 @@ export class BattleScene extends Phaser.Scene {
 
     this.drawStageHud(battle);
     if (battle.finished) {
-      this.draw.finalResultPanel(battle);
+      if (!this.lastSeenFinished) {
+        this.lastSeenFinished = true;
+        this.spectacle.onFinal(battle.result === "win");
+        this.stamp.restart();
+        this.count.restart();
+      }
+      this.verdict = this.draw.finalResultPanel(battle);
     } else if (battle.pendingResult) {
-      this.draw.roundResultPanel(battle, battle.pendingResult);
+      this.verdict = this.draw.roundResultPanel(battle, battle.pendingResult);
     } else {
       this.drawChoiceDock(battle, input.battleFocus, controller.state);
     }
@@ -248,54 +283,6 @@ export class BattleScene extends Phaser.Scene {
     } else {
       addRect(this, backdrop, 0, 0, W, H, palette.deep);
     }
-  }
-
-  // Performer sprites (MC left, rival right), feet on the ground anchor and
-  // bobbing gently in place. Falls back to the compact placeholder figure when
-  // the texture is missing.
-  private addPerformer(x: number, y: number, variant: "mc" | "rival"): void {
-    const key = variant === "mc" ? AssetRegistry.characters.mcIdle.key : AssetRegistry.characters.rivalIdle.key;
-    if (this.textures.exists(key)) {
-      const image = this.add.image(x, y, key).setOrigin(0.5, 1);
-      image.setScale(PERFORMER_SCALE);
-      this.addIdleBob(image, y, variant);
-      return;
-    }
-    const container = this.add.container(x, y);
-    const graphics = this.add.graphics();
-    const bodyColor = variant === "mc" ? hex(palette.teal) : hex(palette.pink);
-    const capColor = variant === "mc" ? hex(palette.red) : hex(palette.blue);
-    graphics.fillStyle(hex("#08090d"), 1);
-    graphics.fillRoundedRect(-16, -24, 32, 48, 6);
-    graphics.fillStyle(bodyColor, 1);
-    graphics.fillRoundedRect(-14, -22, 28, 44, 5);
-    graphics.fillStyle(capColor, 1);
-    graphics.fillRoundedRect(-12, -28, 24, 8, 3);
-    const micX = variant === "mc" ? 18 : -18;
-    graphics.fillStyle(hex("#15171d"), 1);
-    graphics.fillCircle(micX, -2, 4);
-    graphics.fillStyle(hex(palette.ink), 1);
-    graphics.fillCircle(micX, -2, 2);
-    container.add(graphics);
-    container.setScale(3.2);
-    this.addIdleBob(container, y, variant);
-  }
-
-  // Idle bob: 4px sine wave, rival slightly slower and offset.
-  private addIdleBob(
-    target: Phaser.GameObjects.Image | Phaser.GameObjects.Container,
-    y: number,
-    variant: "mc" | "rival",
-  ): void {
-    this.tweens.add({
-      targets: target,
-      y: y - 4,
-      duration: variant === "mc" ? 620 : 700,
-      delay: variant === "mc" ? 0 : 180,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.easeInOut",
-    });
   }
 
   // --- HUD --------------------------------------------------------------------
