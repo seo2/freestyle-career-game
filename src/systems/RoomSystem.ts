@@ -5,11 +5,9 @@
 import type { GameState } from "../core/types";
 import { roomProps } from "../data/roomProps";
 import type { RoomPropDef, RoomUnlock } from "../data/roomProps";
+import { battlesWon } from "./RelationshipSystem";
 
-// Battles won across every rival met.
-export function battlesWon(state: GameState): number {
-  return state.rivalries.reduce((sum, rival) => sum + rival.won, 0);
-}
+export { battlesWon };
 
 export function roomUnlocked(state: GameState, unlock: RoomUnlock): boolean {
   switch (unlock.kind) {

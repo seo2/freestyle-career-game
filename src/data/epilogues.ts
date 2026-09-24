@@ -77,9 +77,30 @@ export interface DestinyAttractor {
   line: string;
   // Every listed axis must lean at least this far in this direction.
   needs: Partial<Record<IdentityAxis, number>>;
+  // Every listed axis must stay within this distance of the centre (Fase 12:
+  // a destiny can be about balance, not only about leaning).
+  balanced?: Partial<Record<IdentityAxis, number>>;
+  // What the career must have DONE, not only leaned toward. An attractor with
+  // deeds is the sharpest read of a career, so when it holds it wins over the
+  // axis-only ones (EpilogueSystem.destinyFor).
+  deeds?: { battlesWon?: number; release?: string };
 }
 
 export const destinyAttractors: DestinyAttractor[] = [
+  {
+    id: "completo",
+    label: "MC completo",
+    line: "Vas camino a MC completo: ganas arriba de la tarima y llenas en el estudio. Pocos pueden las dos.",
+    // The mixed road (2026-09-24). Measured with scripts/measure-routes.mjs: a
+    // career that alternated battles and studio climbed further than either pure
+    // road, and until the axes' brake was fixed it still read as "Campeon de
+    // batallas" — with a record label of its own. Balance alone would hand this
+    // to someone who did nothing, so it also asks for the deeds of BOTH sides:
+    // real wins and a released disco.
+    needs: {},
+    balanced: { batalleroMusico: 30 },
+    deeds: { battlesWon: 20, release: "disco" },
+  },
   {
     id: "leyenda-underground",
     label: "Leyenda underground",
