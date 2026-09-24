@@ -16,6 +16,22 @@ export const ProgressionConfig = {
     min: 1,
     max: 99,
   },
+  // Named ranks a skill climbs through (Fase 12 C). A stat is shown as its rank
+  // plus one pip per point inside it, never against statBounds.max: the
+  // strongest rival in the game has flow 10, so a bar out of 99 said "you are
+  // nowhere" to a player who was already competitive. Bands are measured
+  // against the rival table (src/data/rivals.ts): pieza rivals sit at 2..4,
+  // plaza 4..6, regional 5..8, the top of the game 9..10. Each `min` is where
+  // the rank starts; the last rank is open-ended.
+  skillTiers: [
+    { min: 1, label: "Novato" },
+    { min: 3, label: "Aprendiz" },
+    { min: 5, label: "Callejero" },
+    { min: 8, label: "Filoso" },
+    { min: 12, label: "Veterano" },
+    { min: 17, label: "Maestro" },
+    { min: 24, label: "Leyenda" },
+  ],
   rhythm: {
     repeatPenaltyCap: 12,
     repeatPenaltyPerStreak: 4,

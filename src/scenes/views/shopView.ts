@@ -18,7 +18,7 @@
 
 import type Phaser from "phaser";
 import { eventBus } from "../../events/EventBus";
-import { AssetRegistry } from "../../game/AssetRegistry";
+import { itemIconKey } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
 import { addButton, addDisplayText, addHitZone, addPanel, addSpriteImage, addText } from "../../ui/kit";
 import { clamp } from "../../utils/math";
@@ -128,29 +128,7 @@ const DESC = {
 // must never be trapped in a sub-view.
 const BACK = { x: 560, y: 96, w: 142, h: 34 } as const;
 
-// Item icons cut so far (docs/ASSETS.md): the microphone and the headphones came
-// straight out of this mockup's own rows, the notebook and the bed out of the
-// room dock. Everything else is a pending asset and falls back to the neutral
-// framed slot — no improvised shapes (project rule 2).
-// Every catalogue item has its own icon now: the ten that were missing were
-// generated and processed through scripts/process-icon.mjs (2026-08-13), so no
-// row falls back to the neutral placeholder. Two keep the cuts they borrowed
-// from the mockups, because those ARE their objects.
-const ITEM_ICON_KEYS: Record<string, string> = {
-  microfono: AssetRegistry.icons.battlePunchline.key,
-  audifonos: AssetRegistry.icons.battleFlow.key,
-  interfaz: AssetRegistry.icons.itemInterfaz.key,
-  monitores: AssetRegistry.icons.itemMonitores.key,
-  gorra: AssetRegistry.icons.itemGorra.key,
-  zapatillas: AssetRegistry.icons.itemZapatillas.key,
-  chaqueta: AssetRegistry.icons.itemChaqueta.key,
-  "beat-boombap": AssetRegistry.icons.itemBeatBoombap.key,
-  "beat-trap": AssetRegistry.icons.itemBeatTrap.key,
-  "pack-acapella": AssetRegistry.icons.itemPackAcapella.key,
-  cuaderno: AssetRegistry.icons.itemCuaderno.key,
-  mesa: AssetRegistry.icons.itemMesa.key,
-  colchon: AssetRegistry.icons.actionRest.key,
-};
+// Item icons: AssetRegistry.itemIconKey (shared with the pieza since Fase 12 C).
 
 // Approximate advance per font px of the body monospace stack (same constant
 // CareerScene uses to fit single lines).
@@ -380,7 +358,7 @@ function cursor(ctx: ViewCtx, cy: number): void {
 
 // Item icon, or the neutral framed slot when the sprite is still pending.
 function itemIcon(ctx: ViewCtx, item: ItemDef, cy: number, dim: boolean): void {
-  const key = ITEM_ICON_KEYS[item.id];
+  const key = itemIconKey(item.id);
   const icon = key ? addSpriteImage(ctx.scene, ctx.layer, key, ROW.iconCx, cy, ROW.iconH, 0.5, 0.5, ROW.iconMaxW) : null;
   if (icon) {
     if (dim) icon.setAlpha(0.4);
@@ -414,7 +392,7 @@ function previewPanel(ctx: ViewCtx, item: ItemDef | null): void {
   rect(ctx, wx, wy, ww, wh, ROW_COLORS.well);
   rect(ctx, wx, wy, ww, 2, ROW_COLORS.rule);
   if (!item) return;
-  const key = ITEM_ICON_KEYS[item.id];
+  const key = itemIconKey(item.id);
   const cx = wx + ww / 2;
   const cy = wy + wh / 2;
   // Preview art is a pending asset: the cut icon stands in at display size, and

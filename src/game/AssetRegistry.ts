@@ -29,6 +29,15 @@ export const AssetRegistry = {
     speakerRight: { key: "cover-speaker-right", path: "/assets/main-menu/prop_speaker_right.png" },
     logo: { key: "cover-logo", path: "/assets/main-menu/logo_freestyle_game.png" },
   },
+  // Props the pieza earns (Fase 12 C), cut from the advanced-room mockup by
+  // scripts/build-room-props.mjs.
+  room: {
+    discoOro: { key: "room-disco-oro", path: "/assets/room/disco-oro.png" },
+    rapToWin: { key: "room-rap-to-win", path: "/assets/room/rap-to-win.png" },
+    placa100k: { key: "room-placa-100k", path: "/assets/room/placa-100k.png" },
+    neonFoco: { key: "room-neon-foco", path: "/assets/room/neon-foco.png" },
+    trofeos: { key: "room-trofeos", path: "/assets/room/trofeos.png" },
+  },
   characters: {
     mcIdle: { key: "mc-idle", path: "/assets/characters/mc-idle.png" },
     mcBust: { key: "mc-bust", path: "/assets/characters/mc-bust.png" },
@@ -145,7 +154,46 @@ export function allAssetEntries(): { key: string; path: string }[] {
     ...Object.values(AssetRegistry.scenes),
     ...Object.values(AssetRegistry.cover),
     ...Object.values(AssetRegistry.characters),
+    ...Object.values(AssetRegistry.room),
     ...characterLayerEntries(),
     ...Object.values(AssetRegistry.icons),
   ];
+}
+
+// Store item id -> icon texture key. Shared by the shop rows and the pieza,
+// which shows a bought item at object scale (Fase 12 C). Two items keep the cuts
+// they borrowed from the mockups, because those ARE their objects.
+const ITEM_ICON_KEYS: Record<string, string> = {
+  microfono: AssetRegistry.icons.battlePunchline.key,
+  audifonos: AssetRegistry.icons.battleFlow.key,
+  interfaz: AssetRegistry.icons.itemInterfaz.key,
+  monitores: AssetRegistry.icons.itemMonitores.key,
+  gorra: AssetRegistry.icons.itemGorra.key,
+  zapatillas: AssetRegistry.icons.itemZapatillas.key,
+  chaqueta: AssetRegistry.icons.itemChaqueta.key,
+  "beat-boombap": AssetRegistry.icons.itemBeatBoombap.key,
+  "beat-trap": AssetRegistry.icons.itemBeatTrap.key,
+  "pack-acapella": AssetRegistry.icons.itemPackAcapella.key,
+  cuaderno: AssetRegistry.icons.itemCuaderno.key,
+  mesa: AssetRegistry.icons.itemMesa.key,
+  colchon: AssetRegistry.icons.actionRest.key,
+};
+
+export function itemIconKey(id: string): string | null {
+  return ITEM_ICON_KEYS[id] ?? null;
+}
+
+// A room prop's `art` (src/data/roomProps.ts) -> texture key: "item:<id>" reuses
+// the store icon, anything else is a cut from the advanced-room mockup.
+const ROOM_ART_KEYS: Record<string, string> = {
+  "disco-oro": AssetRegistry.room.discoOro.key,
+  "rap-to-win": AssetRegistry.room.rapToWin.key,
+  "placa-100k": AssetRegistry.room.placa100k.key,
+  "neon-foco": AssetRegistry.room.neonFoco.key,
+  trofeos: AssetRegistry.room.trofeos.key,
+};
+
+export function roomPropKey(art: string): string | null {
+  if (art.startsWith("item:")) return itemIconKey(art.slice(5));
+  return ROOM_ART_KEYS[art] ?? null;
 }

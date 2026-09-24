@@ -10,9 +10,9 @@
 // Deliberate deviations from the mockup:
 //  * The mockup's 8th attribute ("salud mental") is not a trainable stat here,
 //    so the middle column lists the seven real ones.
-//  * The mockup's per-attribute "NIVEL 3 / 65 of 100" implies a per-level point
-//    tier we do not model: a stat is a single 1..99 number, so the value runs
-//    against ProgressionConfig.statBounds.max.
+//  * The mockup's per-attribute "NIVEL 3 / 65 of 100" is a per-level point tier.
+//    Since Fase 12 C each stat shows its named rank (ProgressionConfig.skillTiers)
+//    with one pip per point inside it.
 //  * The left column's flavour quote and the right column's invented
 //    "RESUMEN GENERAL" score become real data: the current stage card and the
 //    live career goals from ProgressionSystem.
@@ -32,12 +32,12 @@ import { palette } from "../../ui/palette";
 import { addDisplayText, addHitZone, addMeter, addPanel, addSpriteImage, addText } from "../../ui/kit";
 import { statLabels, trainingStats } from "../../data/stats";
 import { stages } from "../../data/stages";
-import { ProgressionConfig } from "../../data/config/ProgressionConfig";
 import { currentStage, recordCost, stageIndex } from "../../core/derived";
 import { getCareerGoals } from "../../systems/ProgressionSystem";
 import { clamp } from "../../utils/math";
 import type { CareerGoal, StatKey } from "../../core/types";
-import { line, mcFigure, rect, statColor } from "./viewKit";
+import { line, mcFigure, rect, statColor, tierHint, tierPips } from "./viewKit";
+import { skillTier } from "../../systems/ProgressionSystem";
 import type { ViewCtx } from "./viewKit";
 
 // Screen chrome shared by the Fase 4 sub-views. Duplicated per view file on
@@ -160,7 +160,6 @@ function profileColumn(ctx: ViewCtx): void {
 
 function attributeRow(ctx: ViewCtx, stat: StatKey, index: number): void {
   const value = ctx.controller.state.stats[stat];
-  const max = ProgressionConfig.statBounds.max;
   const y = ROW.y0 + index * ROW.pitch;
   const accent = statColor(stat);
 
@@ -188,29 +187,11 @@ function attributeRow(ctx: ViewCtx, stat: StatKey, index: number): void {
   }
 
   line(ctx, ROW.x + ROW.labelX, y + 18, statLabels[stat].toUpperCase(), 14, palette.ink, 200);
-  statMeter(ctx, ROW.x + ROW.labelX, y + 22, ROW.meterW, value, max, accent);
-  line(ctx, ROW.x + ROW.valueX, y + 18, `NIVEL ${value}`, 13, palette.ink, 98);
-  line(ctx, ROW.x + ROW.valueX, y + 33, `${value} / ${max}`, 9, accent, 98);
-}
-
-// Level meter with a graduated track: early-career stats fill a few percent of
-// the 1..99 range, and without the ticks plus the bright fill cap a low value
-// reads as a broken bar instead of "a long way to go".
-function statMeter(
-  ctx: ViewCtx,
-  x: number,
-  y: number,
-  w: number,
-  value: number,
-  max: number,
-  color: string,
-): void {
-  const h = 12;
-  rect(ctx, x, y, w, h, CARD.track);
-  for (let i = 1; i < 5; i += 1) rect(ctx, x + Math.floor((w * i) / 5), y + 1, 1, h - 2, CARD.tick);
-  const fill = Math.max(5, Math.floor(((w - 2) * clamp(value, 0, max)) / max));
-  rect(ctx, x + 1, y + 1, fill, h - 2, color);
-  rect(ctx, x + fill - 1, y, 2, h, palette.ink);
+  tierPips(ctx, ROW.x + ROW.labelX, y + 22, ROW.meterW, value, accent);
+  line(ctx, ROW.x + ROW.valueX, y + 18, skillTier(value).label.toUpperCase(), 13, accent, 100);
+  // The column is narrow: the hint alone ("2 para APRENDIZ"); the raw value
+  // lives in the training screen.
+  line(ctx, ROW.x + ROW.valueX, y + 33, tierHint(value), 8, palette.muted, 104);
 }
 
 // Backdrop art scaled to cover a box and cropped to it, so the portrait reads as
