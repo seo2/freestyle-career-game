@@ -106,6 +106,8 @@ const actionIconKeys: Record<string, string> = {
   battle: AssetRegistry.icons.battlePunchline.key,
   work: AssetRegistry.icons.resCash.key,
   cypher: AssetRegistry.icons.battleRespuesta.key,
+  // A show is fame on a stage: the fame star until it has its own icon.
+  show: AssetRegistry.icons.resFame.key,
   // The weekly plan's offer slot (Fase 6): the thing with a deadline.
   offer: AssetRegistry.icons.actionOffer.key,
 };

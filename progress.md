@@ -611,3 +611,26 @@ pieza, y el camino de saltar), consola limpia.
 
 **Fase 12 cerrada (A–E).** Queda como arte pendiente (docs/ASSETS.md): público de fondo de
 batalla y props propios para las compras de la pieza.
+
+## 2026-09-24 — Revisión del flujo completo
+
+Pedido del owner: revisar si el flujo está bien y documentarlo en un artefacto. Arreglado:
+
+- **Dilema perdido tras un epílogo.** Si el mismo bloque sacaba un dilema y desbloqueaba una
+  etapa, el epílogo pisaba el modo `dilemma` y al cerrarlo se volvía a la carrera con el
+  dilema pendiente e invisible. Como `rollDilemma` no sortea mientras hay uno pendiente, la
+  carrera dejaba de tener dilemas hasta recargar. Ahora `closeEpilogue` muestra el dilema
+  pendiente (primero el capítulo, después la pregunta). Tiene test de regresión.
+- **Crear MC con partida guardada.** VOLVER era solo para mouse (regla 5), así que un jugador
+  con teclado solo podía salir con COMENZAR, que **pisa el save sin avisar**. Ahora Esc vuelve
+  al menú y un aviso amarillo dice "Comenzar reemplaza tu partida guardada · Esc para volver".
+- **"Show chico" sin puerta.** La acción se desbloquea con la primera canción, pero no estaba
+  en el dock, el mapa ni el calendario: solo se ejecutaba adivinando un dígito en la pieza.
+  Ahora aparece en el ciclo del calendario una vez desbloqueada (al final, así el orden de
+  las demás opciones no cambia) y usa la estrella de fama como ícono.
+
+Quedan anotados sin tocar: OPCIONES / CRÉDITOS / SALIR del menú siguen inertes (ya estaba
+documentado), no hay ajustes en partida (el engranaje del mockup), y la etapa Leyenda no tiene
+cierre (la carrera sigue con la meta "Legado").
+
+Verificado: build + lint + 498 tests + trazas idénticas. Capturas en `output/web-game/revision-flujo/`.

@@ -128,9 +128,16 @@ export function openEpilogue(state: GameState, leftStage: StageId): void {
 
 // Closing it returns to the career. The chapter itself is not stored: it is a
 // read of the state, so it can always be rebuilt.
+//
+// A dilemma can be rolled by the very block that unlocked the stage: the roll
+// sets mode "dilemma", then the stage unlock opens this epilogue on top. The
+// dilemma is still pending, so it is shown now — chapter first, then the
+// question. Returning straight to the career left it pending and unseen, and
+// rollDilemma refuses to roll while one is pending, so the career silently
+// stopped having dilemmas until the next reload.
 export function closeEpilogue(state: GameState): void {
   state.pendingEpilogue = null;
-  state.mode = "career";
+  state.mode = state.pendingDilemma ? "dilemma" : "career";
 }
 
 // The title of the stage the player is heading into, for the epilogue's footer.

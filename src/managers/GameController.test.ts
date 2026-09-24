@@ -265,3 +265,33 @@ describe("GameController.renderGameToText", () => {
     expect(battle.timerSeconds).toBeGreaterThan(0);
   });
 });
+
+describe("flow review (2026-09-24)", () => {
+  it("opens a new career on the prologue, and closing it lands in the room", () => {
+    const { controller } = createController();
+    controller.newCareerDraft();
+    controller.startCareerFromMenu();
+    expect(controller.state.mode).toBe("intro");
+    controller.closeIntro();
+    expect(controller.state.mode).toBe("career");
+    expect(controller.careerView).toBe("base");
+  });
+
+  it("offers the small show in the week plan once it is unlocked, and not before", () => {
+    const { controller } = createController();
+    controller.newCareerDraft();
+    controller.startCareerFromMenu();
+    controller.closeIntro();
+    const cycleAll = (): (string | null)[] => {
+      const seen: (string | null)[] = [];
+      for (let i = 0; i < 12; i += 1) {
+        controller.cyclePlanForDay(3);
+        seen.push(controller.state.plan[2] ?? null);
+      }
+      return seen;
+    };
+    expect(cycleAll()).not.toContain("show");
+    controller.state.songs = 1;
+    expect(cycleAll()).toContain("show");
+  });
+});

@@ -148,6 +148,14 @@ export class InputRouter {
         event.preventDefault();
         return;
       }
+      // With a save on disk this screen has a VOLVER pill; Esc is its keyboard
+      // twin (project rule 5). Without it a keyboard player's only way out was
+      // COMENZAR, which replaces the save.
+      if (event.key === "Escape" && c.hasSave()) {
+        c.loadSavedIntoDraft();
+        event.preventDefault();
+        return;
+      }
       if (event.key === "Backspace") {
         c.backspaceName();
         event.preventDefault();

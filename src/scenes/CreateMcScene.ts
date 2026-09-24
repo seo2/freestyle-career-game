@@ -215,6 +215,16 @@ export class CreateMcScene extends Phaser.Scene {
         () => controller.loadSavedIntoDraft(),
         { size: 14, radius: 6 },
       );
+      // COMENZAR saves over the career on disk: say so before it happens.
+      addAnchoredText(
+        this,
+        this.layer,
+        START_BUTTON.x + START_BUTTON.w / 2,
+        513,
+        "Comenzar reemplaza tu partida guardada · Esc para volver",
+        11,
+        palette.yellow,
+      );
     } else {
       addAnchoredText(
         this,

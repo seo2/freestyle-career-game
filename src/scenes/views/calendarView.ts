@@ -89,6 +89,7 @@ const CARD_LABELS: Record<string, string> = {
   write: "ESCRIBIR",
   battle: "BATALLA",
   cypher: "CYPHER",
+  show: "SHOW",
 };
 
 const DAYS = CalendarConfig.clock.dayLabels;
