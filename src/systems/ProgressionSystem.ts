@@ -12,6 +12,36 @@ import { statLabels } from "../data/stats";
 import { clamp } from "../utils/math";
 import { openEpilogue } from "./EpilogueSystem";
 
+export interface SkillTier {
+  index: number;
+  label: string;
+  // Points already earned inside this rank, and how many the rank holds (0 for
+  // the last, open-ended rank).
+  filled: number;
+  size: number;
+  // Points to the next rank and its name; null at the top.
+  toNext: number | null;
+  nextLabel: string | null;
+}
+
+// Which named rank a skill value sits in, and how far through it.
+export function skillTier(value: number): SkillTier {
+  const tiers = ProgressionConfig.skillTiers;
+  const v = Math.max(tiers[0].min, Math.floor(value));
+  let index = 0;
+  for (let i = 0; i < tiers.length; i += 1) if (v >= tiers[i].min) index = i;
+  const tier = tiers[index];
+  const next = tiers[index + 1];
+  return {
+    index,
+    label: tier.label,
+    filled: v - tier.min + (next ? 0 : 1),
+    size: next ? next.min - tier.min : 0,
+    toNext: next ? next.min - v : null,
+    nextLabel: next ? next.label : null,
+  };
+}
+
 export function addStat(state: GameState, stat: StatKey, amount: number): void {
   state.stats[stat] = clamp(
     state.stats[stat] + amount,

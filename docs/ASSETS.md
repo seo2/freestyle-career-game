@@ -162,6 +162,15 @@ de no calzar con el estilo del mockup.
   estímulo, así que no se puede cortar limpio. Hace falta como capa propia
   (transparente, ~960×120, gente de frente con brazos arriba) y idealmente una
   variante por etapa (plaza, regional, estadio: ver la hoja de mockups 06_52_*).
+- **Props de la pieza para compras** (Fase 12 C): los logros ya tienen arte
+  cortado del mockup de la pieza avanzada (`scripts/build-room-props.mjs` →
+  `public/assets/room/`: disco de oro, RAP TO WIN, placa 100.000, neón, trofeos).
+  Las **compras** usan por ahora el ícono de la tienda a escala de objeto
+  (`src/data/roomProps.ts`, `art: "item:<id>"`). Faltan como arte propio, con la
+  perspectiva de la pieza: pedestal de micrófono con filtro, fila de zapatillas,
+  audífonos colgados, chaqueta en el closet, interfaz y monitores de estudio pro.
+  El micrófono y las zapatillas del mockup se probaron y **no se separan** del
+  fondo oscuro. Reemplazar uno es cambiar su `art`; nada más.
 - **Ilustraciones de trabajo (4)** y sus iconos de fila, con el hueco de 406×168
   ya reservado.
 - **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario);

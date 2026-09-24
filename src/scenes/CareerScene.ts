@@ -13,27 +13,22 @@
 import Phaser from "phaser";
 import { eventBus } from "../events/EventBus";
 import { gameContext } from "../game/context";
-import { AssetRegistry, stageBackdropKey } from "../game/AssetRegistry";
+import { AssetRegistry } from "../game/AssetRegistry";
 import { careerDockSlots } from "../game/InputRouter";
 import type { CareerDockSlot } from "../game/InputRouter";
-import { hex as hexColor, palette } from "../ui/palette";
-import { addDisplayText, addHitZone, addRect, addSpriteImage, addText, textStyle } from "../ui/kit";
-import { maxEnergy } from "../core/derived";
-import { formatBlock, formatDay, formatDuration } from "../systems/CalendarSystem";
-import { getCareerGoals } from "../systems/ProgressionSystem";
-import { CalendarConfig } from "../data/config/CalendarConfig";
+import { palette } from "../ui/palette";
+import { addDisplayText, addHitZone, addRect, addSpriteImage } from "../ui/kit";
+import { formatBlock, formatDuration } from "../systems/CalendarSystem";
 import { clamp } from "../utils/math";
 import { renderCareerView } from "./careerViews";
-import { Floater, diffFeedback, feedbackSnapshot, flicker, idlePose } from "../ui/feedback";
-import type { FeedbackAnchor, FeedbackDelta, FeedbackSnapshot } from "../ui/feedback";
+import { CareerHud, baselineText } from "./careerHud";
+import { CareerFeedback } from "./careerFeedback";
+import { RoomLife } from "./roomLife";
 import type { CareerActionInfo, CareerView, GameState } from "../core/types";
 
 const W = 960;
 const H = 540;
 
-// Approximate monospace advance per font px; used to ellipsize single lines
-// the way legacy drawTextLine did with real canvas metrics.
-const MONO_ADVANCE = 0.62;
 
 // The room mockups are 1672x941, so every measured value below is the mockup
 // pixel times 960/1672 = 0.574 (the comments keep the mockup number).
@@ -78,76 +73,9 @@ const NOTICE = {
 // on screen together without ever stacking.
 const AGENDA = { x: 406, y: 344, w: 510, h: 28 } as const;
 
-// "Where am I going": the next career goal pinned to the room's top-left wall,
-// so the player never has to open the map to know what the week is for. Clicking
-// it opens the map, where goals live in full.
-const GOAL_CHIP = { x: 22, y: 96, w: 262, h: 44, barH: 5 } as const;
-
-// Clock row under the energy bar: weekday + week on the left, the day's three
-// blocks as pips on the right (the lit one is now).
-const CLOCK = { x: 112, baseline: 81, pipsX: 226, pipW: 18, pipH: 6, pipGap: 4 } as const;
-
-// Where each kind of delta is born. HUD resources drop out from under their own
-// card (so it works on every screen, the HUD is always there); character gains
-// rise from the MC in the room, or from mid-screen inside a sub-view.
-const FLOAT_ANCHORS: Record<Exclude<FeedbackAnchor, "mc">, { x: number; y: number }> = {
-  energy: { x: 318, y: 90 },
-  cash: { x: 431, y: 90 },
-  fans: { x: 610, y: 90 },
-  respect: { x: 827, y: 90 },
-};
-const FLOAT_MC = { room: { x: 392, y: 186 }, view: { x: 480, y: 300 } } as const;
-const FLOAT = { staggerMs: 170, stackPx: 22, hudSize: 13, mcSize: 15, headlineSize: 19 } as const;
-
-// The MC stands with feet on this line; idlePose nods and breathes around it.
-const MC_FEET_Y = 312;
-
-// Time-of-day over the room art (which is painted at night): morning warms and
-// lifts it, afternoon goes amber, night stays deep. The window glass gets its
-// own sky so the city outside agrees with the clock.
-const DAYLIGHT = [
-  { color: "#ffe3b3", alpha: 0.15, add: true, sky: "#9cc6ff", skyAlpha: 0.6 },
-  { color: "#ff9a4a", alpha: 0.1, add: true, sky: "#ff9d5c", skyAlpha: 0.42 },
-  { color: "#070c30", alpha: 0.2, add: false, sky: "", skyAlpha: 0 },
-] as const;
-const ROOM_WINDOW = { x: 512, y: 90, w: 175, h: 84 } as const;
-
-// Light sources painted into the pieza backdrop (pixel positions measured on
-// the 960x540 room). Each glows and flickers on its own seed; they only apply
-// to that backdrop, since other stages have their own art.
-const ROOM_LAMPS = [
-  { x: 253, y: 192, r: 34, color: "#ffd27a", seed: 1 },
-  { x: 793, y: 128, r: 26, color: "#ffe2a0", seed: 3 },
-  { x: 811, y: 304, r: 38, color: "#ffcf73", seed: 4 },
-  { x: 343, y: 165, r: 30, color: "#6fd2ff", seed: 5 },
-] as const;
-
 // Screen bezel: the mockups frame every screen with a bright pixel line
 // (mockup 12..15 -> 7..9) over a dark navy margin.
 const BEZEL = { margin: 7, thickness: 2, edge: "#000b24" } as const;
-
-function clipLine(text: string, size: number, maxWidth: number): string {
-  const charW = size * MONO_ADVANCE;
-  if (text.length * charW <= maxWidth) return text;
-  const keep = Math.max(1, Math.floor(maxWidth / charW) - 3);
-  return `${text.slice(0, keep).trimEnd()}...`;
-}
-
-// Single text line placed by its legacy alphabetic baseline (kit text is
-// top-left origin, so we shift up by the font size).
-function baselineText(
-  scene: Phaser.Scene,
-  layer: Phaser.GameObjects.Container,
-  x: number,
-  yBaseline: number,
-  text: string,
-  size: number,
-  color: string,
-  maxWidth = 0,
-): void {
-  const content = maxWidth > 0 ? clipLine(text, size, maxWidth) : text;
-  addText(scene, layer, x, yBaseline - size, content, size, color);
-}
 
 interface DockVisual {
   label: string;
@@ -164,11 +92,6 @@ const DOCK_VISUALS: Record<string, DockVisual> = {
   exit: { label: "SALIR", iconKey: AssetRegistry.icons.actionExit.key },
 };
 
-// Legacy formatHudNumber: thousands separated with dots.
-function formatHudNumber(value: number): string {
-  return String(Math.floor(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
 // A dock slot that runs an action is blocked when that action is unavailable
 // (e.g. no energy left to write); view slots are always open.
 function slotBlockedReason(slot: CareerDockSlot, actions: CareerActionInfo[]): string | undefined {
@@ -180,16 +103,9 @@ export class CareerScene extends Phaser.Scene {
   private layer!: Phaser.GameObjects.Container;
   private noticeLayer!: Phaser.GameObjects.Container;
   private fxLayer!: Phaser.GameObjects.Container;
-  private floatLayer!: Phaser.GameObjects.Container;
-  private floaters: { floater: Floater; node: Phaser.GameObjects.Container; x: number; y: number; dir: 1 | -1 }[] = [];
-  // Last state the feedback layer saw; diffs against it say what an action did.
-  private snapshot: FeedbackSnapshot | null = null;
-  private mcImage: Phaser.GameObjects.Image | null = null;
-  private mcScale = 1;
-  private lampGlows: { glow: Phaser.GameObjects.Arc; halo: Phaser.GameObjects.Arc; seed: number }[] = [];
-  private lampStrength = 1;
-  // Scene clock for the idle animations, advanced by the frame delta only.
-  private clockMs = 0;
+  private hud!: CareerHud;
+  private feedback!: CareerFeedback;
+  private room!: RoomLife;
   // Event text currently shown by the notice; "" forces a re-show.
   private noticeText = "";
   // Milliseconds the current notice has been on screen (hold + fade).
@@ -203,16 +119,14 @@ export class CareerScene extends Phaser.Scene {
     this.layer = this.add.container(0, 0);
     this.noticeLayer = this.add.container(0, 0);
     this.fxLayer = this.add.container(0, 0);
-    this.floatLayer = this.add.container(0, 0);
-    this.floaters = [];
-    // Entering the scene (new game, loaded save, back from battle) is not an
-    // action: start the diff from here so nothing phantom floats up.
-    this.snapshot = feedbackSnapshot(gameContext().controller.state);
+    this.hud = new CareerHud(this, this.layer);
+    this.room = new RoomLife(this);
+    this.feedback = new CareerFeedback(this, this.add.container(0, 0));
     // Re-entering the room (e.g. back from a battle) shows the pending event.
     this.noticeText = "";
     const subs = [
       eventBus.on("STATE_CHANGED", () => {
-        this.emitFeedback();
+        this.feedback.emit();
         this.redraw();
       }),
       eventBus.on("FOCUS_CHANGED", () => this.redraw()),
@@ -231,9 +145,8 @@ export class CareerScene extends Phaser.Scene {
     gameContext().controller.update(delta / 1000);
     this.updateTimeFx();
     this.fadeNotice(delta);
-    this.clockMs += delta;
-    this.animateRoom();
-    this.advanceFloaters(delta);
+    this.room.animate(delta);
+    this.feedback.advance(delta);
   }
 
   private redraw(): void {
@@ -241,19 +154,18 @@ export class CareerScene extends Phaser.Scene {
     const state = controller.state;
     const view = controller.careerView;
     this.layer.removeAll(true);
-    this.lampGlows = [];
-    this.mcImage = null;
+    this.room.reset();
 
     if (view === "base") {
       const hasBackdrop = this.drawStageBackdrop(state);
-      this.drawMcFigure(hasBackdrop);
+      this.room.drawMc(this.layer, hasBackdrop);
       this.drawDock();
       this.drawBezel();
-      this.drawHeader(state);
-      this.drawGoalChip(state);
+      this.hud.drawHeader(state);
+      this.hud.drawGoalChip(state);
     } else {
       this.drawInterfaceBackdrop();
-      this.drawHeader(state);
+      this.hud.drawHeader(state);
       renderCareerView(this, this.layer, view);
     }
     this.updateNotice(state, view);
@@ -261,9 +173,13 @@ export class CareerScene extends Phaser.Scene {
 
   // --- Backdrops ------------------------------------------------------------
 
-  // Stage art scaled cover-style plus the legacy readability scrim bands.
+  // The MC's pieza, scaled cover-style, plus the legacy readability scrim bands.
+  // Always the pieza (Fase 12 C): it used to switch to the stage's art (plaza,
+  // regional), which meant the room the mockups show evolving — gold disc, home
+  // studio — was only ever on screen during the first stage. The stage now shows
+  // where it belongs, in the battle backdrops, and the room shows the career.
   private drawStageBackdrop(state: GameState): boolean {
-    const key = stageBackdropKey(state.stage);
+    const key = AssetRegistry.scenes.pieza.key;
     if (!this.textures.exists(key)) {
       addRect(this, this.layer, 0, 0, W, H, palette.deep);
       return false;
@@ -271,7 +187,8 @@ export class CareerScene extends Phaser.Scene {
     const image = this.add.image(W / 2, H / 2, key);
     image.setScale(Math.max(W / image.width, H / image.height));
     this.layer.add(image);
-    this.drawDaylight(state, key === AssetRegistry.scenes.pieza.key);
+    this.room.drawProps(this.layer, state);
+    this.room.drawLight(this.layer, state, key === AssetRegistry.scenes.pieza.key, DOCK.bandY);
     // Scrim bands: with the panels gone the room can breathe, so only the strip
     // under the HUD and the very bottom keep their darkening.
     addRect(this, this.layer, 0, 0, W, 96, "#04071c", 0.42);
@@ -297,125 +214,6 @@ export class CareerScene extends Phaser.Scene {
     }
   }
 
-  // Standing MC sprite, feet on the legacy floor line (y=312). Falls back to
-  // the compact placeholder rects when the texture is missing.
-  private drawMcFigure(hasBackdrop: boolean): void {
-    const cx = hasBackdrop ? 392 : 284;
-    const image = addSpriteImage(this, this.layer, AssetRegistry.characters.mcIdle.key, cx, MC_FEET_Y, 120, 0.5, 1);
-    if (image) {
-      this.mcImage = image;
-      this.mcScale = image.scaleX;
-      this.animateRoom();
-      return;
-    }
-    addRect(this, this.layer, cx - 12, 276, 24, 36, "#111318");
-    addRect(this, this.layer, cx - 12, 268, 24, 8, palette.red);
-  }
-
-  // Tint for the current block, plus the lamps when this is the pieza art.
-  private drawDaylight(state: GameState, isPieza: boolean): void {
-    const light = DAYLIGHT[state.block] ?? DAYLIGHT[DAYLIGHT.length - 1];
-    if (isPieza && light.sky) {
-      const sky = this.add.rectangle(ROOM_WINDOW.x, ROOM_WINDOW.y, ROOM_WINDOW.w, ROOM_WINDOW.h, hexColor(light.sky), light.skyAlpha);
-      sky.setOrigin(0, 0).setBlendMode(Phaser.BlendModes.ADD);
-      this.layer.add(sky);
-    }
-    const tint = this.add.rectangle(0, 0, W, DOCK.bandY, hexColor(light.color), light.alpha).setOrigin(0, 0);
-    if (light.add) tint.setBlendMode(Phaser.BlendModes.ADD);
-    this.layer.add(tint);
-    if (!isPieza) return;
-    // Lamps matter at night; by day they are nearly invisible against the sun.
-    const strength = state.block === 2 ? 1 : 0.35;
-    for (const lamp of ROOM_LAMPS) {
-      const halo = this.add.circle(lamp.x, lamp.y, lamp.r * 1.8, hexColor(lamp.color), 0.05 * strength);
-      const glow = this.add.circle(lamp.x, lamp.y, lamp.r, hexColor(lamp.color), 0.12 * strength);
-      halo.setBlendMode(Phaser.BlendModes.ADD);
-      glow.setBlendMode(Phaser.BlendModes.ADD);
-      // Into the room layer, before the MC and the HUD are drawn: light sits
-      // on the scenery, never on top of text.
-      this.layer.add([halo, glow]);
-      this.lampGlows.push({ glow, halo, seed: lamp.seed });
-    }
-    this.lampStrength = strength;
-  }
-
-  // Per-frame life for the room: the MC's idle and the lamps' flicker. Both are
-  // pure functions of the scene clock, so a paused frame and a live one agree.
-  private animateRoom(): void {
-    if (this.mcImage) {
-      const pose = idlePose(this.clockMs);
-      this.mcImage.setY(MC_FEET_Y - pose.dy);
-      this.mcImage.setScale(this.mcScale, this.mcScale * pose.scaleY);
-    }
-    const strength = this.lampStrength;
-    for (const lamp of this.lampGlows) {
-      const f = flicker(this.clockMs, lamp.seed);
-      lamp.glow.setAlpha((0.08 + 0.1 * f) * strength);
-      lamp.halo.setAlpha((0.03 + 0.04 * f) * strength);
-    }
-  }
-
-  // --- Action feedback ----------------------------------------------------------
-
-  // Diff the state against the last one seen and float up what moved.
-  private emitFeedback(): void {
-    const state = gameContext().controller.state;
-    const next = feedbackSnapshot(state);
-    const prev = this.snapshot;
-    this.snapshot = next;
-    if (!prev) return;
-    const deltas = diffFeedback(prev, next);
-    const perAnchor = new Map<FeedbackAnchor, number>();
-    deltas.forEach((delta, index) => {
-      const slot = perAnchor.get(delta.anchor) ?? 0;
-      perAnchor.set(delta.anchor, slot + 1);
-      this.spawnFloater(delta, index, slot);
-    });
-  }
-
-  private spawnFloater(delta: FeedbackDelta, order: number, slot: number): void {
-    const inRoom = gameContext().controller.careerView === "base";
-    const isMc = delta.anchor === "mc";
-    const origin = isMc ? (inRoom ? FLOAT_MC.room : FLOAT_MC.view) : FLOAT_ANCHORS[delta.anchor as Exclude<FeedbackAnchor, "mc">];
-    // Character gains rise; HUD deltas drop out from under their card.
-    const dir: 1 | -1 = isMc ? -1 : 1;
-    const headline = delta.text.startsWith("¡");
-    const size = headline ? FLOAT.headlineSize : isMc ? FLOAT.mcSize : FLOAT.hudSize;
-    const text = this.add.text(0, 0, delta.text, textStyle(size, delta.color));
-    text.setOrigin(0.5, 0.5);
-    // A dark pill behind the number: it has to read over the room art and over
-    // a sub-view's rows alike, and a stroke alone does not survive the latter.
-    const pill = this.add.rectangle(0, 0, text.width + 10, text.height + 2, hexColor("#03061a"), 0.94);
-    const edge = this.add.rectangle(-pill.width / 2, 0, 2, pill.height, hexColor(delta.color));
-    const node = this.add.container(0, 0, [pill, edge, text]).setAlpha(0);
-    this.floatLayer.add(node);
-    this.floaters.push({
-      floater: new Floater(order * FLOAT.staggerMs),
-      node,
-      x: origin.x,
-      // Later deltas are born BEHIND the earlier ones (opposite to their travel),
-      // so the head start of the first one widens the gap instead of closing it.
-      y: origin.y - dir * slot * FLOAT.stackPx,
-      dir,
-    });
-  }
-
-  private advanceFloaters(deltaMs: number): void {
-    if (this.floaters.length === 0) return;
-    this.floaters = this.floaters.filter((entry) => {
-      entry.floater.advance(deltaMs);
-      if (entry.floater.done) {
-        entry.node.destroy();
-        return false;
-      }
-      entry.node
-        .setPosition(Math.round(entry.x), Math.round(entry.y + entry.dir * entry.floater.rise))
-        .setAlpha(entry.floater.alpha)
-        .setScale(entry.floater.scale);
-      return true;
-    });
-  }
-
   // Mockup screen bezel: dark navy margin plus a bright pixel line, so the room
   // art reads as a framed window instead of bleeding off the edges.
   private drawBezel(): void {
@@ -428,173 +226,6 @@ export class CareerScene extends Phaser.Scene {
     addRect(this, this.layer, m, H - m - t, W - 2 * m, t, TILE.border);
     addRect(this, this.layer, m, m, t, H - 2 * m, TILE.border);
     addRect(this, this.layer, W - m - t, m, t, H - 2 * m, TILE.border);
-  }
-
-  // --- Top HUD ----------------------------------------------------------------
-
-  private drawHeader(state: GameState): void {
-    this.drawHudFrame(12, 10, 936, 76);
-    // MC bust: the mockup sits it straight on the HUD band (no well box) at
-    // roughly 105 mockup px tall; placeholder initial fallback.
-    if (!addSpriteImage(this, this.layer, AssetRegistry.characters.mcBust.key, 58, 49, 60)) {
-      const initial = (state.playerName.trim() || "MC").charAt(0).toUpperCase();
-      addText(this, this.layer, 58, 49, initial, 26, palette.yellow).setOrigin(0.5);
-    }
-    // The portrait is the character sheet's door, as in most RPGs.
-    addHitZone(this, this.layer, 22, 14, 74, 70, () => gameContext().controller.setCareerView("stats"));
-
-    // Mockup stacks label + value on one line (baseline ~44) over the bar.
-    baselineText(this, this.layer, 112, 42, "ENERGIA", 16, palette.ink);
-    baselineText(this, this.layer, 270, 42, `${state.energy}/${maxEnergy(state)}`, 16, palette.ink, 86);
-    this.drawHudBar(112, 52, 230, 15, state.energy, maxEnergy(state), palette.green);
-    this.drawClock(state);
-
-    this.drawResourceCard(362, 22, 138, 54, "cash", "", formatHudNumber(state.cash), palette.green);
-    this.drawResourceCard(516, 22, 224, 54, "fans", "FANS", formatHudNumber(state.fans), palette.blue);
-    this.drawResourceCard(756, 22, 142, 54, "respect", "RESPETO", formatHudNumber(state.respect), "#7b63cc");
-    // The calendar mockup (06_23_14 (4)) carries two icon buttons at the top
-    // right; they are also the only POINTER entry to the calendar and the stats
-    // screens, which the removed tab bar used to provide (project rule 5: the
-    // game must be fully playable with the mouse alone).
-    this.drawHudIconButton(904, 20, "calendar");
-    this.drawHudIconButton(904, 50, "stats");
-  }
-
-  // "LUN · SEM 1" plus three pips for Mañana/Tarde/Noche: how much of today is
-  // left reads at a glance instead of from a word.
-  private drawClock(state: GameState): void {
-    baselineText(this, this.layer, CLOCK.x, CLOCK.baseline, `${formatDay(state.day)} · SEM ${state.week}`, 10, palette.ink, 140);
-    const blocks = CalendarConfig.clock.blocksPerDay;
-    for (let i = 0; i < blocks; i += 1) {
-      const x = CLOCK.pipsX + i * (CLOCK.pipW + CLOCK.pipGap);
-      const color = i === state.block ? palette.yellow : i < state.block ? "#2a3170" : "#4a5299";
-      addRect(this, this.layer, x, CLOCK.baseline - 8, CLOCK.pipW, CLOCK.pipH, color);
-    }
-    baselineText(
-      this,
-      this.layer,
-      CLOCK.pipsX + blocks * (CLOCK.pipW + CLOCK.pipGap) + 2,
-      CLOCK.baseline,
-      formatBlock(state.block).toUpperCase(),
-      10,
-      palette.yellow,
-    );
-  }
-
-  // Pinned next goal: label, one line of what is missing, and a thin progress
-  // bar in the goal's own colour.
-  private drawGoalChip(state: GameState): void {
-    const goal = getCareerGoals(state)[0];
-    if (!goal) return;
-    const { x, y, w, h, barH } = GOAL_CHIP;
-    addRect(this, this.layer, x + 3, y + 3, w, h, "#000000", 0.35);
-    addRect(this, this.layer, x, y, w, h, "#060b27", 0.9);
-    addRect(this, this.layer, x, y, 3, h, palette.yellow);
-    baselineText(this, this.layer, x + 12, y + 14, "SIGUIENTE META", 9, palette.yellow);
-    baselineText(this, this.layer, x + 108, y + 14, goal.detail, 9, palette.muted, w - 116);
-    baselineText(this, this.layer, x + 12, y + 31, goal.label.toUpperCase(), 13, palette.ink, w - 24);
-    const barW = w - 24;
-    addRect(this, this.layer, x + 12, y + h - barH - 5, barW, barH, "#0d1030");
-    const fill = Math.floor((clamp(goal.value, 0, goal.max) / Math.max(1, goal.max)) * barW);
-    if (fill > 0) addRect(this, this.layer, x + 12, y + h - barH - 5, fill, barH, goal.color);
-    addHitZone(this, this.layer, x, y, w, h, () => gameContext().controller.setCareerView("map"));
-  }
-
-  // Legacy drawHudFrame: layered pixel frame with sheen.
-  private drawHudFrame(x: number, y: number, w: number, h: number): void {
-    addRect(this, this.layer, x + 5, y + 5, w, h, "#000000", 0.38);
-    addRect(this, this.layer, x, y, w, h, "#060b27");
-    addRect(this, this.layer, x + 3, y + 3, w - 6, h - 6, "#0b1234");
-    addRect(this, this.layer, x, y, w, 3, "#2e377f");
-    addRect(this, this.layer, x, y + h - 3, w, 3, "#262e6e");
-    addRect(this, this.layer, x, y, 3, h, "#5660b5");
-    addRect(this, this.layer, x + w - 3, y, 3, h, "#1b2258");
-    addRect(this, this.layer, x + 7, y + 7, w - 14, 2, "#ffffff", 0.14);
-  }
-
-  // Legacy drawHudBar (non-segmented variant).
-  private drawHudBar(x: number, y: number, w: number, h: number, value: number, max: number, color: string): void {
-    addRect(this, this.layer, x + 3, y + 3, w, h, "#000000", 0.28);
-    addRect(this, this.layer, x, y, w, h, "#060814");
-    addRect(this, this.layer, x, y, w, 2, "#ffffff", 0.2);
-    addRect(this, this.layer, x, y + h - 2, w, 2, "#03040a");
-    const fill = Math.floor((clamp(value, 0, max) / max) * w);
-    if (fill > 0) {
-      addRect(this, this.layer, x, y, fill, h, color);
-      addRect(this, this.layer, x, y, fill, Math.max(2, Math.floor(h * 0.35)), "#ffffff", 0.14);
-    }
-  }
-
-  // Legacy drawHudResourceCard with simplified rect/glyph icons.
-  // Small square HUD button: pixel frame + short caption, opens a career view.
-  // The calendar glyph is the mockup's own; stats reuses the rising-bars mark
-  // the stats screen draws beside every metric, so the button looks like what
-  // it opens.
-  private drawHudIconButton(x: number, y: number, view: "calendar" | "stats"): void {
-    const active = gameContext().controller.careerView === view;
-    addRect(this, this.layer, x - 1, y - 1, 34, 28, active ? palette.yellow : "#333a78");
-    addRect(this, this.layer, x, y, 32, 26, active ? "#1b2555" : "#0b1230");
-    if (view === "calendar") {
-      if (!addSpriteImage(this, this.layer, AssetRegistry.icons.uiCalendar.key, x + 16, y + 13, 20, 0.5, 0.5, 22)) {
-        addText(this, this.layer, x + 16, y + 13, "CAL", 10, palette.ink).setOrigin(0.5);
-      }
-    } else {
-      const bars = [7, 12, 17];
-      bars.forEach((bh, i) => addRect(this, this.layer, x + 7 + i * 7, y + 21 - bh, 5, bh, i === 2 ? palette.yellow : "#8e97e6"));
-    }
-    addHitZone(this, this.layer, x, y, 32, 26, () => gameContext().controller.setCareerView(view));
-  }
-
-  private drawResourceCard(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    icon: "cash" | "fans" | "respect",
-    label: string,
-    value: string,
-    color: string,
-  ): void {
-    addRect(this, this.layer, x + 4, y + 4, w, h, "#000000", 0.32);
-    addRect(this, this.layer, x, y, w, h, "#07102d");
-    addRect(this, this.layer, x, y, w, 3, "#343d86");
-    addRect(this, this.layer, x, y + h - 3, w, 3, "#111744");
-    addRect(this, this.layer, x, y, 3, h, "#5660b5");
-    addRect(this, this.layer, x + w - 3, y, 3, h, "#1c2359");
-
-    const resIconKeys = {
-      cash: AssetRegistry.icons.resCash.key,
-      fans: AssetRegistry.icons.resFans.key,
-      respect: AssetRegistry.icons.resRespect.key,
-    } as const;
-    if (addSpriteImage(this, this.layer, resIconKeys[icon], x + 34, y + 27, 32, 0.5, 0.5, 32)) {
-      // Sprite icon drawn; skip the procedural glyph fallback below.
-    } else if (icon === "cash") {
-      baselineText(this, this.layer, x + 12, y + 40, "$", 36, color);
-      addRect(this, this.layer, x + 34, y + 5, 3, 40, "#1d6f3c");
-    } else if (icon === "fans") {
-      addRect(this, this.layer, x + 29, y + 9, 12, 12, color);
-      addRect(this, this.layer, x + 27, y + 23, 16, 14, color);
-      addRect(this, this.layer, x + 13, y + 17, 10, 10, "#4776df");
-      addRect(this, this.layer, x + 10, y + 28, 14, 10, "#4776df");
-      addRect(this, this.layer, x + 47, y + 17, 10, 10, "#4776df");
-      addRect(this, this.layer, x + 46, y + 28, 14, 10, "#4776df");
-    } else {
-      addRect(this, this.layer, x + 27, y + 5, 8, 20, color);
-      addRect(this, this.layer, x + 36, y + 7, 8, 18, color);
-      addRect(this, this.layer, x + 45, y + 11, 8, 16, color);
-      addRect(this, this.layer, x + 20, y + 15, 10, 16, color);
-      addRect(this, this.layer, x + 24, y + 25, 28, 18, color);
-      addRect(this, this.layer, x + 32, y + 41, 18, 8, "#4b3c88");
-      addRect(this, this.layer, x + 16, y + 22, 9, 6, "#4b3c88");
-    }
-
-    if (label) {
-      baselineText(this, this.layer, x + 72, y + 25, label, 16, palette.ink);
-      baselineText(this, this.layer, x + 72, y + 48, value, 20, palette.ink, w - 84);
-    } else {
-      baselineText(this, this.layer, x + 66, y + 40, value, 22, palette.ink, w - 68);
-    }
   }
 
   // --- Action dock ------------------------------------------------------------

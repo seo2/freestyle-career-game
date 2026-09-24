@@ -10,6 +10,9 @@
 import type { GameState, StatKey } from "../core/types";
 import { statLabels, trainingStats } from "../data/stats";
 import { palette } from "./palette";
+import { skillTier } from "../systems/ProgressionSystem";
+import { earnedRoomProps } from "../systems/RoomSystem";
+import { roomProps } from "../data/roomProps";
 
 // Where a delta floats from: a HUD card (resources the HUD shows) or the MC
 // (everything that lives in the character: skills, xp, songs).
@@ -22,12 +25,15 @@ export interface FeedbackDelta {
   // Positive deltas celebrate, negative ones just inform: the scene may play
   // them differently (a pop vs. a plain fade).
   positive: boolean;
+  // A milestone (new rank, level-up, finished song) gets the centre-screen
+  // banner instead of a floater: `kicker` is its small line above `text`.
+  milestone?: { kicker: string };
 }
 
 export type FeedbackSnapshot = Pick<
   GameState,
   "energy" | "cash" | "fans" | "respect" | "xp" | "level" | "songs" | "discProgress"
-> & { stats: Record<StatKey, number> };
+> & { stats: Record<StatKey, number>; roomProps: string[] };
 
 export function feedbackSnapshot(state: GameState): FeedbackSnapshot {
   return {
@@ -40,6 +46,7 @@ export function feedbackSnapshot(state: GameState): FeedbackSnapshot {
     songs: state.songs,
     discProgress: state.discProgress,
     stats: { ...state.stats },
+    roomProps: earnedRoomProps(state).map((prop) => prop.id),
   };
 }
 
@@ -56,11 +63,22 @@ export function diffFeedback(prev: FeedbackSnapshot, next: FeedbackSnapshot): Fe
   const out: FeedbackDelta[] = [];
 
   if (next.level > prev.level) {
-    out.push({ anchor: "mc", text: `¡NIVEL ${next.level}!`, color: palette.yellow, positive: true });
+    out.push({ anchor: "mc", text: `¡NIVEL ${next.level}!`, color: palette.yellow, positive: true, milestone: { kicker: "SUBISTE DE NIVEL" } });
   }
   for (const key of trainingStats) {
     const d = Math.round(next.stats[key] - prev.stats[key]);
-    if (d !== 0) {
+    const rankUp = skillTier(next.stats[key]).index > skillTier(prev.stats[key]).index;
+    if (rankUp) {
+      // Crossing into a new rank replaces the "+1": this is the moment to feel.
+      const rank = skillTier(next.stats[key]).label.toUpperCase();
+      out.push({
+        anchor: "mc",
+        text: `${statLabels[key].toUpperCase()} ${rank}`,
+        color: palette.yellow,
+        positive: true,
+        milestone: { kicker: "NUEVO RANGO" },
+      });
+    } else if (d !== 0) {
       out.push({
         anchor: "mc",
         text: `${signed(d)} ${statLabels[key].toUpperCase()}`,
@@ -70,7 +88,7 @@ export function diffFeedback(prev: FeedbackSnapshot, next: FeedbackSnapshot): Fe
     }
   }
   if (next.songs > prev.songs) {
-    out.push({ anchor: "mc", text: "¡TEMA TERMINADO!", color: palette.yellow, positive: true });
+    out.push({ anchor: "mc", text: "¡TEMA TERMINADO!", color: palette.yellow, positive: true, milestone: { kicker: "EN LA CALLE" } });
   } else {
     const d = Math.round(next.discProgress - prev.discProgress);
     if (d > 0) out.push({ anchor: "mc", text: `+${d}% TEMA`, color: palette.pink, positive: true });
@@ -87,6 +105,15 @@ export function diffFeedback(prev: FeedbackSnapshot, next: FeedbackSnapshot): Fe
     if (rounded === 0) return;
     out.push({ anchor, text: signed(rounded, prefix), color: rounded > 0 ? color : NEGATIVE, positive: rounded > 0 });
   };
+  // Something new in the pieza: the room itself is the trophy case.
+  for (const id of next.roomProps) {
+    if (prev.roomProps.includes(id)) continue;
+    const prop = roomProps.find((entry) => entry.id === id);
+    if (prop) {
+      out.push({ anchor: "mc", text: prop.label.toUpperCase(), color: palette.yellow, positive: true, milestone: { kicker: "TU PIEZA CAMBIO" } });
+    }
+  }
+
   resource("cash", next.cash - prev.cash, palette.green, "$");
   resource("fans", next.fans - prev.fans, palette.blue);
   resource("respect", next.respect - prev.respect, "#9f86ff");

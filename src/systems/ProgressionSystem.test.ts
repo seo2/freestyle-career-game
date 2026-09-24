@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createNewState } from "../core/state";
 import {
   addStat,
+  skillTier,
   addXp,
   applyRhythm,
   finalizeEvent,
@@ -299,5 +300,44 @@ describe("rhythmPreview", () => {
     state.lastActionId = "practice";
     state.actionStreak = 0; // next penalty min(12, 4) = 4
     expect(rhythmPreview(state, "practice", 4)).toBe("Impulso neutro");
+  });
+});
+
+describe("skillTier (Fase 12 C)", () => {
+  it("starts a fresh MC as Novato with the first point earned", () => {
+    const tier = skillTier(1);
+    expect(tier.label).toBe("Novato");
+    expect(tier.filled).toBe(0);
+    expect(tier.size).toBe(2);
+    expect(tier.toNext).toBe(2);
+    expect(tier.nextLabel).toBe("Aprendiz");
+  });
+
+  it("fills pips inside a rank and names what is next", () => {
+    const tier = skillTier(6);
+    expect(tier.label).toBe("Callejero");
+    expect(tier.filled).toBe(1);
+    expect(tier.size).toBe(3);
+    expect(tier.toNext).toBe(2);
+    expect(tier.nextLabel).toBe("Filoso");
+  });
+
+  it("crosses into the next rank exactly at its threshold", () => {
+    expect(skillTier(7).label).toBe("Callejero");
+    expect(skillTier(8).label).toBe("Filoso");
+    expect(skillTier(8).filled).toBe(0);
+  });
+
+  it("tops out at Leyenda with nothing left to reach", () => {
+    const tier = skillTier(40);
+    expect(tier.label).toBe("Leyenda");
+    expect(tier.toNext).toBeNull();
+    expect(tier.size).toBe(0);
+  });
+
+  it("puts the strongest rivals in the game inside the upper-middle ranks, not at the bottom", () => {
+    // The whole point: a rival with flow 10 is Filoso, not "10 out of 99".
+    expect(skillTier(10).label).toBe("Filoso");
+    expect(skillTier(2).label).toBe("Novato");
   });
 });

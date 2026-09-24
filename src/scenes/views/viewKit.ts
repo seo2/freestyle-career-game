@@ -10,6 +10,7 @@ import { palette } from "../../ui/palette";
 import { addRect, addText } from "../../ui/kit";
 import { drawCharacter, lookOf } from "../../ui/characterDraw";
 import { clamp } from "../../utils/math";
+import { skillTier } from "../../systems/ProgressionSystem";
 import type { CareerGoal, StatKey } from "../../core/types";
 import type { GameController } from "../../managers/GameController";
 
@@ -132,4 +133,53 @@ export function goalRow(ctx: ViewCtx, x: number, y: number, w: number, goal: Car
   line(ctx, x, y + 13, goal.detail, 9, palette.muted, w);
   rect(ctx, x, y + 19, w, 6, "#08090c", 0.92);
   rect(ctx, x, y + 19, Math.floor((clamp(goal.value, 0, goal.max) / goal.max) * w), 6, goal.color);
+}
+
+
+// A skill as its named rank (Fase 12 C): one pip per point inside the rank,
+// the earned ones lit, the next one to earn outlined. Replaces the old bar out
+// of statBounds.max, which drew a competitive MC as an empty track. The last,
+// open-ended rank draws as a single full bar.
+export function tierPips(
+  ctx: ViewCtx,
+  x: number,
+  y: number,
+  w: number,
+  value: number,
+  color: string,
+  bright = true,
+): void {
+  const h = 12;
+  const tier = skillTier(value);
+  const alpha = bright ? 1 : 0.4;
+  if (tier.size === 0) {
+    rect(ctx, x, y, w, h, color, alpha);
+    rect(ctx, x, y, w, 3, "#ffffff", 0.25 * alpha);
+    return;
+  }
+  const gap = 3;
+  const pip = Math.floor((w - gap * (tier.size - 1)) / tier.size);
+  for (let i = 0; i < tier.size; i += 1) {
+    const px = x + i * (pip + gap);
+    if (i < tier.filled) {
+      rect(ctx, px, y, pip, h, color, alpha);
+      rect(ctx, px, y, pip, 3, "#ffffff", 0.25 * alpha);
+    } else {
+      rect(ctx, px, y, pip, h, "#060a1f", alpha);
+      // The next point to earn gets an outline in the stat's colour: the goal
+      // of the next session, visible before you take it.
+      const edge = i === tier.filled ? color : "#1c2352";
+      rect(ctx, px, y, pip, 1, edge, alpha);
+      rect(ctx, px, y + h - 1, pip, 1, edge, alpha);
+      rect(ctx, px, y, 1, h, edge, alpha);
+      rect(ctx, px + pip - 1, y, 1, h, edge, alpha);
+    }
+  }
+}
+
+// "2 para FILOSO" under the rank, or "rango maximo" at the top.
+export function tierHint(value: number): string {
+  const tier = skillTier(value);
+  if (tier.toNext === null || tier.nextLabel === null) return "rango maximo";
+  return `${tier.toNext} para ${tier.nextLabel.toUpperCase()}`;
 }

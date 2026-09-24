@@ -17,6 +17,7 @@ function snapshot(overrides: Partial<FeedbackSnapshot> = {}): FeedbackSnapshot {
     songs: 0,
     discProgress: 0,
     stats: { flow: 2, punchline: 2, metrica: 1, improvisacion: 2, escena: 1, carisma: 1, disciplina: 1 },
+    roomProps: [],
     ...overrides,
   };
 }
@@ -27,8 +28,8 @@ describe("diffFeedback", () => {
   });
 
   it("reports a training session as the skill gained plus the energy spent", () => {
-    const before = snapshot();
-    const after = snapshot({ energy: 76, xp: 6, stats: { ...before.stats, flow: 3 } });
+    const before = snapshot({ stats: { ...snapshot().stats, flow: 3 } });
+    const after = snapshot({ energy: 76, xp: 6, stats: { ...before.stats, flow: 4 } });
     const texts = diffFeedback(before, after).map((d) => d.text);
     expect(texts).toEqual(["+1 FLOW", "+6 XP", "-14"]);
   });
@@ -47,6 +48,20 @@ describe("diffFeedback", () => {
     const [cash] = diffFeedback(snapshot({ cash: 50 }), snapshot({ cash: 20 }));
     expect(cash.text).toBe("-$30");
     expect(cash.positive).toBe(false);
+  });
+
+  it("turns a rank crossing into a milestone instead of a +1", () => {
+    const before = snapshot({ stats: { ...snapshot().stats, flow: 4 } });
+    const after = snapshot({ stats: { ...snapshot().stats, flow: 5 } });
+    const [delta] = diffFeedback(before, after);
+    expect(delta.text).toBe("FLOW CALLEJERO");
+    expect(delta.milestone?.kicker).toBe("NUEVO RANGO");
+  });
+
+  it("announces a new prop in the pieza as a milestone", () => {
+    const [delta] = diffFeedback(snapshot(), snapshot({ roomProps: ["disco-oro"] }));
+    expect(delta.text).toBe("DISCO DE ORO");
+    expect(delta.milestone?.kicker).toBe("TU PIEZA CAMBIO");
   });
 
   it("shows a level-up instead of the xp bar resetting", () => {

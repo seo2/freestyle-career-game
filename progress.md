@@ -553,3 +553,32 @@ reja, anotado en `docs/ASSETS.md` como arte pendiente.
 
 Pendiente acordado con el owner: **C** (tiers de progreso) y la **pieza que evoluciona**
 con compras y logros (mockup `06_34_34 (5)` como meta), después **E** (gancho inicial).
+
+## 2026-09-24 — Fase 12 (C): el progreso se siente y la pieza crece
+
+- **Rangos en vez de "n / 99"**. El rival más fuerte del juego tiene flow 10, así que la
+  barra sobre 99 le decía "no eres nada" a un MC ya competitivo. Ahora hay 7 rangos
+  (`ProgressionConfig.skillTiers`, medidos contra la tabla de rivales) y `skillTier()`
+  en ProgressionSystem. Entrenamiento y Estadísticas muestran el rango, una marca por
+  punto (la próxima a ganar va delineada) y "2 para FILOSO". Helper `tierPips` en viewKit.
+- **Celebración**: cruzar de rango, subir de nivel, terminar un tema o que la pieza gane algo
+  pasan a ser *milestones* en `diffFeedback`: un cartel a media pantalla ("NUEVO RANGO ·
+  DISCIPLINA APRENDIZ") en vez de un flotante. Los flotantes de acciones seguidas ya no
+  se montan.
+- **La pieza crece** (pedido del owner): `src/data/roomProps.ts` + `RoomSystem`. Los logros
+  cuelgan arte cortado del mockup de la pieza avanzada (`scripts/build-room-props.mjs`):
+  RAP TO WIN (1ª victoria), trofeos (5), neón FOCO DISCIPLINA LEGADO (disciplina Callejero),
+  disco de oro (release "disco"), placa 100.000 (fans). Lo comprado aparece como objeto
+  (micrófono, audífonos, cuaderno, chaqueta, zapatillas) con el ícono de la tienda, hasta
+  tener arte propio (docs/ASSETS.md). Se deriva del estado: sin migración de save.
+- **Decisión**: la pantalla base es siempre la pieza. Antes cambiaba al fondo de la etapa,
+  y la habitación que los mockups muestran evolucionando solo existía en la primera etapa.
+- **Refactor** (regla de 500 líneas): CareerScene había llegado a 781 líneas. Se partió
+  en `careerHud.ts`, `careerFeedback.ts` y `roomLife.ts`, y quedó en 367.
+
+Verificado: build + lint + 490 tests + trazas idénticas. Capturas en
+`output/web-game/progreso-y-pieza/` (rangos, cartel de rango, stats, y la pieza avanzada
+cargada desde un save editado), consola limpia.
+
+Pendiente: **E** (gancho inicial: la partida arranca con una batalla), el público de fondo de
+batalla y el arte propio de los props de compra.

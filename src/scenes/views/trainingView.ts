@@ -13,9 +13,9 @@
 //  * The mockup shows 5 rows and a "PUNTOS DISPONIBLES" counter; we have 7
 //    trainable stats and no skill-point currency, so the pitch is tightened to
 //    fit all seven and the strip shows the real gate (energy left).
-//  * The mockup's bar is a per-level fill under a separate "NIVEL 3"; a stat
-//    here is one 1..99 number, so the bar runs against
-//    ProgressionConfig.statBounds.max and the exact value is printed next to it.
+//  * The mockup's bar is a per-level fill under a separate "NIVEL 3". Since
+//    Fase 12 C that is what it is: the stat's named rank
+//    (ProgressionConfig.skillTiers) with one pip per point inside it.
 //  * The mockup's big button reads ENTRENAR, but training has no target until a
 //    stat is picked (each row is the real command). That slot carries the exit
 //    instead: with the Fase 4 nav bar gone it is the only on-screen way back,
@@ -28,12 +28,11 @@ import { AssetRegistry, stageBackdropKey } from "../../game/AssetRegistry";
 import { palette } from "../../ui/palette";
 import { addDisplayText, addHitZone, addPanel, addSoftPanel, addSpriteImage, addText } from "../../ui/kit";
 import { statLabels, trainingStats } from "../../data/stats";
-import { ProgressionConfig } from "../../data/config/ProgressionConfig";
 import { TrainingConfig } from "../../data/config/TrainingConfig";
 import { formatDuration } from "../../systems/CalendarSystem";
-import { clamp } from "../../utils/math";
 import type { StatKey } from "../../core/types";
-import { line, mcFigure, rect, statColor } from "./viewKit";
+import { line, mcFigure, rect, statColor, tierHint, tierPips } from "./viewKit";
+import { skillTier } from "../../systems/ProgressionSystem";
 import type { ViewCtx } from "./viewKit";
 
 // Screen chrome shared by the Fase 4 sub-views. Duplicated per view file on
@@ -129,7 +128,6 @@ function energyStrip(ctx: ViewCtx, energy: number, canTrain: boolean): void {
 function trainingRow(ctx: ViewCtx, stat: StatKey, index: number, canTrain: boolean): void {
   const { controller } = ctx;
   const value = controller.state.stats[stat];
-  const max = ProgressionConfig.statBounds.max;
   const y = ROW.y0 + index * ROW.pitch;
   const accent = statColor(stat);
   const train = (): void => controller.trainSpecificStat(stat);
@@ -150,39 +148,18 @@ function trainingRow(ctx: ViewCtx, stat: StatKey, index: number, canTrain: boole
     canTrain ? palette.ink : ROW_COLORS.textDim,
     150,
   );
-  statMeter(ctx, ROW.x + ROW.labelX, y + 22, ROW.meterW, value, max, accent, canTrain);
+  tierPips(ctx, ROW.x + ROW.labelX, y + 22, ROW.meterW, value, accent, canTrain);
   line(
     ctx,
-    ROW.x + ROW.levelX,
+    ROW.x + ROW.levelX - 40,
     y + 18,
-    `NIVEL ${value}`,
+    skillTier(value).label.toUpperCase(),
     14,
-    canTrain ? palette.ink : ROW_COLORS.textDim,
-    96,
+    canTrain ? accent : ROW_COLORS.textDim,
+    136,
   );
-  line(ctx, ROW.x + ROW.levelX, y + 33, `${value} / ${max}`, 9, canTrain ? accent : ROW_COLORS.textDim, 96);
+  line(ctx, ROW.x + ROW.levelX - 40, y + 33, `Nv ${value} · ${tierHint(value)}`, 9, canTrain ? palette.muted : ROW_COLORS.textDim, 136);
   plusButton(ctx, ROW.x + ROW.plusX, y + 5, ROW.plusW, ROW.h - 10, canTrain, train);
-}
-
-// Level meter with a graduated track: early-career stats fill a few percent of
-// the 1..99 range, and without the ticks plus the bright fill cap a low value
-// reads as a broken bar instead of "a long way to go".
-function statMeter(
-  ctx: ViewCtx,
-  x: number,
-  y: number,
-  w: number,
-  value: number,
-  max: number,
-  color: string,
-  bright: boolean,
-): void {
-  const h = 12;
-  rect(ctx, x, y, w, h, ROW_COLORS.track);
-  for (let i = 1; i < 5; i += 1) rect(ctx, x + Math.floor((w * i) / 5), y + 1, 1, h - 2, ROW_COLORS.tick);
-  const fill = Math.max(5, Math.floor(((w - 2) * clamp(value, 0, max)) / max));
-  rect(ctx, x + 1, y + 1, fill, h - 2, color, bright ? 1 : 0.4);
-  rect(ctx, x + fill - 1, y, 2, h, bright ? palette.ink : ROW_COLORS.textDim);
 }
 
 // Backdrop art scaled to cover a box and cropped to it, so the well reads as a
