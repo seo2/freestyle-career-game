@@ -502,3 +502,28 @@ Hecho en A:
 
 Verificado: build + lint + 457 tests + `npm run traces` idéntico. Capturas en
 `output/web-game/ui-limpieza/`, consola limpia.
+
+## 2026-09-24 — Fase 12 (B): la pieza vive y responde
+
+- **Números flotantes** (`src/ui/feedback.ts`): `diffFeedback` compara dos snapshots del
+  estado y dice qué se movió; cada delta flota con píldora oscura. Los recursos (plata,
+  fans, respeto, energía) caen desde **su propia tarjeta del HUD**, así que funciona en
+  cualquier pantalla; lo del personaje (+1 FLOW, +XP, % de tema, ¡NIVEL!, ¡TEMA
+  TERMINADO!) sube desde el MC en la pieza o desde el centro en una sub-vista. Los que
+  vienen después nacen detrás de los primeros para que el adelanto los separe en vez de
+  montarlos. Entrar a la escena (partida nueva, save, vuelta de batalla) toma snapshot
+  sin emitir: nada fantasma.
+- **MC vivo**: `idlePose` = respiración (±1,2 % de escala) + cabeceo en cada beat (88 BPM).
+- **Hora del día**: tinte por bloque sobre la pieza (mañana cálida y cielo en la ventana,
+  tarde ámbar, noche profunda) y cuatro lámparas del arte que titilan con `flicker`
+  determinista (sin RNG). Todo va en la capa de la pieza, bajo el HUD: la luz nunca pisa texto.
+- Todo corre sobre el delta de frame (no tweens) y la matemática está en
+  `src/ui/feedback.test.ts` (13 tests), porque el arnés headless no alcanza a muestrear
+  animaciones cortas.
+
+Verificado: build + lint + 470 tests + trazas idénticas. Capturas en
+`output/web-game/pieza-viva/` (mañana/tarde/noche y flotantes en pieza y entrenamiento),
+consola limpia. El idle del MC no se puede probar en PNG: está cubierto por su test.
+
+Siguiente: C (progreso con tiers y celebración en vez de barras sobre 99), D (batalla
+espectáculo), E (gancho inicial).

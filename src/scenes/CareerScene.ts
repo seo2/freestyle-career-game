@@ -16,14 +16,16 @@ import { gameContext } from "../game/context";
 import { AssetRegistry, stageBackdropKey } from "../game/AssetRegistry";
 import { careerDockSlots } from "../game/InputRouter";
 import type { CareerDockSlot } from "../game/InputRouter";
-import { palette } from "../ui/palette";
-import { addDisplayText, addHitZone, addRect, addSpriteImage, addText } from "../ui/kit";
+import { hex as hexColor, palette } from "../ui/palette";
+import { addDisplayText, addHitZone, addRect, addSpriteImage, addText, textStyle } from "../ui/kit";
 import { maxEnergy } from "../core/derived";
 import { formatBlock, formatDay, formatDuration } from "../systems/CalendarSystem";
 import { getCareerGoals } from "../systems/ProgressionSystem";
 import { CalendarConfig } from "../data/config/CalendarConfig";
 import { clamp } from "../utils/math";
 import { renderCareerView } from "./careerViews";
+import { Floater, diffFeedback, feedbackSnapshot, flicker, idlePose } from "../ui/feedback";
+import type { FeedbackAnchor, FeedbackDelta, FeedbackSnapshot } from "../ui/feedback";
 import type { CareerActionInfo, CareerView, GameState } from "../core/types";
 
 const W = 960;
@@ -85,6 +87,41 @@ const GOAL_CHIP = { x: 22, y: 96, w: 262, h: 44, barH: 5 } as const;
 // blocks as pips on the right (the lit one is now).
 const CLOCK = { x: 112, baseline: 81, pipsX: 226, pipW: 18, pipH: 6, pipGap: 4 } as const;
 
+// Where each kind of delta is born. HUD resources drop out from under their own
+// card (so it works on every screen, the HUD is always there); character gains
+// rise from the MC in the room, or from mid-screen inside a sub-view.
+const FLOAT_ANCHORS: Record<Exclude<FeedbackAnchor, "mc">, { x: number; y: number }> = {
+  energy: { x: 318, y: 90 },
+  cash: { x: 431, y: 90 },
+  fans: { x: 610, y: 90 },
+  respect: { x: 827, y: 90 },
+};
+const FLOAT_MC = { room: { x: 392, y: 186 }, view: { x: 480, y: 300 } } as const;
+const FLOAT = { staggerMs: 170, stackPx: 22, hudSize: 13, mcSize: 15, headlineSize: 19 } as const;
+
+// The MC stands with feet on this line; idlePose nods and breathes around it.
+const MC_FEET_Y = 312;
+
+// Time-of-day over the room art (which is painted at night): morning warms and
+// lifts it, afternoon goes amber, night stays deep. The window glass gets its
+// own sky so the city outside agrees with the clock.
+const DAYLIGHT = [
+  { color: "#ffe3b3", alpha: 0.15, add: true, sky: "#9cc6ff", skyAlpha: 0.6 },
+  { color: "#ff9a4a", alpha: 0.1, add: true, sky: "#ff9d5c", skyAlpha: 0.42 },
+  { color: "#070c30", alpha: 0.2, add: false, sky: "", skyAlpha: 0 },
+] as const;
+const ROOM_WINDOW = { x: 512, y: 90, w: 175, h: 84 } as const;
+
+// Light sources painted into the pieza backdrop (pixel positions measured on
+// the 960x540 room). Each glows and flickers on its own seed; they only apply
+// to that backdrop, since other stages have their own art.
+const ROOM_LAMPS = [
+  { x: 253, y: 192, r: 34, color: "#ffd27a", seed: 1 },
+  { x: 793, y: 128, r: 26, color: "#ffe2a0", seed: 3 },
+  { x: 811, y: 304, r: 38, color: "#ffcf73", seed: 4 },
+  { x: 343, y: 165, r: 30, color: "#6fd2ff", seed: 5 },
+] as const;
+
 // Screen bezel: the mockups frame every screen with a bright pixel line
 // (mockup 12..15 -> 7..9) over a dark navy margin.
 const BEZEL = { margin: 7, thickness: 2, edge: "#000b24" } as const;
@@ -143,6 +180,16 @@ export class CareerScene extends Phaser.Scene {
   private layer!: Phaser.GameObjects.Container;
   private noticeLayer!: Phaser.GameObjects.Container;
   private fxLayer!: Phaser.GameObjects.Container;
+  private floatLayer!: Phaser.GameObjects.Container;
+  private floaters: { floater: Floater; node: Phaser.GameObjects.Container; x: number; y: number; dir: 1 | -1 }[] = [];
+  // Last state the feedback layer saw; diffs against it say what an action did.
+  private snapshot: FeedbackSnapshot | null = null;
+  private mcImage: Phaser.GameObjects.Image | null = null;
+  private mcScale = 1;
+  private lampGlows: { glow: Phaser.GameObjects.Arc; halo: Phaser.GameObjects.Arc; seed: number }[] = [];
+  private lampStrength = 1;
+  // Scene clock for the idle animations, advanced by the frame delta only.
+  private clockMs = 0;
   // Event text currently shown by the notice; "" forces a re-show.
   private noticeText = "";
   // Milliseconds the current notice has been on screen (hold + fade).
@@ -156,10 +203,18 @@ export class CareerScene extends Phaser.Scene {
     this.layer = this.add.container(0, 0);
     this.noticeLayer = this.add.container(0, 0);
     this.fxLayer = this.add.container(0, 0);
+    this.floatLayer = this.add.container(0, 0);
+    this.floaters = [];
+    // Entering the scene (new game, loaded save, back from battle) is not an
+    // action: start the diff from here so nothing phantom floats up.
+    this.snapshot = feedbackSnapshot(gameContext().controller.state);
     // Re-entering the room (e.g. back from a battle) shows the pending event.
     this.noticeText = "";
     const subs = [
-      eventBus.on("STATE_CHANGED", () => this.redraw()),
+      eventBus.on("STATE_CHANGED", () => {
+        this.emitFeedback();
+        this.redraw();
+      }),
       eventBus.on("FOCUS_CHANGED", () => this.redraw()),
       eventBus.on("CAREER_VIEW_CHANGED", () => this.redraw()),
       // Repeating an action can produce the very same event text; the time jump
@@ -176,6 +231,9 @@ export class CareerScene extends Phaser.Scene {
     gameContext().controller.update(delta / 1000);
     this.updateTimeFx();
     this.fadeNotice(delta);
+    this.clockMs += delta;
+    this.animateRoom();
+    this.advanceFloaters(delta);
   }
 
   private redraw(): void {
@@ -183,6 +241,8 @@ export class CareerScene extends Phaser.Scene {
     const state = controller.state;
     const view = controller.careerView;
     this.layer.removeAll(true);
+    this.lampGlows = [];
+    this.mcImage = null;
 
     if (view === "base") {
       const hasBackdrop = this.drawStageBackdrop(state);
@@ -211,6 +271,7 @@ export class CareerScene extends Phaser.Scene {
     const image = this.add.image(W / 2, H / 2, key);
     image.setScale(Math.max(W / image.width, H / image.height));
     this.layer.add(image);
+    this.drawDaylight(state, key === AssetRegistry.scenes.pieza.key);
     // Scrim bands: with the panels gone the room can breathe, so only the strip
     // under the HUD and the very bottom keep their darkening.
     addRect(this, this.layer, 0, 0, W, 96, "#04071c", 0.42);
@@ -240,9 +301,119 @@ export class CareerScene extends Phaser.Scene {
   // the compact placeholder rects when the texture is missing.
   private drawMcFigure(hasBackdrop: boolean): void {
     const cx = hasBackdrop ? 392 : 284;
-    if (addSpriteImage(this, this.layer, AssetRegistry.characters.mcIdle.key, cx, 312, 120, 0.5, 1)) return;
+    const image = addSpriteImage(this, this.layer, AssetRegistry.characters.mcIdle.key, cx, MC_FEET_Y, 120, 0.5, 1);
+    if (image) {
+      this.mcImage = image;
+      this.mcScale = image.scaleX;
+      this.animateRoom();
+      return;
+    }
     addRect(this, this.layer, cx - 12, 276, 24, 36, "#111318");
     addRect(this, this.layer, cx - 12, 268, 24, 8, palette.red);
+  }
+
+  // Tint for the current block, plus the lamps when this is the pieza art.
+  private drawDaylight(state: GameState, isPieza: boolean): void {
+    const light = DAYLIGHT[state.block] ?? DAYLIGHT[DAYLIGHT.length - 1];
+    if (isPieza && light.sky) {
+      const sky = this.add.rectangle(ROOM_WINDOW.x, ROOM_WINDOW.y, ROOM_WINDOW.w, ROOM_WINDOW.h, hexColor(light.sky), light.skyAlpha);
+      sky.setOrigin(0, 0).setBlendMode(Phaser.BlendModes.ADD);
+      this.layer.add(sky);
+    }
+    const tint = this.add.rectangle(0, 0, W, DOCK.bandY, hexColor(light.color), light.alpha).setOrigin(0, 0);
+    if (light.add) tint.setBlendMode(Phaser.BlendModes.ADD);
+    this.layer.add(tint);
+    if (!isPieza) return;
+    // Lamps matter at night; by day they are nearly invisible against the sun.
+    const strength = state.block === 2 ? 1 : 0.35;
+    for (const lamp of ROOM_LAMPS) {
+      const halo = this.add.circle(lamp.x, lamp.y, lamp.r * 1.8, hexColor(lamp.color), 0.05 * strength);
+      const glow = this.add.circle(lamp.x, lamp.y, lamp.r, hexColor(lamp.color), 0.12 * strength);
+      halo.setBlendMode(Phaser.BlendModes.ADD);
+      glow.setBlendMode(Phaser.BlendModes.ADD);
+      // Into the room layer, before the MC and the HUD are drawn: light sits
+      // on the scenery, never on top of text.
+      this.layer.add([halo, glow]);
+      this.lampGlows.push({ glow, halo, seed: lamp.seed });
+    }
+    this.lampStrength = strength;
+  }
+
+  // Per-frame life for the room: the MC's idle and the lamps' flicker. Both are
+  // pure functions of the scene clock, so a paused frame and a live one agree.
+  private animateRoom(): void {
+    if (this.mcImage) {
+      const pose = idlePose(this.clockMs);
+      this.mcImage.setY(MC_FEET_Y - pose.dy);
+      this.mcImage.setScale(this.mcScale, this.mcScale * pose.scaleY);
+    }
+    const strength = this.lampStrength;
+    for (const lamp of this.lampGlows) {
+      const f = flicker(this.clockMs, lamp.seed);
+      lamp.glow.setAlpha((0.08 + 0.1 * f) * strength);
+      lamp.halo.setAlpha((0.03 + 0.04 * f) * strength);
+    }
+  }
+
+  // --- Action feedback ----------------------------------------------------------
+
+  // Diff the state against the last one seen and float up what moved.
+  private emitFeedback(): void {
+    const state = gameContext().controller.state;
+    const next = feedbackSnapshot(state);
+    const prev = this.snapshot;
+    this.snapshot = next;
+    if (!prev) return;
+    const deltas = diffFeedback(prev, next);
+    const perAnchor = new Map<FeedbackAnchor, number>();
+    deltas.forEach((delta, index) => {
+      const slot = perAnchor.get(delta.anchor) ?? 0;
+      perAnchor.set(delta.anchor, slot + 1);
+      this.spawnFloater(delta, index, slot);
+    });
+  }
+
+  private spawnFloater(delta: FeedbackDelta, order: number, slot: number): void {
+    const inRoom = gameContext().controller.careerView === "base";
+    const isMc = delta.anchor === "mc";
+    const origin = isMc ? (inRoom ? FLOAT_MC.room : FLOAT_MC.view) : FLOAT_ANCHORS[delta.anchor as Exclude<FeedbackAnchor, "mc">];
+    // Character gains rise; HUD deltas drop out from under their card.
+    const dir: 1 | -1 = isMc ? -1 : 1;
+    const headline = delta.text.startsWith("¡");
+    const size = headline ? FLOAT.headlineSize : isMc ? FLOAT.mcSize : FLOAT.hudSize;
+    const text = this.add.text(0, 0, delta.text, textStyle(size, delta.color));
+    text.setOrigin(0.5, 0.5);
+    // A dark pill behind the number: it has to read over the room art and over
+    // a sub-view's rows alike, and a stroke alone does not survive the latter.
+    const pill = this.add.rectangle(0, 0, text.width + 10, text.height + 2, hexColor("#03061a"), 0.94);
+    const edge = this.add.rectangle(-pill.width / 2, 0, 2, pill.height, hexColor(delta.color));
+    const node = this.add.container(0, 0, [pill, edge, text]).setAlpha(0);
+    this.floatLayer.add(node);
+    this.floaters.push({
+      floater: new Floater(order * FLOAT.staggerMs),
+      node,
+      x: origin.x,
+      // Later deltas are born BEHIND the earlier ones (opposite to their travel),
+      // so the head start of the first one widens the gap instead of closing it.
+      y: origin.y - dir * slot * FLOAT.stackPx,
+      dir,
+    });
+  }
+
+  private advanceFloaters(deltaMs: number): void {
+    if (this.floaters.length === 0) return;
+    this.floaters = this.floaters.filter((entry) => {
+      entry.floater.advance(deltaMs);
+      if (entry.floater.done) {
+        entry.node.destroy();
+        return false;
+      }
+      entry.node
+        .setPosition(Math.round(entry.x), Math.round(entry.y + entry.dir * entry.floater.rise))
+        .setAlpha(entry.floater.alpha)
+        .setScale(entry.floater.scale);
+      return true;
+    });
   }
 
   // Mockup screen bezel: dark navy margin plus a bright pixel line, so the room
