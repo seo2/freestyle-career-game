@@ -129,6 +129,12 @@ export function crewHypeBoost(state: GameState): number {
 
 // --- rivalries -------------------------------------------------------------
 
+// Battles won across every rival met: the career's record, read from the
+// rivals who remember it.
+export function battlesWon(state: GameState): number {
+  return state.rivalries.reduce((sum, rival) => sum + rival.won, 0);
+}
+
 export function rivalryWith(state: GameState, rivalName: string): RivalryState | null {
   return state.rivalries.find((entry) => entry.name === rivalName) ?? null;
 }

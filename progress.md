@@ -634,3 +634,17 @@ documentado), no hay ajustes en partida (el engranaje del mockup), y la etapa Le
 cierre (la carrera sigue con la meta "Legado").
 
 Verificado: build + lint + 498 tests + trazas idénticas. Capturas en `output/web-game/revision-flujo/`.
+
+## 2026-09-24 — El camino mixto tiene identidad
+
+- La medición de la ruta mixta estaba mal (en la práctica medía a un batallero). Se corrigió y
+  se sumó la variante `mixto-tiempo`.
+- El freno de los ejes pasa a actuar **solo hacia afuera** (`driftFromAction`). Antes ningún
+  eje tenía centro: cualquier desbalance terminaba en un extremo.
+- Destino nuevo **MC completo**: batallero↔músico dentro de ±30, 20 batallas ganadas y un
+  disco. Los atractores pueden pedir `balanced` y `deeds`, y un atractor con logros gana.
+  `battlesWon` se movió a RelationshipSystem.
+- Medido: batallero −70 / Campeón, músico +69 / Artista, mixto −18 / MC completo (llega a
+  Internacional), mixto por tiempo +29 / MC completo. Detalle en docs/GDD.md.
+
+Verificado: build + lint + 505 tests (7 nuevos) + trazas idénticas.

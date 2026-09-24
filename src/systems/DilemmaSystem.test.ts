@@ -9,6 +9,7 @@ import { createSequenceRng } from "../services/RandomService";
 import { dilemmas } from "../data/dilemmas";
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import {
+  driftFromAction,
   axisLean,
   dilemmaThisWeek,
   eligibleDilemmas,
@@ -335,5 +336,39 @@ describe("the quiet opening is counted in days, not weeks", () => {
     const rng = createSequenceRng([0, 0, 0.77]);
     rollDilemma(quietState, rng);
     expect(rng.next()).toBeCloseTo(0.77, 10);
+  });
+});
+
+describe("drift brake (2026-09-24: outward only)", () => {
+  it("brakes a move that pushes further out", () => {
+    const state = createNewState("MC Test", 1);
+    state.axes.batalleroMusico = -35;
+    driftFromAction(state, "battle");
+    // -2 at half the cap is damped to -1.
+    expect(state.axes.batalleroMusico).toBeCloseTo(-36, 5);
+  });
+
+  it("never brakes a move back toward the centre", () => {
+    const state = createNewState("MC Test", 1);
+    state.axes.batalleroMusico = -60;
+    driftFromAction(state, "write");
+    expect(state.axes.batalleroMusico).toBeCloseTo(-59, 5);
+  });
+
+  it("settles a mixed life in the middle instead of running it to an extreme", () => {
+    const state = createNewState("MC Test", 1);
+    // Same weight on both sides per round: one battle (-2) against two writes (+1 each).
+    for (let i = 0; i < 400; i += 1) {
+      driftFromAction(state, "battle");
+      driftFromAction(state, "write");
+      driftFromAction(state, "write");
+    }
+    expect(Math.abs(state.axes.batalleroMusico)).toBeLessThan(5);
+  });
+
+  it("still lets a life of one thing reach the cap", () => {
+    const state = createNewState("MC Test", 1);
+    for (let i = 0; i < 400; i += 1) driftFromAction(state, "battle");
+    expect(state.axes.batalleroMusico).toBeLessThan(-65);
   });
 });

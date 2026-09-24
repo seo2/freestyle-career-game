@@ -10,7 +10,7 @@
 // and plays three routes for a fixed number of weeks:
 //   batallero — trains and battles, never records
 //   musico    — writes and records, never battles
-//   mixto     — alternates
+//   mixto     — alternates stage and studio, block by block
 //
 // MEASUREMENT tool, not a test: it prints and never asserts.
 //
@@ -56,10 +56,22 @@ const report = await page.evaluate(
         state.cash < needed
           ? ["work", "write", "rest"]
           : ["record", "write", "show", "social", "rest"],
-      mixto: (state, needed) =>
-        state.cash < needed
-          ? ["work", "battle", "write", "rest"]
-          : ["battle", "record", "write", "practice", "rest"],
+      // A real mix: alternate the two sides block by block. The first version put
+      // "battle" first whenever there was money, and since a battle is almost
+      // always available, the "mixed" route it measured was a battler who
+      // recorded one song by accident (2026-09-24).
+      mixto: (state, needed, turn) => {
+        const stage = ["battle", "practice", "cypher"];
+        const studio = state.cash < needed ? ["work", "write"] : ["record", "write", "show"];
+        return [...(turn % 2 === 0 ? stage : studio), ...(turn % 2 === 0 ? studio : stage), "rest"];
+      },
+      // The same mix balanced by TIME: a battle is two blocks from the plaza on,
+      // so one battle is followed by two studio blocks.
+      "mixto-tiempo": (state, needed, turn) => {
+        const stage = ["battle", "practice", "cypher"];
+        const studio = state.cash < needed ? ["work", "write"] : ["record", "write", "show"];
+        return [...(turn % 3 === 0 ? stage : studio), ...(turn % 3 === 0 ? studio : stage), "rest"];
+      },
     };
 
     function playBattleOut(state, rng) {
@@ -89,6 +101,8 @@ const report = await page.evaluate(
       const route = ROUTES[routeName];
       const timeline = [];
       let guard = 0;
+      let turn = 0;
+      const counts = {};
       let lastStage = state.stage;
 
       while (state.week <= weeks && guard < 6000) {
@@ -97,10 +111,12 @@ const report = await page.evaluate(
         // otherwise spin forever.
         let acted = false;
         const needed = recordCost(state);
-        for (const id of state.energy < 25 ? ["rest"] : route(state, needed)) {
+        for (const id of state.energy < 25 ? ["rest"] : route(state, needed, turn)) {
           const outcome = actions.executeAction(state, rng, id);
           if (outcome.type === "none") continue;
           acted = true;
+          counts[id] = (counts[id] ?? 0) + 1;
+          if (id !== "rest") turn += 1;
           if (outcome.type === "battle-started") playBattleOut(state, rng);
           if (outcome.type === "cypher-started") state.cypher = null;
           break;
@@ -128,6 +144,7 @@ const report = await page.evaluate(
       const next = stages[idx + 1];
       return {
         route: routeName,
+        counts,
         stage: state.stage,
         stagesClimbed: idx,
         level: state.level,
@@ -154,7 +171,7 @@ const report = await page.evaluate(
       };
     }
 
-    return ["batallero", "musico", "mixto"].map(run);
+    return ["batallero", "musico", "mixto", "mixto-tiempo"].map(run);
   },
   { weeks: WEEKS },
 );
@@ -169,6 +186,7 @@ for (const r of report) {
   console.log(`   ejes: batallero/musico ${r.axes.batalleroMusico >= 0 ? "+" : ""}${r.axes.batalleroMusico}` +
     ` · under/comercial ${r.axes.undergroundComercial >= 0 ? "+" : ""}${r.axes.undergroundComercial}` +
     ` · solo/crew ${r.axes.soloCrew >= 0 ? "+" : ""}${r.axes.soloCrew}`);
+  console.log(`   acciones: ${JSON.stringify(r.counts)}`);
   console.log(`   se lee como: ${r.leaning.length ? r.leaning.join(", ") : "sin definir"}`);
   console.log(`   destino: ${r.destiny ?? "ninguno todavia"}`);
   console.log(`   obra: ${r.releases.length ? r.releases.join(" → ") : "nada grabado"}`);

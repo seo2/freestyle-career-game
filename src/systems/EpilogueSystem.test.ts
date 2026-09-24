@@ -171,8 +171,39 @@ describe("mismo origen, destinos distintos", () => {
         built[axis as keyof IdentityAxes] = needed >= 0 ? needed + 30 : needed - 30;
       }
       state.axes = built;
+      // Deed-based attractors also need the career to have done what they ask.
+      if (attractor.deeds?.battlesWon) {
+        state.rivalries = [{ name: "X", faced: attractor.deeds.battlesWon, won: attractor.deeds.battlesWon, lost: 0, heat: 0, lastWeek: 1 }];
+      }
+      if (attractor.deeds?.release) state.releases = [attractor.deeds.release];
       expect(destinyFor(state)?.label).toBe(attractor.label);
     }
+  });
+});
+
+describe("MC completo (the mixed road)", () => {
+  const withDeeds = (state: GameState, won: number, releases: string[]): GameState => {
+    state.rivalries = [{ name: "X", faced: won, won, lost: 0, heat: 0, lastWeek: 1 }];
+    state.releases = releases;
+    return state;
+  };
+
+  it("reads a career with wins AND a disco near the centre as both", () => {
+    const state = withDeeds(career(), 40, ["sencillo", "ep", "disco"]);
+    state.axes = axes({ batalleroMusico: -18, undergroundComercial: 30 });
+    expect(destinyFor(state)?.label).toBe("MC completo");
+  });
+
+  it("never hands it to someone balanced who did nothing", () => {
+    const state = career();
+    state.axes = axes({ batalleroMusico: 0 });
+    expect(destinyFor(state)?.label).not.toBe("MC completo");
+  });
+
+  it("leaves a battler who recorded a disco on the side he lives on", () => {
+    const state = withDeeds(career(), 120, ["sencillo", "ep", "disco"]);
+    state.axes = axes({ batalleroMusico: -60 });
+    expect(destinyFor(state)?.label).toBe("Campeon de batallas");
   });
 });
 

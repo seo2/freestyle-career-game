@@ -108,7 +108,16 @@ export function driftFromAction(state: GameState, actionId: string): Partial<Rec
     // way out: without it, twenty weeks of one activity pinned every axis to ±97,
     // where a dilemma's ±15 does nothing and the game's headline decisions become
     // decoration.
-    const damped = delta * (1 - Math.abs(current) / driftCap);
+    //
+    // The brake applies OUTWARD only (2026-09-24). It used to damp every move by
+    // (1 - |x|/cap), including the ones pulling back toward the centre, so any
+    // imbalance — even a 55/45 life — ran the axis to its extreme: the measured
+    // 50/50 careers ended at -46 or +51 depending on which side had a little more,
+    // and no career could ever read as "both". Braking only the move that pushes
+    // further out makes the axis settle where the two sides balance, i.e. it reads
+    // the PROPORTION of a life, which is what an identity axis is for.
+    const outward = current === 0 || Math.sign(delta) === Math.sign(current);
+    const damped = outward ? delta * (1 - Math.abs(current) / driftCap) : delta;
     // Already past what a life alone can buy? Then only decisions move you.
     if (Math.abs(current) >= driftCap && Math.sign(damped) === Math.sign(current)) continue;
     moveAxis(state.axes, axis, damped);

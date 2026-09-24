@@ -344,6 +344,44 @@ Los hitos le dan forma, pero falta que un tema cueste más que plata (tiempo de
 estudio, calidad, rendimientos decrecientes por tema). Es tuning con medición, no
 un sistema nuevo.
 
+### El camino mixto (Fase 12, 2026-09-24)
+
+La revisión del flujo marcó que la ruta mixta "terminaba igual que la batallera". Al
+revisarlo, eran **dos problemas distintos**, y solo uno era del juego:
+
+- **La medición mentía.** La política "mixto" de `measure-routes.mjs` ponía la batalla
+  primera siempre que había plata; como casi siempre está disponible, medía un
+  batallero que grabó un tema de casualidad. Ahora alterna de verdad, y hay una
+  variante `mixto-tiempo` que equilibra por **tiempo** (una batalla dura 2 bloques
+  desde la plaza).
+- **El eje no tenía centro.** El freno `(1 − |x|/70)` se aplicaba en las dos
+  direcciones, también a los empujes que traen de vuelta al centro. Con eso, cualquier
+  desbalance, incluso 55/45, terminaba arrastrando el eje a un extremo: medido, un 50/50 por
+  acciones terminó en −46 y un 50/50 por tiempo en +51. **Ahora frena solo hacia afuera**,
+  y el eje se asienta donde los dos lados se equilibran: lee la **proporción** de la vida.
+  Los puros no cambian (−70 y +69).
+- **Faltaba el destino.** Con el eje arreglado, el mixto quedaba cerca de 0 y *sin
+  destino*, siendo la carrera más completa (Internacional, obra hasta sello propio).
+  Se sumó **MC completo**: eje batallero↔músico dentro de ±30 **y** logros de los dos
+  lados (20 batallas ganadas y un disco). Los logros evitan que se lo lleve alguien
+  indefinido que no hizo nada, y un atractor con logros gana sobre los que miran solo
+  ejes (`destinyFor`).
+
+**Medido, cuatro rutas de 20 semanas** (`output/web-game/camino-mixto/cuatro-rutas.txt`):
+
+| ruta | batallero↔músico | destino | llega a |
+|---|---|---|---|
+| batallero | −70 | Campeón de batallas | Nacional |
+| músico | +69 | Artista de discos | Nacional |
+| mixto (1:1 acciones) | −18 | **MC completo** | **Internacional** |
+| mixto (1:2 tiempo) | +29 | **MC completo** | Nacional |
+
+**Abierto, anotado:** el mixto es la ruta que más lejos llega (Internacional contra
+Nacional), porque la batalla da respeto y el estudio da fans y fama, y la escalera pide
+las cuatro cosas. Es coherente con la escalera y ahora tiene nombre, pero si los
+especialistas deben competir en velocidad, la palanca está en los requisitos de etapa,
+no en los ejes.
+
 ### Contenido de batalla: tres rivales por etapa y 16 estimulos (Fase 9, 2026-08-13)
 
 Con **un** rival por etapa, la segunda batalla de una etapa era idéntica a la

@@ -15,6 +15,8 @@ import { axisChapterLines, destinyAttractors, stageChapters, undecidedLine } fro
 import { DilemmaConfig } from "../data/config/DilemmaConfig";
 import { stages } from "../data/stages";
 import { releaseTitle } from "./ReleaseSystem";
+import { battlesWon } from "./RelationshipSystem";
+import type { DestinyAttractor } from "../data/epilogues";
 
 const AXES: IdentityAxis[] = ["undergroundComercial", "batalleroMusico", "soloCrew", "autenticoPolemico"];
 
@@ -47,9 +49,25 @@ function leanedAxes(state: GameState): { axis: IdentityAxis; value: number }[] {
 // into HARDEST wins — scored by how far past its thresholds they went. Picking
 // the first match instead read a +52 comercial MC as a producer just because
 // "productor" happened to be listed earlier.
+// A deed-based attractor holds when the career did what it asks and its axes
+// sit where it asks.
+function deedsHold(state: GameState, attractor: DestinyAttractor): boolean {
+  const deeds = attractor.deeds;
+  if (!deeds) return false;
+  if (deeds.battlesWon !== undefined && battlesWon(state) < deeds.battlesWon) return false;
+  if (deeds.release !== undefined && !state.releases.includes(deeds.release)) return false;
+  const balanced = Object.entries(attractor.balanced ?? {}) as [IdentityAxis, number][];
+  return balanced.every(([axis, within]) => Math.abs(state.axes[axis]) <= within);
+}
+
 export function destinyFor(state: GameState): { label: string; line: string } | null {
+  // What a career DID is a sharper read than where it leans: a deed-based
+  // attractor that holds wins outright.
+  const earned = destinyAttractors.find((attractor) => attractor.deeds && deedsHold(state, attractor));
+  if (earned) return { label: earned.label, line: earned.line };
   let best: { label: string; line: string; score: number } | null = null;
   for (const attractor of destinyAttractors) {
+    if (attractor.deeds) continue;
     const needs = Object.entries(attractor.needs) as [IdentityAxis, number][];
     let score = 0;
     const holds = needs.every(([axis, needed]) => {
