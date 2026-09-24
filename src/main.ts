@@ -16,6 +16,7 @@ import { BattleScene } from "./scenes/BattleScene";
 import { CypherScene } from "./scenes/CypherScene";
 import { DilemmaScene } from "./scenes/DilemmaScene";
 import { EpilogueScene } from "./scenes/EpilogueScene";
+import { IntroScene } from "./scenes/IntroScene";
 import { hex, palette } from "./ui/palette";
 import { AudioService } from "./services/AudioService";
 import { wireAudio } from "./game/audioWiring";
@@ -59,7 +60,7 @@ fontsReady.then(() => {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, MenuScene, CreateMcScene, CareerScene, BattleScene, CypherScene, DilemmaScene, EpilogueScene],
+    scene: [BootScene, MenuScene, CreateMcScene, IntroScene, CareerScene, BattleScene, CypherScene, DilemmaScene, EpilogueScene],
   });
   new SceneDirector(game, controller);
 });

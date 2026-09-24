@@ -41,8 +41,12 @@ import {
   advanceBattleRound as advanceBattleRoundSys,
   expireBattleRound as expireBattleRoundSys,
   finishBattle as finishBattleSys,
+  finishIntroBattle as finishIntroBattleSys,
   resolveBattle as resolveBattleSys,
+  startIntroBattle as startIntroBattleSys,
 } from "../systems/BattleSystem";
+import { IntroConfig } from "../data/config/IntroConfig";
+import { fillIntro, introRoomEvent } from "../data/intro";
 import {
   buyItem as buyItemSys,
   buyRecommendedItem as buyRecommendedItemSys,
@@ -107,6 +111,9 @@ export class GameController {
   careerView: CareerView = "base";
   private audio: AudioService | null = null;
   timeFx: TimeAdvanceFx | null = null;
+  // How the prologue battle went (Fase 12 E), so its closing beat can be told.
+  // Presentation state: null before the battle, never persisted.
+  introOutcome: "win" | "loss" | "draw" | null = null;
   creatingNew: boolean;
   savedSnapshot: GameState | null;
 
@@ -442,6 +449,15 @@ export class GameController {
   }
 
   finishBattle(): void {
+    // The prologue collects through its own path: no payout, no clock, back to
+    // the prologue screen for its closing beat.
+    if (this.state.battle?.intro) {
+      this.introOutcome = finishIntroBattleSys(this.state);
+      eventBus.emit("BATTLE_FINISHED", undefined);
+      eventBus.emit("MODE_CHANGED", this.state.mode);
+      eventBus.emit("STATE_CHANGED", undefined);
+      return;
+    }
     // The day the battle was fought, captured before the payout advances the
     // clock (a late-night battle can roll the day over).
     const foughtDay = this.state.day;
@@ -524,14 +540,39 @@ export class GameController {
     this.state.skin = draft.skin;
     this.state.voice = draft.voice;
     this.state.difficulty = draft.difficulty;
-    this.state.mode = "career";
-    this.state.lastEvent = `${cleanName} parte rapeando en su pieza.`;
+    // The career opens on the prologue (Fase 12 E): a battle before the room.
+    this.state.mode = "intro";
+    this.introOutcome = null;
+    this.state.lastEvent = fillIntro(introRoomEvent.skip, IntroConfig.rivalName, cleanName);
     this.creatingNew = false;
     this.careerView = "base";
     this.timeFx = null;
     // The week's offers are rolled before the first decision: an opportunity
     // you cannot see coming is not an opportunity.
     this.ensureWeekOpportunities();
+    this.saveState();
+    eventBus.emit("MODE_CHANGED", this.state.mode);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // --- Prologue (Fase 12 E) ----------------------------------------------------
+
+  startIntroBattle(): void {
+    if (this.state.mode !== "intro" || this.introOutcome) return;
+    startIntroBattleSys(this.state, this.rng);
+    eventBus.emit("BATTLE_STARTED", undefined);
+    eventBus.emit("MODE_CHANGED", this.state.mode);
+    eventBus.emit("STATE_CHANGED", undefined);
+  }
+
+  // Skipping (before the battle) and closing (after it) both land in the room;
+  // only the line waiting there differs.
+  closeIntro(): void {
+    if (this.state.mode !== "intro") return;
+    const key = this.introOutcome ?? "skip";
+    this.state.lastEvent = fillIntro(introRoomEvent[key], IntroConfig.rivalName, this.state.playerName);
+    this.state.mode = "career";
+    this.careerView = "base";
     this.saveState();
     eventBus.emit("MODE_CHANGED", this.state.mode);
     eventBus.emit("STATE_CHANGED", undefined);

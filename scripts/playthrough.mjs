@@ -69,6 +69,9 @@ async function run() {
   await page.goto("http://localhost:5173", { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
   await press("Enter", 250); // new career
+  // Fase 12 E: skip the prologue battle, so this keeps measuring the career's
+  // pacing from day one (the prologue moves no clock anyway).
+  await press("Escape", 250);
 
   const report = {
     reachedTarget: false,

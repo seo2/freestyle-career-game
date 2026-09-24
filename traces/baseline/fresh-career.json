@@ -161,6 +161,142 @@
         "lastClosed": null,
         "closedWeeks": 0
       },
+      "mode": "intro",
+      "careerView": null,
+      "player": {
+        "name": "MC Barrio",
+        "nickname": "Freestyler",
+        "look": 1,
+        "skin": 1,
+        "voice": 1,
+        "hair": "gorra",
+        "hairColor": 1,
+        "eyes": "lentes",
+        "difficulty": "normal",
+        "stage": "pieza",
+        "level": 1,
+        "week": 1,
+        "day": 1,
+        "block": 0,
+        "timeLabel": "Mañana",
+        "xp": 0,
+        "xpNext": 70,
+        "energy": 86,
+        "health": 88,
+        "cash": 25,
+        "fans": 0,
+        "respect": 0,
+        "fame": 0,
+        "songs": 0,
+        "discProgress": 0,
+        "upgrades": {
+          "outfit": 0,
+          "studio": 0,
+          "home": 0
+        },
+        "items": [],
+        "momentum": 42,
+        "momentumMood": "Frio",
+        "lastActionId": null,
+        "actionStreak": 0,
+        "stats": {
+          "flow": 2,
+          "punchline": 2,
+          "metrica": 1,
+          "improvisacion": 2,
+          "escena": 1,
+          "carisma": 1,
+          "disciplina": 1
+        }
+      },
+      "timeFx": null,
+      "lastEvent": "MC Barrio parte rapeando en su pieza.",
+      "goals": [
+        {
+          "label": "Abrir Plaza",
+          "detail": "Nv 1/5 · Resp 0/45",
+          "value": 30,
+          "max": 100
+        },
+        {
+          "label": "Primer tema",
+          "detail": "0% escrito",
+          "value": 0,
+          "max": 80
+        }
+      ],
+      "recommendedItem": null,
+      "actions": [],
+      "battle": null,
+      "cypher": null,
+      "identity": {
+        "axes": {
+          "undergroundComercial": 0,
+          "batalleroMusico": 0,
+          "soloCrew": 0,
+          "autenticoPolemico": 0
+        },
+        "leaning": [],
+        "pendingDilemma": null,
+        "pendingEpilogue": null,
+        "destiny": null,
+        "stageStartedWeek": 1,
+        "decisions": []
+      },
+      "relationships": {
+        "bonds": [
+          {
+            "id": "familia",
+            "affinity": 62,
+            "fedWeek": 0,
+            "temperature": "steady"
+          },
+          {
+            "id": "crew",
+            "affinity": 40,
+            "fedWeek": 0,
+            "temperature": "steady"
+          }
+        ],
+        "summary": "Nadie cerca, nadie lejos.",
+        "rivalries": []
+      }
+    }
+  },
+  {
+    "step": 2,
+    "input": "key:Escape",
+    "state": {
+      "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
+      "week": {
+        "number": 1,
+        "day": 1,
+        "plan": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "today": null,
+        "openDays": 7,
+        "battleDay": 6,
+        "record": [],
+        "opportunities": [
+          {
+            "id": "cypher-sorpresa",
+            "day": 5,
+            "label": "Cypher sorpresa",
+            "taken": false,
+            "missed": false
+          }
+        ],
+        "burntOut": false,
+        "lastClosed": null,
+        "closedWeeks": 0
+      },
       "mode": "career",
       "careerView": "base",
       "player": {
@@ -345,7 +481,7 @@
     }
   },
   {
-    "step": 2,
+    "step": 3,
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -568,7 +704,7 @@
     }
   },
   {
-    "step": 3,
+    "step": 4,
     "input": "key:2",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -740,7 +876,7 @@
     }
   },
   {
-    "step": 4,
+    "step": 5,
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -942,7 +1078,7 @@
     }
   },
   {
-    "step": 5,
+    "step": 6,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1130,7 +1266,7 @@
     }
   },
   {
-    "step": 6,
+    "step": 7,
     "input": "key:2",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1347,7 +1483,7 @@
     }
   },
   {
-    "step": 7,
+    "step": 8,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1549,7 +1685,7 @@
     }
   },
   {
-    "step": 8,
+    "step": 9,
     "input": "key:3",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1780,7 +1916,7 @@
     }
   },
   {
-    "step": 9,
+    "step": 10,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -1997,7 +2133,7 @@
     }
   },
   {
-    "step": 10,
+    "step": 11,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2227,7 +2363,7 @@
     }
   },
   {
-    "step": 11,
+    "step": 12,
     "input": "key:3",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2463,7 +2599,7 @@
     }
   },
   {
-    "step": 12,
+    "step": 13,
     "input": "key:4",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2699,7 +2835,7 @@
     }
   },
   {
-    "step": 13,
+    "step": 14,
     "input": "key:5",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -2935,7 +3071,7 @@
     }
   },
   {
-    "step": 14,
+    "step": 15,
     "input": "key:u",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -3167,7 +3303,7 @@
     }
   },
   {
-    "step": 15,
+    "step": 16,
     "input": "key:c",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -3399,7 +3535,7 @@
     }
   },
   {
-    "step": 16,
+    "step": 17,
     "input": "key:4",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -3631,7 +3767,7 @@
     }
   },
   {
-    "step": 17,
+    "step": 18,
     "input": "key:1",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -3863,7 +3999,7 @@
     }
   },
   {
-    "step": 18,
+    "step": 19,
     "input": "key:Enter",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
@@ -4101,7 +4237,7 @@
     }
   },
   {
-    "step": 19,
+    "step": 20,
     "input": "key:Escape",
     "state": {
       "coordinate_system": "canvas 960x540, origin top-left, x right, y down",
