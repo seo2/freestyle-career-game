@@ -90,7 +90,7 @@ const statIconKeys: Record<StatKey, string> = {
 };
 
 export function renderStats(ctx: ViewCtx): void {
-  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "13. ESTADISTICAS", TITLE.size, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "ESTADISTICAS", TITLE.size, palette.ink);
 
   addPanel(ctx.scene, ctx.layer, LEFT.x, LEFT.y, LEFT.w, LEFT.h, "#0a1030");
   profileColumn(ctx);

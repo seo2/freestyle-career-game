@@ -93,7 +93,7 @@ export function renderTraining(ctx: ViewCtx): void {
   const cost = TrainingConfig.session.energyCost;
   const canTrain = state.energy >= cost;
 
-  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "6. ENTRENAMIENTO", TITLE.size, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "ENTRENAMIENTO", TITLE.size, palette.ink);
 
   addPanel(ctx.scene, ctx.layer, LEFT.x, LEFT.y, LEFT.w, LEFT.h, "#0a1030");
   energyStrip(ctx, state.energy, canTrain);

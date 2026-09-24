@@ -30,7 +30,7 @@ const FOOTER = { x: 26, y: 486, w: 908, h: 40 } as const;
 const CARD = { border: "#272c61", fill: "#070e35", dim: "#6a6f85" } as const;
 
 export function renderBarber(ctx: ViewCtx): void {
-  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "15. BARBERIA", TITLE.size, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "BARBERIA", TITLE.size, palette.ink);
   const cash = ctx.controller.state.cash;
   const wallet = addText(ctx.scene, ctx.layer, 0, TITLE.y + 6, `$${cash}`, 16, palette.green ?? palette.teal);
   wallet.setX(Math.round(934 - wallet.width));

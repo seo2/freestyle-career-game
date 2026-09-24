@@ -197,7 +197,7 @@ function bindJobKeys(ctx: ViewCtx): void {
 }
 
 function header(ctx: ViewCtx, cash: number): void {
-  addDisplayText(ctx.scene, ctx.layer, HEAD.titleX, HEAD.titleY, "8. TRABAJO", HEAD.titleSize, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, HEAD.titleX, HEAD.titleY, "TRABAJO", HEAD.titleSize, palette.ink);
   addPanel(ctx.scene, ctx.layer, HEAD.cashX, HEAD.cashY, HEAD.cashW, HEAD.cashH);
   const centerY = HEAD.cashY + HEAD.cashH / 2;
   const label = addText(

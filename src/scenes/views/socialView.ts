@@ -79,7 +79,7 @@ const ROW_COLORS = {
 export function renderSocial(ctx: ViewCtx): void {
   const state = ctx.controller.state;
 
-  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "7. REDES SOCIALES", TITLE.size, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "REDES SOCIALES", TITLE.size, palette.ink);
   addPanel(ctx.scene, ctx.layer, OUTER.x, OUTER.y, OUTER.w, OUTER.h, "#0a1030");
 
   counterStrip(ctx, state.fans, state.fame);

@@ -42,6 +42,8 @@ export const AssetRegistry = {
     resRespect: { key: "res-respect", path: "/assets/icons/res-respect.png" },
     resFame: { key: "res-fame", path: "/assets/icons/res-fame.png" },
     uiCart: { key: "ui-cart", path: "/assets/icons/ui-cart.png" },
+    // Cut from the calendar mockup (06_23_14 (4)), its top-right HUD button.
+    uiCalendar: { key: "ui-calendar", path: "/assets/icons/ui-calendar.png" },
     actionOffer: { key: "action-offer", path: "/assets/icons/action-offer.png" },
     battleDefensa: { key: "battle-defensa", path: "/assets/icons/battle-defensa.png" },
     battleDobletempo: { key: "battle-dobletempo", path: "/assets/icons/battle-dobletempo.png" },

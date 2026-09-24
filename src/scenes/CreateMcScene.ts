@@ -179,7 +179,7 @@ export class CreateMcScene extends Phaser.Scene {
     // watermark; a multiply tint would turn the yellow GAME olive, so the real
     // lockup is simply dropped in opacity instead.
     addLogoLockup(this, layer, { x: 83, y: 74, width: 214, alpha: 0.45 });
-    addAnchoredText(this, layer, 41, 43, "2. CREAR MC", 28, palette.ink, 0, true);
+    addAnchoredText(this, layer, 41, 43, "CREAR MC", 28, palette.ink, 0, true);
   }
 
   // --- Dynamic layer --------------------------------------------------------

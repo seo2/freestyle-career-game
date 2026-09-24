@@ -7,6 +7,8 @@ export const CalendarConfig = {
     daysPerWeek: 7,
     // Player-visible names for blocks 0..2, indexed by GameState.block.
     blockLabels: ["Mañana", "Tarde", "Noche"],
+    // Short weekday names for days 1..7, indexed by GameState.day - 1.
+    dayLabels: ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"],
   },
   dailyRecovery: {
     energyBase: 8,

@@ -278,7 +278,7 @@ function bindShopKeys(ctx: ViewCtx): void {
 }
 
 function header(ctx: ViewCtx, cash: number): void {
-  addDisplayText(ctx.scene, ctx.layer, HEAD.titleX, HEAD.titleY, "9. TIENDA", HEAD.titleSize, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, HEAD.titleX, HEAD.titleY, "TIENDA", HEAD.titleSize, palette.ink);
   const label = addText(ctx.scene, ctx.layer, HEAD.cashLabelX, HEAD.cashCenterY, "DINERO", HEAD.cashLabelSize, palette.ink);
   label.setOrigin(0, 0.5).setPosition(HEAD.cashLabelX, HEAD.cashCenterY);
   const value = addText(ctx.scene, ctx.layer, 0, HEAD.cashCenterY, `$ ${cash}`, HEAD.cashValueSize, palette.green);

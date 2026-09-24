@@ -57,7 +57,7 @@ const axisOrder: IdentityAxis[] = [
 ];
 
 export function renderIdentity(ctx: ViewCtx): void {
-  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "14. QUIEN VAS SIENDO", TITLE.size, palette.ink);
+  addDisplayText(ctx.scene, ctx.layer, TITLE.x, TITLE.y, "QUIEN VAS SIENDO", TITLE.size, palette.ink);
   statsChip(ctx, 706, 90, 228, 28);
 
   addPanel(ctx.scene, ctx.layer, AXES_PANEL.x, AXES_PANEL.y, AXES_PANEL.w, AXES_PANEL.h, "#0a1030");
