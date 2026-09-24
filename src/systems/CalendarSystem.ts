@@ -108,6 +108,11 @@ export function formatBlock(block: number): string {
   return CalendarConfig.clock.blockLabels[block] ?? CalendarConfig.clock.blockLabels[0];
 }
 
+// Day 1..7 -> "LUN".."DOM".
+export function formatDay(day: number): string {
+  return CalendarConfig.clock.dayLabels[day - 1] ?? CalendarConfig.clock.dayLabels[0];
+}
+
 export function formatDuration(blocks: number): string {
   return blocks === 1 ? "1 bloque" : `${blocks} bloques`;
 }

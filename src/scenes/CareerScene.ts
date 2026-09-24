@@ -19,7 +19,9 @@ import type { CareerDockSlot } from "../game/InputRouter";
 import { palette } from "../ui/palette";
 import { addDisplayText, addHitZone, addRect, addSpriteImage, addText } from "../ui/kit";
 import { maxEnergy } from "../core/derived";
-import { formatBlock, formatDuration } from "../systems/CalendarSystem";
+import { formatBlock, formatDay, formatDuration } from "../systems/CalendarSystem";
+import { getCareerGoals } from "../systems/ProgressionSystem";
+import { CalendarConfig } from "../data/config/CalendarConfig";
 import { clamp } from "../utils/math";
 import { renderCareerView } from "./careerViews";
 import type { CareerActionInfo, CareerView, GameState } from "../core/types";
@@ -73,6 +75,15 @@ const NOTICE = {
 // Agenda strip (timeFx) sits directly above the notice slot so the two can be
 // on screen together without ever stacking.
 const AGENDA = { x: 406, y: 344, w: 510, h: 28 } as const;
+
+// "Where am I going": the next career goal pinned to the room's top-left wall,
+// so the player never has to open the map to know what the week is for. Clicking
+// it opens the map, where goals live in full.
+const GOAL_CHIP = { x: 22, y: 96, w: 262, h: 44, barH: 5 } as const;
+
+// Clock row under the energy bar: weekday + week on the left, the day's three
+// blocks as pips on the right (the lit one is now).
+const CLOCK = { x: 112, baseline: 81, pipsX: 226, pipW: 18, pipH: 6, pipGap: 4 } as const;
 
 // Screen bezel: the mockups frame every screen with a bright pixel line
 // (mockup 12..15 -> 7..9) over a dark navy margin.
@@ -179,6 +190,7 @@ export class CareerScene extends Phaser.Scene {
       this.drawDock();
       this.drawBezel();
       this.drawHeader(state);
+      this.drawGoalChip(state);
     } else {
       this.drawInterfaceBackdrop();
       this.drawHeader(state);
@@ -257,21 +269,14 @@ export class CareerScene extends Phaser.Scene {
       const initial = (state.playerName.trim() || "MC").charAt(0).toUpperCase();
       addText(this, this.layer, 58, 49, initial, 26, palette.yellow).setOrigin(0.5);
     }
+    // The portrait is the character sheet's door, as in most RPGs.
+    addHitZone(this, this.layer, 22, 14, 74, 70, () => gameContext().controller.setCareerView("stats"));
 
     // Mockup stacks label + value on one line (baseline ~44) over the bar.
     baselineText(this, this.layer, 112, 42, "ENERGIA", 16, palette.ink);
     baselineText(this, this.layer, 270, 42, `${state.energy}/${maxEnergy(state)}`, 16, palette.ink, 86);
     this.drawHudBar(112, 52, 230, 15, state.energy, maxEnergy(state), palette.green);
-    baselineText(
-      this,
-      this.layer,
-      112,
-      81,
-      `SEM ${state.week}.${state.day}  ${formatBlock(state.block)}`,
-      10,
-      palette.muted,
-      150,
-    );
+    this.drawClock(state);
 
     this.drawResourceCard(362, 22, 138, 54, "cash", "", formatHudNumber(state.cash), palette.green);
     this.drawResourceCard(516, 22, 224, 54, "fans", "FANS", formatHudNumber(state.fans), palette.blue);
@@ -280,8 +285,48 @@ export class CareerScene extends Phaser.Scene {
     // right; they are also the only POINTER entry to the calendar and the stats
     // screens, which the removed tab bar used to provide (project rule 5: the
     // game must be fully playable with the mouse alone).
-    this.drawHudIconButton(904, 20, "SEM", "calendar");
-    this.drawHudIconButton(904, 50, "STA", "stats");
+    this.drawHudIconButton(904, 20, "calendar");
+    this.drawHudIconButton(904, 50, "stats");
+  }
+
+  // "LUN · SEM 1" plus three pips for Mañana/Tarde/Noche: how much of today is
+  // left reads at a glance instead of from a word.
+  private drawClock(state: GameState): void {
+    baselineText(this, this.layer, CLOCK.x, CLOCK.baseline, `${formatDay(state.day)} · SEM ${state.week}`, 10, palette.ink, 140);
+    const blocks = CalendarConfig.clock.blocksPerDay;
+    for (let i = 0; i < blocks; i += 1) {
+      const x = CLOCK.pipsX + i * (CLOCK.pipW + CLOCK.pipGap);
+      const color = i === state.block ? palette.yellow : i < state.block ? "#2a3170" : "#4a5299";
+      addRect(this, this.layer, x, CLOCK.baseline - 8, CLOCK.pipW, CLOCK.pipH, color);
+    }
+    baselineText(
+      this,
+      this.layer,
+      CLOCK.pipsX + blocks * (CLOCK.pipW + CLOCK.pipGap) + 2,
+      CLOCK.baseline,
+      formatBlock(state.block).toUpperCase(),
+      10,
+      palette.yellow,
+    );
+  }
+
+  // Pinned next goal: label, one line of what is missing, and a thin progress
+  // bar in the goal's own colour.
+  private drawGoalChip(state: GameState): void {
+    const goal = getCareerGoals(state)[0];
+    if (!goal) return;
+    const { x, y, w, h, barH } = GOAL_CHIP;
+    addRect(this, this.layer, x + 3, y + 3, w, h, "#000000", 0.35);
+    addRect(this, this.layer, x, y, w, h, "#060b27", 0.9);
+    addRect(this, this.layer, x, y, 3, h, palette.yellow);
+    baselineText(this, this.layer, x + 12, y + 14, "SIGUIENTE META", 9, palette.yellow);
+    baselineText(this, this.layer, x + 108, y + 14, goal.detail, 9, palette.muted, w - 116);
+    baselineText(this, this.layer, x + 12, y + 31, goal.label.toUpperCase(), 13, palette.ink, w - 24);
+    const barW = w - 24;
+    addRect(this, this.layer, x + 12, y + h - barH - 5, barW, barH, "#0d1030");
+    const fill = Math.floor((clamp(goal.value, 0, goal.max) / Math.max(1, goal.max)) * barW);
+    if (fill > 0) addRect(this, this.layer, x + 12, y + h - barH - 5, fill, barH, goal.color);
+    addHitZone(this, this.layer, x, y, w, h, () => gameContext().controller.setCareerView("map"));
   }
 
   // Legacy drawHudFrame: layered pixel frame with sheen.
@@ -311,11 +356,21 @@ export class CareerScene extends Phaser.Scene {
 
   // Legacy drawHudResourceCard with simplified rect/glyph icons.
   // Small square HUD button: pixel frame + short caption, opens a career view.
-  private drawHudIconButton(x: number, y: number, caption: string, view: CareerView): void {
+  // The calendar glyph is the mockup's own; stats reuses the rising-bars mark
+  // the stats screen draws beside every metric, so the button looks like what
+  // it opens.
+  private drawHudIconButton(x: number, y: number, view: "calendar" | "stats"): void {
     const active = gameContext().controller.careerView === view;
     addRect(this, this.layer, x - 1, y - 1, 34, 28, active ? palette.yellow : "#333a78");
     addRect(this, this.layer, x, y, 32, 26, active ? "#1b2555" : "#0b1230");
-    addText(this, this.layer, x + 16, y + 13, caption, 10, active ? palette.yellow : palette.ink).setOrigin(0.5);
+    if (view === "calendar") {
+      if (!addSpriteImage(this, this.layer, AssetRegistry.icons.uiCalendar.key, x + 16, y + 13, 20, 0.5, 0.5, 22)) {
+        addText(this, this.layer, x + 16, y + 13, "CAL", 10, palette.ink).setOrigin(0.5);
+      }
+    } else {
+      const bars = [7, 12, 17];
+      bars.forEach((bh, i) => addRect(this, this.layer, x + 7 + i * 7, y + 21 - bh, 5, bh, i === 2 ? palette.yellow : "#8e97e6"));
+    }
     addHitZone(this, this.layer, x, y, 32, 26, () => gameContext().controller.setCareerView(view));
   }
 

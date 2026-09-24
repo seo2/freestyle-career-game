@@ -99,10 +99,23 @@ export function addTextBlock(
   size: number,
   color: string,
   width: number,
+  maxHeight?: number,
 ): Phaser.GameObjects.Text {
-  return addText(scene, layer, x, y, content, size, color, {
+  const text = addText(scene, layer, x, y, content, size, color, {
     wordWrap: { width, useAdvancedWrap: true },
   });
+  if (maxHeight !== undefined && text.height > maxHeight) clipToHeight(text, maxHeight);
+  return text;
+}
+
+// Drops trailing wrapped lines until the block fits its box. Callers order
+// their lines by priority, so what falls off is what mattered least — a panel
+// border is never crossed by text again.
+function clipToHeight(text: Phaser.GameObjects.Text, maxHeight: number): void {
+  const lines = text.getWrappedText(text.text);
+  const lineHeight = text.height / Math.max(1, lines.length);
+  const fit = Math.max(1, Math.floor(maxHeight / lineHeight));
+  text.setWordWrapWidth(null).setText(lines.slice(0, fit).join("\n"));
 }
 
 export function addRect(

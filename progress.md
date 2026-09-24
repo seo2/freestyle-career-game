@@ -478,3 +478,27 @@ de sombra casi no se ve y las zapatillas son losas. El camino está en el spec
 (§64/§65): concepto → vector en Figma → validación contra el template → metadata →
 import. Como cada asset es una función que devuelve SVG, cambiar una pieza a mano por
 un archivo exportado toca `assets/` y nada más.
+
+## 2026-09-24 — Fase 12 (A): deja de verse prototipo
+
+Pedido del owner: la interfaz no engancha. Auditoría en `output/web-game/ux-audit-actual/`
+(recorrido completo a 1920×1080, comparado contra los mockups). El arte está bien; lo que
+falla es lo de encima: pantallas que se leen como planilla, un mundo quieto, restos de
+prototipo y ninguna pista de qué conviene hacer. Plan acordado: A (limpieza) → B (pieza viva
+y retroalimentación) → C (progreso con tiers) → D (batalla espectáculo) → E (gancho inicial).
+El owner autorizó ir más allá de los mockups cuando mejore la experiencia.
+
+Hecho en A:
+- Fuera la numeración del mockup de los títulos ("6. ENTRENAMIENTO", "13. ESTADISTICAS"…).
+- HUD: "SEM"/"STA" pasan a ícono de calendario (recortado del propio mockup del calendario,
+  `public/assets/icons/ui-calendar.png`) y barras ascendentes para stats; el bust del MC
+  también abre stats. El reloj dice "LUN · SEM 1" con tres pips Mañana/Tarde/Noche.
+- La pieza muestra la **siguiente meta** (chip arriba a la izquierda, con barra); clic → mapa.
+- Calendario: el panel INFORMACIÓN se salía del borde. Ahora las líneas van por urgencia y
+  `addTextBlock` acepta `maxHeight` (recorta las últimas en vez de cruzar el borde). El
+  impulso pasó a un chip propio. Los días libres llevan el "?" del mockup y un "+" en la
+  ranura; "AGENDAR" solo en el día de hoy.
+- Nombres de día a `CalendarConfig.clock.dayLabels` + `formatDay()`.
+
+Verificado: build + lint + 457 tests + `npm run traces` idéntico. Capturas en
+`output/web-game/ui-limpieza/`, consola limpia.

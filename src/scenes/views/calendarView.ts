@@ -15,6 +15,7 @@ import { eventBus } from "../../events/EventBus";
 import { battleDay, dayAlreadyLived, openDays, plannedActionFor, todaysPlan } from "../../systems/PlanSystem";
 import { findOpportunity, isBurntOut, pendingOpportunities } from "../../systems/OpportunitySystem";
 import { OpportunityConfig } from "../../data/config/OpportunityConfig";
+import { CalendarConfig } from "../../data/config/CalendarConfig";
 import { momentumMood } from "../../core/derived";
 import type { GameState, WeekSummary } from "../../core/types";
 import { currentStage } from "../../core/derived";
@@ -66,7 +67,14 @@ const CARD_COLORS = {
 // Bottom row: INFORMACION panel 74..1041 x 713..886, CONTINUAR 1275..1604 x
 // 776..858.
 const INFO = { x: 42, y: 409, w: 555, h: 100, fill: "#050e2d" } as const;
+// Room left for the body under the INFORMACION heading (42 from the top, 8 of
+// bottom padding). The brief is ordered by urgency, so clipping drops the least
+// important line instead of letting it cross the panel's border.
+const INFO_BODY_H = INFO.h - 50;
 const CONTINUE = { x: 732, y: 445, w: 189, h: 47 } as const;
+// Momentum moves battle rolls, so it gets its own chip above the button instead
+// of competing for a line inside the brief.
+const MOMENTUM = { x: 732, y: 413, w: 189, h: 24 } as const;
 
 
 // The mockup prints its own short card wording (ENTRENAR / REDES / TRABAJAR /
@@ -83,7 +91,7 @@ const CARD_LABELS: Record<string, string> = {
   cypher: "CYPHER",
 };
 
-const DAYS = ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"];
+const DAYS = CalendarConfig.clock.dayLabels;
 
 // Which week the arrows are looking at: 0 = the live week (planning), 1 = last
 // finished week, 2 = the one before it... Presentation state, so it lives here
@@ -148,6 +156,7 @@ function renderLiveWeek(ctx: ViewCtx, state: GameState, controller: ViewCtx["con
   });
 
   infoPanel(ctx, planningBrief(state, controller));
+  momentumChip(ctx, state);
 
   // The mockup's primary button is now what the loop needs: live today.
   const planned = todaysPlan(state);
@@ -208,28 +217,23 @@ function planningBrief(state: GameState, controller: ViewCtx["controller"]): str
   const open = openDays(state);
   const appointment = plannedActionFor(state, battleDay()) === "battle";
   const pending = pendingOpportunities(state);
+  const blocked = controller.careerActions().find((a) => a.id === todaysPlan(state))?.disabledReason;
+  // Most urgent first: the panel clips from the bottom when it runs out of room.
   const lines = [
-    state.lastEvent || currentStage(state).nextHint,
+    ...(todaysPlan(state) && blocked ? [`Hoy no te alcanza: ${blocked}`] : []),
+    ...(isBurntOut(state) ? [OpportunityConfig.burnout.notice] : []),
+    // Offers with a deadline: what is still on the table this week.
+    ...pending.map((entry) => {
+      const offer = findOpportunity(entry.id);
+      return `${DAYS[entry.day - 1]}: ${offer?.label ?? entry.id} — se va si no la tomas.`;
+    }),
     appointment
       ? `Batalla agendada para ${DAYS[battleDay() - 1]}: llega con energia.`
       : `${DAYS[battleDay() - 1]} es dia de batalla: agendala si quieres competir.`,
     open === 0
       ? "La semana esta completa."
       : `Te quedan ${open} ${open === 1 ? "dia" : "dias"} sin plan (clic en un dia para agendarlo).`,
-    ...(todaysPlan(state) && controller.careerActions().find((a) => a.id === todaysPlan(state))?.disabledReason
-      ? [`Hoy no te alcanza: ${controller.careerActions().find((a) => a.id === todaysPlan(state))?.disabledReason}`]
-      : []),
-    // Offers with a deadline: what is still on the table this week.
-    ...(pending.length > 0
-      ? pending.map((entry) => {
-          const offer = findOpportunity(entry.id);
-          return `${DAYS[entry.day - 1]}: ${offer?.label ?? entry.id} — se va si no la tomas.`;
-        })
-      : []),
-    // Momentum is a real modifier (it moves battle rolls), so it is stated here
-    // where the week is decided instead of only surfacing inside event text.
-    `Impulso ${Math.round(state.momentum)}/100 · ${momentumMood(state)}.`,
-    ...(isBurntOut(state) ? [OpportunityConfig.burnout.notice] : []),
+    state.lastEvent || currentStage(state).nextHint,
   ];
   return lines.join("\n");
 }
@@ -337,6 +341,11 @@ function dayCard(ctx: ViewCtx, index: number, day: string, card: DayCardState): 
     : null;
   if (icon) icon.setAlpha(past ? 0.45 : 1);
   else if (shownId) actionIcon(ctx, actionId, cx - 13, CARD.iconCenterY - 13, past ? CARD_COLORS.labelBlocked : actionAccent(actionId));
+  else {
+    // The mockup's LIBRE card carries a "?" where the action icon would be.
+    const unknown = addDisplayText(ctx.scene, ctx.layer, cx, CARD.iconCenterY, "?", 34, CARD_COLORS.slot);
+    unknown.setOrigin(0.5, 0.5).setPosition(cx, CARD.iconCenterY);
+  }
 
   const labelText = addText(
     ctx.scene,
@@ -354,7 +363,17 @@ function dayCard(ctx: ViewCtx, index: number, day: string, card: DayCardState): 
   // with a solid bar once something is planned there.
   const slotY = CARD.y + CARD.slotDy;
   if (shownId === null) {
-    dashedBox(ctx, x + CARD.slotDx, slotY, CARD.slotW, CARD.slotH, CARD_COLORS.slot);
+    dashedBox(ctx, x + CARD.slotDx, slotY, CARD.slotW, CARD.slotH, active ? palette.yellow : CARD_COLORS.slot);
+    // An open day invites a click: a "+" in the slot (the mockup's "?" icon
+    // read as "unknown", this reads as "put something here").
+    if (!past) {
+      const plus = addDisplayText(ctx.scene, ctx.layer, x + CARD.slotDx + CARD.slotW / 2, slotY + CARD.slotH / 2 - 8, "+", 26, active ? palette.yellow : CARD_COLORS.slot);
+      plus.setOrigin(0.5, 0.5).setPosition(x + CARD.slotDx + CARD.slotW / 2, slotY + CARD.slotH / 2 - 8);
+      if (active) {
+        const hint = addText(ctx.scene, ctx.layer, x + CARD.slotDx + CARD.slotW / 2, slotY + CARD.slotH - 16, "AGENDAR", 10, palette.yellow);
+        hint.setOrigin(0.5, 0.5).setPosition(x + CARD.slotDx + CARD.slotW / 2, slotY + CARD.slotH - 16);
+      }
+    }
   } else {
     rect(ctx, x + CARD.slotDx, slotY, CARD.slotW, CARD.slotH, warn ? palette.red : actionAccent(actionId), past ? 0.35 : 0.9);
   }
@@ -389,7 +408,26 @@ function dayCard(ctx: ViewCtx, index: number, day: string, card: DayCardState): 
 function infoPanel(ctx: ViewCtx, body: string): void {
   addPanel(ctx.scene, ctx.layer, INFO.x, INFO.y, INFO.w, INFO.h, INFO.fill);
   addDisplayText(ctx.scene, ctx.layer, INFO.x + 19, INFO.y + 15, "INFORMACION", 20, palette.yellow);
-  addTextBlock(ctx.scene, ctx.layer, INFO.x + 19, INFO.y + 42, body, 13, palette.ink, INFO.w - 38);
+  addTextBlock(ctx.scene, ctx.layer, INFO.x + 19, INFO.y + 42, body, 13, palette.ink, INFO.w - 38, INFO_BODY_H);
+}
+
+// "IMPULSO 34 · FRIO": the week's momentum as a stated modifier, coloured by
+// whether it is helping or hurting the rolls.
+function momentumChip(ctx: ViewCtx, state: GameState): void {
+  const value = Math.round(state.momentum);
+  const color = value >= 60 ? palette.green : value >= 40 ? palette.yellow : palette.blue;
+  rect(ctx, MOMENTUM.x, MOMENTUM.y, MOMENTUM.w, MOMENTUM.h, INFO.fill);
+  rect(ctx, MOMENTUM.x, MOMENTUM.y, 3, MOMENTUM.h, color);
+  const text = addText(
+    ctx.scene,
+    ctx.layer,
+    MOMENTUM.x + MOMENTUM.w / 2,
+    MOMENTUM.y + MOMENTUM.h / 2,
+    `IMPULSO ${value} · ${momentumMood(state).toUpperCase()}`,
+    11,
+    color,
+  );
+  text.setOrigin(0.5, 0.5).setPosition(MOMENTUM.x + MOMENTUM.w / 2, MOMENTUM.y + MOMENTUM.h / 2);
 }
 
 // --- Local pixel helpers -------------------------------------------------------
