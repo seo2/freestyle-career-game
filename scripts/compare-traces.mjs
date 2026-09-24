@@ -19,7 +19,7 @@ import os from "node:os";
 import path from "node:path";
 
 const BASELINE_DIR = "traces/baseline";
-const SCENARIOS = ["fresh-career", "views-tour", "battle-flow", "save-continue"];
+const SCENARIOS = ["prologue", "fresh-career", "views-tour", "battle-flow", "save-continue"];
 
 const args = process.argv.slice(2);
 const update = args.includes("--update");

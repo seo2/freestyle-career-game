@@ -15,12 +15,14 @@ import { maxEnergy, stageIndex } from "../core/derived";
 import { clamp } from "../utils/math";
 import type { RandomSource } from "../services/RandomService";
 import { battleResources, battleStimuli } from "../data/battle";
-import { rivalArchetypes } from "../data/rivals";
+import { rivalArchetypes, rivalRoster } from "../data/rivals";
+import { IntroConfig } from "../data/config/IntroConfig";
 import { BattleConfig } from "../data/config/BattleConfig";
 import { difficultyRules } from "../data/config/DifficultyConfig";
 import { advanceClock, formatDuration } from "./CalendarSystem";
 import { addXp, applyRhythm } from "./ProgressionSystem";
-import { getBattleTier } from "./battleTier";
+import { getBattleTier, tierFor } from "./battleTier";
+import type { BattleTier } from "./battleTier";
 import { crewHypeBoost, recordRivalry } from "./RelationshipSystem";
 
 export function battleLabel(state: GameState): string {
@@ -162,12 +164,27 @@ export function chooseRivalMove(battle: BattleState, rng: RandomSource): BattleR
 
 // Returns false (no mutation, no RNG consumed) when too tired to enter.
 // RNG draws: 1 rival pick + 1 stimulus pick + hand.size hand draws, in that order.
+// The prologue (Fase 12 E): the career's first minute is a battle against a
+// named pieza rival. No energy is spent — it is the night before day one — and
+// the draws after the rival (stimulus, hand) follow the normal order.
+export function startIntroBattle(state: GameState, rng: RandomSource): boolean {
+  const profile = rivalRoster.find((entry) => entry.name === IntroConfig.rivalName) ?? rivalRoster[0];
+  const tier = { ...tierFor(state, profile), eventName: IntroConfig.eventName };
+  openBattle(state, rng, tier);
+  if (state.battle) state.battle.intro = true;
+  return true;
+}
+
 export function startBattle(state: GameState, rng: RandomSource): boolean {
   const cost = battleEnergyCost(state);
   if (state.energy < cost) return false;
   state.energy = clamp(state.energy - cost, 0, maxEnergy(state));
   // Draw order (the trace harness depends on it): rival pick, stimulus, hand.
-  const tier = getBattleTier(state, rng);
+  openBattle(state, rng, getBattleTier(state, rng));
+  return true;
+}
+
+function openBattle(state: GameState, rng: RandomSource, tier: BattleTier): void {
   const rival = BattleConfig.rival;
   const prompt = pickStimulus(rng);
   const hand = dealHand(rng, null);
@@ -193,7 +210,6 @@ export function startBattle(state: GameState, rng: RandomSource): boolean {
     finished: false,
     result: null,
   };
-  return true;
 }
 
 function pickStimulus(rng: RandomSource): BattleStimulus {
@@ -383,6 +399,24 @@ export function advanceBattleRound(state: GameState, rng: RandomSource): void {
 // Pays out rewards and exits battle mode. Returns the event parts and clock
 // fx for the orchestrator to finalize; null when there is nothing to finish.
 // rng is part of the system contract even though this path consumes none.
+// Collecting the prologue: the rival remembers (that is the point — the grudge
+// is the hook), a win earns a nudge, and nothing else moves. Hands back the
+// outcome so the prologue can close on the matching beat.
+export function finishIntroBattle(state: GameState): "win" | "loss" | "draw" | null {
+  const battle = state.battle;
+  if (!battle || !battle.finished || !battle.intro) return null;
+  const outcome = battle.result === "win" ? "win" : battle.result === "draw" ? "draw" : "loss";
+  const reward = outcome === "win" ? IntroConfig.winReward : outcome === "draw" ? IntroConfig.drawReward : null;
+  if (reward) {
+    state.fans += reward.fans;
+    state.respect += reward.respect;
+  }
+  recordRivalry(state, battle.rivalName, outcome, battle.playerScore - battle.rivalScore);
+  state.battle = null;
+  state.mode = "intro";
+  return outcome;
+}
+
 export function finishBattle(state: GameState, rng: RandomSource): { parts: string[]; fx: TimeAdvance } | null {
   void rng;
   const battle = state.battle;

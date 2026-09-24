@@ -4,7 +4,7 @@
 // any-day outlet that lets the stage battle keep its weekend appointment.
 // "dilemma" is a decision with its own screen: the loop stops, because a choice
 // that shapes who you become should not be a line in a log.
-export type GameMode = "start" | "career" | "battle" | "cypher" | "dilemma" | "epilogue";
+export type GameMode = "start" | "intro" | "career" | "battle" | "cypher" | "dilemma" | "epilogue";
 // Career difficulty picked once on the Crear MC screen. Mechanical effects live
 // in src/data/config/DifficultyConfig.ts and are applied by BattleSystem.
 export type Difficulty = "facil" | "normal" | "dificil";
@@ -341,6 +341,9 @@ export interface BattleState {
   // Round-result beat: set when a round has resolved and its verdict panel is
   // on screen; advanceBattleRound clears it (next round or final verdict).
   pendingResult: RoundResult | null;
+  // The prologue battle (Fase 12 E): fought the night before day one, so it
+  // costs no energy, moves no clock and pays by IntroConfig instead.
+  intro?: boolean;
   finished: boolean;
   result: "win" | "loss" | "draw" | null;
 }

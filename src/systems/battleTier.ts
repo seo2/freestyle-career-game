@@ -61,8 +61,14 @@ export function pickRival(state: GameState, rng: RandomSource): RivalProfile {
 }
 
 export function getBattleTier(state: GameState, rng: RandomSource): BattleTier {
+  return tierFor(state, pickRival(state, rng));
+}
+
+// The stakes of facing one specific rival: split from getBattleTier so a
+// battle with a named opponent (the prologue, Fase 12 E) is built by the same
+// formula without drawing a rival from the RNG.
+export function tierFor(state: GameState, profile: RivalProfile): BattleTier {
   const idx = stageIndex(state);
-  const profile = pickRival(state, rng);
   const crowd = crowdByStage[profile.stage];
   // What this rival remembers about you (Fase 7). A grudge makes them stronger
   // and more aggressive, so the second time is not the first time.

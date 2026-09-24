@@ -582,3 +582,32 @@ cargada desde un save editado), consola limpia.
 
 Pendiente: **E** (gancho inicial: la partida arranca con una batalla), el público de fondo de
 batalla y el arte propio de los props de compra.
+
+## 2026-09-24 — Fase 12 (E): la carrera abre en la tarima
+
+Antes, lo primero que hacía el MC era *dormir*: la fantasía (una batalla) quedaba a dos
+pantallas y un mapa. Ahora COMENZAR lleva a un **prólogo** (`IntroScene`, modo `"intro"`):
+
+- Primer beat en la plaza, con el público y Tuti ya esperando: "Te anotaron sin avisarte".
+  **SUBIR A LA TARIMA** (Enter) o **SALTAR** (Esc).
+- Una **batalla real** con todo el espectáculo de D, marcada `battle.intro`. `tierFor()` se
+  separó de `getBattleTier` para enfrentar a un rival con nombre sin sortearlo. Ocurre la
+  noche antes del día uno: sin costo de energía, sin reloj y con un pago mínimo
+  (`IntroConfig`). **Sí registra la rivalidad**: Tuti te recuerda en la plaza, y ese es el gancho.
+- Un cierre según el resultado (`src/data/intro.ts`: ganar / perder / réplica) que termina
+  en qué hacer en la pieza, y la línea que espera en la habitación ("Tuti te ganó en la
+  plaza. Entrena: la revancha llega.").
+- Saltar el prólogo no consume RNG, así que la carrera queda **idéntica** a la de antes.
+
+**Trazas**: el baseline se actualizó a propósito. Los 4 escenarios existentes presionan Escape
+después del primer Enter, y se verificó por script que cada estado posterior es idéntico al
+baseline anterior corrido un paso. Hay un escenario nuevo, `prologue`, que juega el prólogo
+entero. `playthrough.mjs` también lo salta. El save siempre se escribe en modo career, así que
+cerrar durante el prólogo solo lo salta.
+
+Verificado: build + lint + 494 tests (4 nuevos del prólogo) + trazas + `verify-save-migration`
++ playthrough corto. Capturas en `output/web-game/gancho-inicial/` (prólogo, batalla, cierre,
+pieza, y el camino de saltar), consola limpia.
+
+**Fase 12 cerrada (A–E).** Queda como arte pendiente (docs/ASSETS.md): público de fondo de
+batalla y props propios para las compras de la pieza.

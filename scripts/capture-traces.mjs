@@ -19,8 +19,26 @@ const STEP_SETTLE_MS = 40;
 
 // Each step is either { press: <key> } or { reload: true }.
 const SCENARIOS = {
+  // Fase 12 E: the prologue played through — a real battle against the named
+  // pieza rival the night before day one (no energy, no clock), its closing
+  // beat, and the room it hands you to.
+  prologue: [
+    { press: "Enter" }, // start new career -> prologue
+    { press: "Enter" }, // SUBIR A LA TARIMA
+    { press: "1" },
+    { press: "Enter" },
+    { press: "2" },
+    { press: "Enter" },
+    { press: "3" },
+    { press: "Enter" }, // -> final verdict
+    { press: "Enter" }, // collect -> prologue closing beat
+    { press: "Enter" }, // A TU PIEZA
+  ],
   "fresh-career": [
     { press: "Enter" }, // start new career with default name
+    // Fase 12 E: the career opens on the prologue. Esc skips it, so the rest of
+    // this scenario plays the same career (and draws the same RNG) as before.
+    { press: "Escape" },
     { press: "1" }, // practice
     // The cypher is training with its own screen now (2026-08-13): it opens,
     // three turns are thrown, and closing the circle is what pays the clock.
@@ -46,6 +64,7 @@ const SCENARIOS = {
   ],
   "views-tour": [
     { press: "Enter" },
+    { press: "Escape" }, // skip the prologue (Fase 12 E)
     { press: "e" }, // training view
     { press: "1" }, // train flow
     { press: "r" }, // social view
@@ -69,6 +88,7 @@ const SCENARIOS = {
   // stay byte-identical across runs.
   "battle-flow": [
     { press: "Enter" },
+    { press: "Escape" }, // skip the prologue (Fase 12 E)
     { press: "c" },
     // Day 6 is the week's battle slot: six presses cycle it to BATALLA, and
     // Enter would live it on Saturday. Reaching a battle from Monday takes a
@@ -90,6 +110,7 @@ const SCENARIOS = {
   ],
   "save-continue": [
     { press: "Enter" },
+    { press: "Escape" }, // skip the prologue (Fase 12 E)
     { press: "1" }, // practice
     { press: "3" }, // work
     { reload: true }, // back to the main menu with a save present
