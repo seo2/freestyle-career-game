@@ -154,8 +154,14 @@ costó afinarlo, en la cabecera del script.
 Esto es lo que queda, y es de otra escala: son **ilustraciones**, con más riesgo
 de no calzar con el estilo del mockup.
 
-- **Multitud de batalla**: el mockup tiene público rodeando el cypher; hoy
-  reacciona la **luz** de la escena al hype, no una multitud.
+- **Multitud de batalla — fondo**: el **primer plano** ya existe (Fase 12 D):
+  las cabezas de espaldas se cortaron del mockup de batalla con
+  `scripts/build-battle-crowd.mjs` → `public/assets/scenes/battle-crowd-front-v1.png`,
+  y saltan en 12 franjas al ritmo del hype. Falta el público **detrás de la
+  reja**, entre los dos MC: en el mockup está pintado bajo los personajes y el
+  estímulo, así que no se puede cortar limpio. Hace falta como capa propia
+  (transparente, ~960×120, gente de frente con brazos arriba) y idealmente una
+  variante por etapa (plaza, regional, estadio: ver la hoja de mockups 06_52_*).
 - **Ilustraciones de trabajo (4)** y sus iconos de fila, con el hueco de 406×168
   ya reservado.
 - **Preview por ítem** de la tienda (el mockup los muestra sobre un escenario);

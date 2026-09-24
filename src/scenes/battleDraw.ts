@@ -18,6 +18,14 @@ import type { BattleResource, BattleState, RoundResult } from "../core/types";
 
 const W = 960;
 
+// The verdict's two big pieces, handed back so the scene can stamp the grade in
+// and count the hype up (frame-delta animation lives in BattleScene).
+export interface VerdictStamp {
+  grade: Phaser.GameObjects.Text;
+  amount: Phaser.GameObjects.Text;
+  value: number;
+}
+
 // Mockup tones the palette does not carry yet (handoff: fold into palette.ts).
 export const FRAME = "#878da3";
 export const FRAME_DIM = "#4e5470";
@@ -72,7 +80,7 @@ export class BattleDraw {
   // the timer expired), the big one-word grade with the hype the answer
   // earned, RESPUESTA RIVAL naming the rival's resource with its grade and
   // hype, the tension note when a rule fired, HYPE TOTAL, and CONTINUAR.
-  roundResultPanel(battle: BattleState, result: RoundResult): void {
+  roundResultPanel(battle: BattleState, result: RoundResult): VerdictStamp {
     const played = result.choice ? resourceById(result.choice) : null;
     const playerColor = result.playerHypeDelta > 0 ? palette.green : palette.red;
 
@@ -82,8 +90,8 @@ export class BattleDraw {
     // Centre box: player verdict + hype delta (mockup rows 275/322/372).
     addRect(this.scene, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
     this.frame(340, 262, 266, 141, FRAME);
-    this.centeredDisplayText(473, 274, result.playerVerdict, 32, playerColor);
-    this.centeredDisplayText(473, 318, this.signed(result.playerHypeDelta), 44, playerColor);
+    const grade = this.stampText(473, 274, result.playerVerdict, 32, playerColor);
+    const amount = this.stampText(473, 318, this.signed(result.playerHypeDelta), 44, playerColor);
     this.centeredText(473, 372, "HYPE", 20, HYPE_ORANGE);
 
     this.drawRivalAnswerPanel(result);
@@ -93,6 +101,7 @@ export class BattleDraw {
       fill: "#11183a",
       size: 13,
     });
+    return { grade, amount, value: result.playerHypeDelta };
   }
 
   // Rival box: which resource they answered with, their grade and the hype
@@ -136,7 +145,7 @@ export class BattleDraw {
 
   // --- Final result (battle over) ----------------------------------------------
 
-  finalResultPanel(battle: BattleState): void {
+  finalResultPanel(battle: BattleState): VerdictStamp {
     const last = battle.results[battle.results.length - 1];
     const played = last?.choice ? resourceById(last.choice) : null;
     const verdict = battle.result === "win" ? "GANASTE" : battle.result === "draw" ? "REPLICA" : "DERROTA";
@@ -145,13 +154,14 @@ export class BattleDraw {
 
     this.drawResultSeparator();
     this.drawPlayedPanel(played);
-    this.drawVerdictPanel(verdict, color, hypeDelta);
+    const stamp = this.drawVerdictPanel(verdict, color, hypeDelta);
     this.drawRivalPanel(battle, last?.rival ?? 0);
     this.drawHypeTotal(battle.hype);
     addButton(this.scene, this.layer, 390, 492, 180, 26, "Continuar", () => gameContext().controller.finishBattle(), {
       fill: "#11183a",
       size: 13,
     });
+    return stamp;
   }
 
   // "RESULTADO" between two rules, like the mockup's section divider.
@@ -177,12 +187,26 @@ export class BattleDraw {
   }
 
   // Big verdict word plus the hype the battle swung, in the mockup's centre box.
-  private drawVerdictPanel(verdict: string, color: string, hypeDelta: number): void {
+  private drawVerdictPanel(verdict: string, color: string, hypeDelta: number): VerdictStamp {
     addRect(this.scene, this.layer, 340, 262, 266, 141, palette.deep, 0.94);
     this.frame(340, 262, 266, 141, FRAME);
-    this.centeredDisplayText(473, 272, verdict, 38, color);
-    this.centeredDisplayText(473, 318, this.signed(hypeDelta), 40, color);
+    const grade = this.stampText(473, 272, verdict, 38, color);
+    const amount = this.stampText(473, 318, this.signed(hypeDelta), 40, color);
     this.centeredText(473, 372, "HYPE", 20, HYPE_ORANGE);
+    return { grade, amount, value: hypeDelta };
+  }
+
+  // "+18" / "-7" for a value mid count-up.
+  signedValue(value: number): string {
+    return this.signed(value);
+  }
+
+  // Display text anchored on its centre, so the scene can scale it (the stamp)
+  // without it sliding sideways.
+  private stampText(cx: number, y: number, content: string, size: number, color: string): Phaser.GameObjects.Text {
+    const text = addDisplayText(this.scene, this.layer, 0, y, content, size, color);
+    text.setOrigin(0.5, 0.5).setPosition(Math.round(cx), Math.round(y + text.height / 2));
+    return text;
   }
 
   // RESPUESTA RIVAL: who answered and how hard they connected that round.

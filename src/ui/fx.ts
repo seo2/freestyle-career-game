@@ -109,6 +109,11 @@ export class Pulse {
     return this.elapsed >= this.durationMs;
   }
 
+  // Linear 0..1 progress, for callers that bring their own curve.
+  get elapsedFraction(): number {
+    return Math.min(1, this.elapsed / this.durationMs);
+  }
+
   // Progress after advancing, eased out so entrances land softly.
   advance(deltaMs: number): number {
     if (this.done) return 1;

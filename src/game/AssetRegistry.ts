@@ -12,6 +12,9 @@ export const AssetRegistry = {
     // The isometric night city of the map mockup, cut from reference/ and cleaned
     // of its baked-in UI (see scripts/build-map-city.mjs).
     mapCity: { key: "scene-map-city", path: "/assets/scenes/map-city-v1.png" },
+    // The crowd seen from behind along the bottom of the battle mockup, cut and
+    // feathered by scripts/build-battle-crowd.mjs.
+    battleCrowd: { key: "scene-battle-crowd", path: "/assets/scenes/battle-crowd-front-v1.png" },
   },
   cover: {
     sky: { key: "cover-sky", path: "/assets/main-menu/bg_sky_night.png" },
