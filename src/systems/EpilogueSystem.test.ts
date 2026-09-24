@@ -175,3 +175,28 @@ describe("mismo origen, destinos distintos", () => {
     }
   });
 });
+
+describe("epilogue and a dilemma rolled by the same block", () => {
+  it("shows the pending dilemma after the chapter instead of losing it", () => {
+    const state = createNewState("MC Test", 1);
+    // The block rolled a dilemma first...
+    state.pendingDilemma = "entrevista-local";
+    state.mode = "dilemma";
+    // ...and the same block's event met the plaza's requirements.
+    state.level = 5;
+    state.fans = 140;
+    state.respect = 45;
+    expect(maybeUnlockStage(state)).not.toBeNull();
+    expect(state.mode).toBe("epilogue");
+    closeEpilogue(state);
+    expect(state.mode).toBe("dilemma");
+    expect(state.pendingDilemma).toBe("entrevista-local");
+  });
+
+  it("returns to the career when nothing is waiting", () => {
+    const state = createNewState("MC Test", 1);
+    openEpilogue(state, "pieza");
+    closeEpilogue(state);
+    expect(state.mode).toBe("career");
+  });
+});

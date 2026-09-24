@@ -258,6 +258,10 @@ export class GameController {
       // The day's offer comes first: it is the thing with a deadline.
       ...(opportunityOn(this.state, day) ? [OFFER_ACTION_ID] : []),
       ...calendarActionIds.filter((id) => id !== "battle" || day === battleDay()),
+      // The small show unlocks mid-career and had no door at all (no dock tile,
+      // no map node): it is offered in the week once it exists, appended last so
+      // the order of every earlier option stays the same.
+      ...(this.careerActions().some((action) => action.id === "show") ? ["show"] : []),
     ];
     const current = plannedActionFor(this.state, day);
     const index = options.indexOf(current);
